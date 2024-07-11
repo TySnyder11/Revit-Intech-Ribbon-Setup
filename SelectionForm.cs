@@ -12,6 +12,7 @@ namespace Intech
 {
     public partial class SelectionForm : System.Windows.Forms.Form
     {
+        public DataTable dt = new DataTable();
 
         public SelectionForm(List<string> list)
         {
@@ -33,8 +34,7 @@ namespace Intech
             checkedListBox.DisplayMember = "Item";
             checkedListBox.ValueMember = "Item";
 
-            // If not already done by the designer...
-            checkedListBox.ItemCheck += SearchBar_TextChanged;
+            checkedListBox.ItemCheck += checkedListBox_ItemCheck;
 
         }
         protected void checkedListBox_SelectedIndexChanged(object sender, EventArgs e)
@@ -75,6 +75,7 @@ namespace Intech
 
         public void saveAS_Click(object sender, EventArgs e)//this is the save buttom
         {
+            textBox1.Text = "";
             this.Close(); //just closing the form
         }
 

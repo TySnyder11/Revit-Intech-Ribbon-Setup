@@ -6,6 +6,7 @@ using OfficeOpenXml.Style;
 using OfficeOpenXml.Table;
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -51,9 +52,13 @@ namespace Intech
             SelectionForm selectionForm = new SelectionForm(txtschedules);
 
             result2 = selectionForm.ShowDialog(); //shows dialog selection windoe
+            if (selectionForm.checkedListBox.CheckedItems.Count != 0)
+            { 
 
-            //prompt user to select file save location
-            SaveFileDialog saveFileDialog1 = new SaveFileDialog
+            }
+            else return Result.Cancelled; 
+                //prompt user to select file save location
+                SaveFileDialog saveFileDialog1 = new SaveFileDialog
                 {
                     FileName = "Folder Selection"
                 };
@@ -63,7 +68,7 @@ namespace Intech
             {
                 baseFolder = saveFileDialog1.FileName.Replace("Folder Selection",null);
             }
-            Debug.WriteLine(baseFolder);
+            if (baseFolder == null) return Result.Cancelled;
 
             foreach (ViewSchedule i in selected)
             {

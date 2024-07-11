@@ -50,7 +50,6 @@ namespace Intech
             this.checkedListBox.Size = new System.Drawing.Size(565, 361);
             this.checkedListBox.TabIndex = 10;
             this.checkedListBox.SelectedIndexChanged += new System.EventHandler(this.checkedListBox_SelectedIndexChanged);
-            this.checkedListBox.ItemCheck += new ItemCheckEventHandler(this.checkedListBox_ItemCheck);
             // 
             // button4
             // 
