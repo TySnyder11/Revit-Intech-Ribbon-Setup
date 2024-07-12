@@ -1,7 +1,6 @@
 ﻿using Autodesk.Revit.DB;
 using Autodesk.Revit.UI;
 using OfficeOpenXml;
-using DocumentFormat.OpenXml.Spreadsheet;
 using OfficeOpenXml.Style;
 using OfficeOpenXml.Table;
 using System;
@@ -11,6 +10,7 @@ using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Windows.Forms;
+using System.Diagnostics;
 
 
 namespace Intech
@@ -138,25 +138,22 @@ namespace Intech
             int nRows = section.NumberOfRows;
             int nColumns = section.NumberOfColumns;
 
+            //valueData.Add(viewSchedule.Name);
 
-            if (nRows > 1)
+            List<List<string>> scheduleData = new List<List<string>>();
+            for (int i = 0; i < nRows; i++)
             {
-                //valueData.Add(viewSchedule.Name);
+                List<string> rowData = new List<string>();
 
-                List<List<string>> scheduleData = new List<List<string>>();
-                for (int i = 0; i < nRows; i++)
+                for (int j = 0; j < nColumns; j++)
                 {
-                    List<string> rowData = new List<string>();
-
-                    for (int j = 0; j < nColumns; j++)
-                    {
-                        rowData.Add("\"" + vs.GetCellText(SectionType.Body, i, j).Replace("\"", "\"\"") + "\"");//added text qualifiers (the quotations)
-                    }
-                    scheduleData.Add(rowData);
+                    rowData.Add("\"" + vs.GetCellText(SectionType.Body, i, j).Replace("\"", "\"\"") + "\"");//added text qualifiers (the quotations)
                 }
-
-                customExport(scheduleData, filePath);
+                scheduleData.Add(rowData);
             }
+
+            customExport(scheduleData, filePath);
+            
         }
 
         static void customExport(List<List<string>> scheduleData, string filePath)
@@ -235,6 +232,7 @@ namespace Intech
                             // Load data from the CSV, skipping the first row and setting the second row as the column headers.
                             var range = copiedWorksheet.Cells[startCell.Address].LoadFromText(new FileInfo(csvFileName), format);
 
+
                             //add's image inside the header
                             var img = copiedWorksheet.HeaderFooter.OddHeader.InsertPicture(
                                 new FileInfo(HeaderPath), PictureAlignment.Centered
@@ -244,12 +242,7 @@ namespace Intech
                             while (!string.IsNullOrWhiteSpace(copiedWorksheet.Cells[2, currentColumn].Text))
                             {
                                 currentColumn++; // Move to the next row
-                            }
-                            int currentRow = 3; // Start from the fourth row 
-                            while (!string.IsNullOrWhiteSpace(copiedWorksheet.Cells[currentRow, 1].Text))
-                            {
-                                currentRow++; // Move to the next row
-                            }
+                            }           
 
                             string merger = "A1:" + IndexToColumn(currentColumn - 1) + "1"; //Format example "A1:E1"
                             copiedWorksheet.Cells[merger].Merge = true;
@@ -265,9 +258,15 @@ namespace Intech
                             cellStyle.Border.Bottom.Style = ExcelBorderStyle.Medium;
                             cellStyle.Border.Left.Style = ExcelBorderStyle.Medium;
                             cellStyle.Border.Right.Style = ExcelBorderStyle.Medium;
-                            //Add a table onto the data
 
-                            string merger2 = "A2:" + IndexToColumn(currentColumn - 1) + (currentRow - 1); //get data range
+                            TableData tableData = vs2.GetTableData();
+                            TableSectionData section = tableData.GetSectionData(SectionType.Body);
+                            int nRows = section.NumberOfRows;
+                            Debug.WriteLine(nRows);
+
+                            //Add a table onto the data
+                            string merger2 = "A2:" + IndexToColumn(currentColumn - 1) + (nRows+1); //get data range
+                            Debug.WriteLine(merger2);
 
                             var dataRange = copiedWorksheet.Cells[merger2];
                             ExcelTable table = copiedWorksheet.Tables.Add(dataRange, "Table" + tableNum);
