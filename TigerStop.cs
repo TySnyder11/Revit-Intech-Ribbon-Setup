@@ -22,7 +22,7 @@ namespace Intech
     public class TigerStopExport : IExternalCommand
     {
         public Result Execute(ExternalCommandData commandData, ref string message, ElementSet elements)
-        {   
+        {
             UIApplication uiapp = commandData.Application;
             Document doc = uiapp.ActiveUIDocument.Document;
             Transaction trans = new Transaction(doc);
@@ -45,35 +45,47 @@ namespace Intech
                 {
                     schedules.Add(i);
                     txtschedules.Add(i.Name);
-
                 }
             }
 
             SelectionForm selectionForm = new SelectionForm(txtschedules);
 
-            result2 = selectionForm.ShowDialog(); //shows dialog selection windoe
-            if (selectionForm.checkedListBox.CheckedItems.Count != 0)
-            { 
+            result2 = selectionForm.ShowDialog(); //shows dialog selection window
+            if (selectionForm.checkedListBox.CheckedItems.Count == 0) return Result.Cancelled;
 
-            }
-            else return Result.Cancelled; 
-                //prompt user to select file save location
-                SaveFileDialog saveFileDialog1 = new SaveFileDialog
+            for (int x = 0; x < selectionForm.checkedListBox.CheckedItems.Count; x++)
+            {
+                //compare schedule name
+                foreach (ViewSchedule w in schedules)
                 {
-                    FileName = "Folder Selection"
-                };
+                    //if schedule name is in the CheckedItems list, add schedule to selected list.
+                    if (w.Name.Equals((selectionForm.checkedListBox.CheckedItems[x] as DataRowView).Row[0]))
+                    {
+                        selected.Add(w);
+                    }
+                }
+            }
+
+            //prompt user to select file save location
+            SaveFileDialog saveFileDialog1 = new SaveFileDialog
+            {
+                FileName = "Folder Selection"
+            };
 
             string baseFolder = string.Empty;
             if (saveFileDialog1.ShowDialog() == DialogResult.OK)
             {
-                baseFolder = saveFileDialog1.FileName.Replace("Folder Selection",null);
+                baseFolder = saveFileDialog1.FileName.Replace("Folder Selection", null);
             }
             if (baseFolder == null) return Result.Cancelled;
 
+            Debug.WriteLine(baseFolder);
+
             foreach (ViewSchedule i in selected)
             {
+
                 string pattern = @"[\\/:*?""<>|]";
-                System.String name = Regex.Replace(i.Name, pattern, "");
+                string name = Regex.Replace(i.Name, pattern, "");
                 string CSV = baseFolder + name + @".csv";
 
                 TableData table = i.GetTableData();
@@ -91,7 +103,6 @@ namespace Intech
                         rowData.Add("\"" + i.GetCellText(SectionType.Body, d, j).Replace("\"", "\"\"") + "\"");//added text qualifiers (the quotations)
                     }
                     scheduleData.Add(rowData);
-                    Debug.WriteLine(rowData);
                 }
 
                 try

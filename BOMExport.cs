@@ -1,11 +1,12 @@
 ﻿using Autodesk.Revit.DB;
 using Autodesk.Revit.UI;
 using OfficeOpenXml;
+using DocumentFormat.OpenXml.Spreadsheet;
 using OfficeOpenXml.Style;
 using OfficeOpenXml.Table;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
+using System.Data;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -65,7 +66,7 @@ namespace Intech
                     foreach (ViewSchedule w in schedules)
                     {
                         //if schedule name is in the CheckedItems list, add schedule to selected list.
-                        if (w.Name.Equals(selectionForm.checkedListBox.CheckedItems[x]))
+                        if (w.Name.Equals((selectionForm.checkedListBox.CheckedItems[x] as DataRowView).Row[0]))
                         {
                             selected.Add(w);
                         }
@@ -196,12 +197,9 @@ namespace Intech
                 //change this to selected directory in step 1
 
                 string basepath = typeof(RibbonTab).Assembly.Location.Replace("RibbonSetup.dll", null);
-                Debug.WriteLine(basepath);
                 string template = basepath + @"\BOMtemplate.xlsx";
-                Debug.WriteLine(template);
                 string HeaderPath = basepath + @"\header.png";
 
-                Debug.WriteLine(template);
                 if (!File.Exists(template))
                 {
                     TaskDialog.Show("Error", "The template file does not exist.");
@@ -253,7 +251,7 @@ namespace Intech
                                 currentRow++; // Move to the next row
                             }
 
-                            System.String merger = "A1:" + IndexToColumn(currentColumn - 1) + "1"; //Format example "A1:E1"
+                            string merger = "A1:" + IndexToColumn(currentColumn - 1) + "1"; //Format example "A1:E1"
                             copiedWorksheet.Cells[merger].Merge = true;
                             // Create a new ExcelStyle object to define cell formatting.
                             ExcelStyle cellStyle = copiedWorksheet.Cells[merger].Style;
@@ -269,7 +267,7 @@ namespace Intech
                             cellStyle.Border.Right.Style = ExcelBorderStyle.Medium;
                             //Add a table onto the data
 
-                            System.String merger2 = "A2:" + IndexToColumn(currentColumn - 1) + (currentRow - 1); //get data range
+                            string merger2 = "A2:" + IndexToColumn(currentColumn - 1) + (currentRow - 1); //get data range
 
                             var dataRange = copiedWorksheet.Cells[merger2];
                             ExcelTable table = copiedWorksheet.Tables.Add(dataRange, "Table" + tableNum);
