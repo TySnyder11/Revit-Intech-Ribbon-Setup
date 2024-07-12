@@ -89,18 +89,30 @@ namespace Intech
         }
         private void dataGridView1_CellContentClick(object sender, DataGridViewCellEventArgs e)
         {
-            var cell = dataGridView1.SelectedCells[0];
-            Debug.WriteLine(cell);
-            if (cell.ColumnIndex == 4)
+          
+        }
+
+        private void dataGridView1_SelectionChange(object sender, EventArgs e)
+        {
+            try
             {
-                OpenFileDialog Browser = new OpenFileDialog();
-                if (Browser.ShowDialog(this) == DialogResult.OK)
+                var cell = dataGridView1.SelectedCells[0];
+                Debug.WriteLine(cell);
+                if (cell.ColumnIndex == 4)
                 {
-                    string path = Browser.FileName;
-                    cell.Value = path;
-                    int row = cell.RowIndex;
-                    dataGridView1.Rows[row].Cells[5].Value = Path.GetFileNameWithoutExtension(path);
+                    OpenFileDialog Browser = new OpenFileDialog();
+                    if (Browser.ShowDialog(this) == DialogResult.OK)
+                    {
+                        string path = Browser.FileName;
+                        cell.Value = path;
+                        int row = cell.RowIndex;
+                        dataGridView1.Rows[row].Cells[5].Value = Path.GetFileNameWithoutExtension(path);
+                    }
                 }
+            }
+            catch 
+            { 
+
             }
         }
 
