@@ -43,8 +43,16 @@ namespace Intech
             {
                 if (!i.IsTemplate)
                 {
-                    schedules.Add(i);
-                    txtschedules.Add(i.Name);
+                    if (i.LookupParameter("IMC_ExportReady") != null)
+                    {
+                        schedules.Add(i);
+                        txtschedules.Add(i.Name);
+                    }
+                    else if (i.LookupParameter("IMC_ExportReady").AsString() != "" && i.LookupParameter("IMC_ExportComplete").AsString() == "")
+                    {
+                        schedules.Add(i);
+                        txtschedules.Add(i.Name);
+                    }
                 }
             }
 

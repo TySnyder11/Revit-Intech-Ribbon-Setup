@@ -69,7 +69,7 @@ namespace Intech
             // Export
             // 
             this.Export.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.Export.Location = new System.Drawing.Point(93, 424);
+            this.Export.Location = new System.Drawing.Point(93, 439);
             this.Export.Name = "Export";
             this.Export.Size = new System.Drawing.Size(75, 32);
             this.Export.TabIndex = 2;
@@ -80,7 +80,7 @@ namespace Intech
             // Import
             // 
             this.Import.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.Import.Location = new System.Drawing.Point(185, 423);
+            this.Import.Location = new System.Drawing.Point(184, 439);
             this.Import.Name = "Import";
             this.Import.Size = new System.Drawing.Size(75, 35);
             this.Import.TabIndex = 3;
@@ -119,10 +119,9 @@ namespace Intech
             this.dataGridView1.Name = "dataGridView1";
             this.dataGridView1.RowHeadersWidth = 51;
             this.dataGridView1.RowTemplate.Height = 24;
-            this.dataGridView1.Size = new System.Drawing.Size(764, 397);
+            this.dataGridView1.Size = new System.Drawing.Size(764, 392);
             this.dataGridView1.TabIndex = 6;
             this.dataGridView1.CellContentClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dataGridView1_CellContentClick);
-            this.dataGridView1.SelectionChanged += dataGridView1_SelectionChange;
             // 
             // TagSetting
             // 
@@ -154,6 +153,5 @@ namespace Intech
         private System.Windows.Forms.SaveFileDialog ExportDialog1;
         private System.Windows.Forms.OpenFileDialog openFileDialog1;
         private System.Windows.Forms.DataGridView dataGridView1;
-        
     }
 }
