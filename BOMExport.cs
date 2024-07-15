@@ -51,7 +51,9 @@ namespace Intech
                         schedules.Add(i);
                         txtschedules.Add(i.Name);
                     }
-                    else if (i.LookupParameter("IMC_ExportReady").AsString() != "" && i.LookupParameter("IMC_ExportComplete").AsString() == "")
+
+                    else if (
+                        ( i.LookupParameter("IMC_ExportReady").AsInteger() == 1) && i.LookupParameter("IMC_ExportComplete").AsInteger() == 0)
                     {
                         schedules.Add(i);
                         txtschedules.Add(i.Name);
@@ -312,12 +314,14 @@ namespace Intech
 
                             }
                         }
+                    }
+                    foreach (ViewSchedule i in schedules)
+                    {
                         Transaction complete = new Transaction(doc, "Change Complete Parameter");
                         complete.Start();
-                        vs2.LookupParameter("IMC_ExportComplete").Set("Complete");
+                        i.LookupParameter("IMC_ExportComplete").Set(1);
                         complete.Commit();
                     }
-
                 }
             }
             TaskDialog.Show("Success", "File saved");
