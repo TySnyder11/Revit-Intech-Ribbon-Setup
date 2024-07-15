@@ -1,9 +1,14 @@
 ﻿using System;
 using System.Diagnostics;
+using System.Reflection;
+using System.Windows.Forms;
 using System.Windows.Media.Imaging;
 using Autodesk.Revit.DB;
 using Autodesk.Revit.UI;
-using OfficeOpenXml;
+using AW = Autodesk.Windows;
+using System.Collections.Generic;
+using System.IO;
+
 
 namespace Intech
 {
@@ -30,7 +35,7 @@ namespace Intech
             }
             catch (Exception ex)
             {
-                TaskDialog.Show("Intech Ribbon", ex.ToString());
+                Autodesk.Revit.UI.TaskDialog.Show("Intech Ribbon", ex.ToString());
 
                 return Autodesk.Revit.UI.Result.Failed;
             }
@@ -63,9 +68,9 @@ namespace Intech
             Debug.WriteLine("Search " + IconPath);
 
             //Create different panels
-            RibbonPanel SheetPanel = application.CreateRibbonPanel(tabName, "Sheets");
-            RibbonPanel TaggingPanel = application.CreateRibbonPanel(tabName, "Tagging");
-            RibbonPanel ExportPanel = application.CreateRibbonPanel(tabName, "Exports");
+            Autodesk.Revit.UI.RibbonPanel SheetPanel = application.CreateRibbonPanel(tabName, "Sheets");
+            Autodesk.Revit.UI.RibbonPanel TaggingPanel = application.CreateRibbonPanel(tabName, "Tagging");
+            Autodesk.Revit.UI.RibbonPanel ExportPanel = application.CreateRibbonPanel(tabName, "Exports");
 
             //Sheets Ribbon
             {
@@ -90,35 +95,82 @@ namespace Intech
                 b3Data.LargeImage = new BitmapImage(new Uri(CSVIcon));
                 PushButton pb3 = ExportPanel.AddItem(b3Data) as PushButton;
             }
-            
+
+            List<Autodesk.Windows.RibbonItem> buttons = new List<Autodesk.Windows.RibbonItem>();
+
             //Tagging Ribbon
             {
                 PushButtonData b4Data = new PushButtonData("Size", "Size", AddInPath, "Intech.Size");
-                b4Data.LargeImage = new BitmapImage(new Uri(IconPath));
+                b4Data.LargeImage = new BitmapImage(new Uri(BasePath + @"\Tag Images\Size.png"));
+                b4Data.Image = new BitmapImage(new Uri(BasePath + @"\Tag Images\SmallSize.png"));
                 PushButtonData b5Data = new PushButtonData("Elevation", "Elevation", AddInPath, "Intech.Elevation");
-                b5Data.LargeImage = new BitmapImage(new Uri(IconPath));
+                b5Data.LargeImage = new BitmapImage(new Uri(BasePath + @"\Tag Images\Elevation.png"));
+                b5Data.Image = new BitmapImage(new Uri(BasePath + @"\Tag Images\SmallElevation.png"));
                 PushButton pb4 = TaggingPanel.AddStackedItems(b4Data, b5Data) as PushButton;
-               
+                buttons.Add(GetButton(tabName, TaggingPanel.Name, "Size"));
+                buttons.Add(GetButton(tabName, TaggingPanel.Name, "Elevation"));
+
                 PushButtonData b6Data = new PushButtonData("OffSet", "OffSet", AddInPath, "Intech.Offset");
-                b6Data.LargeImage = new BitmapImage(new Uri(IconPath));
+                b6Data.LargeImage = new BitmapImage(new Uri(BasePath + @"\Tag Images\OffSet.png"));
+                b6Data.Image = new BitmapImage(new Uri(BasePath + @"\Tag Images\SmallOffSet.png"));
                 PushButtonData b7Data = new PushButtonData("Renumber", "Number", AddInPath, "Intech.Number");
-                b7Data.LargeImage = new BitmapImage(new Uri(IconPath));
-                PushButton pb5 = TaggingPanel.AddStackedItems(b6Data, b7Data) as PushButton;
+                b7Data.LargeImage = new BitmapImage(new Uri(BasePath + @"\Tag Images\Number.png"));
+                b7Data.Image = new BitmapImage(new Uri(BasePath + @"\Tag Images\SmallNumber.png"));
+                List<PushButton> pb5 = TaggingPanel.AddStackedItems(b6Data, b7Data) as List<PushButton>;
+                buttons.Add(GetButton(tabName, TaggingPanel.Name, "OffSet"));
+                buttons.Add(GetButton(tabName, TaggingPanel.Name, "Renumber"));
 
                 PushButtonData b8Data = new PushButtonData("Length", "Length", AddInPath, "Intech.Length");
-                b8Data.LargeImage = new BitmapImage(new Uri(IconPath));
-                PushButtonData b9Data = new PushButtonData("Equipment", "Equipment", AddInPath, "Intech.Equipment");
-                b9Data.LargeImage = new BitmapImage(new Uri(IconPath));
-                PushButton pb6 = TaggingPanel.AddStackedItems(b8Data, b9Data) as PushButton;
+                b8Data.LargeImage = new BitmapImage(new Uri(BasePath + @"\Tag Images\Length.png"));
+                b8Data.Image = new BitmapImage(new Uri(BasePath + @"\Tag Images\SmallLength.png"));
+                PushButtonData b9Data = new PushButtonData("Hanger", "Hanger", AddInPath, "Intech.Hanger");
+                b9Data.LargeImage = new BitmapImage(new Uri(BasePath + @"\Tag Images\Hanger.png"));
+                b9Data.Image = new BitmapImage(new Uri(BasePath + @"\Tag Images\SmallHanger.png"));
+                IList<Autodesk.Revit.UI.RibbonItem> pb6 = TaggingPanel.AddStackedItems(b8Data, b9Data);
+                buttons.Add(GetButton(tabName, TaggingPanel.Name, "Length"));
+                buttons.Add(GetButton(tabName, TaggingPanel.Name, "Hanger"));
 
-                PushButtonData b10Data = new PushButtonData("Hanger", "Hanger", AddInPath, "Intech.Hanger");
-                b10Data.LargeImage = new BitmapImage(new Uri(IconPath));
+
+                foreach (Autodesk.Windows.RibbonItem i in buttons)
+                {
+                    i.Size = AW.RibbonItemSize.Large;
+                    i.ShowText = false;
+                }
+
+                SplitButtonData b12Data = new SplitButtonData("Extra", "Extra");
+                SplitButton sb1 =TaggingPanel.AddItem(b12Data) as SplitButton;
+                for (int i = 1; i <= 10; i++)
+                {
+                    PushButtonData newb = new PushButtonData("Tag" + i.ToString(), "Tag" + i.ToString(), AddInPath, "Intech.Tag" + i.ToString());
+                    b8Data.LargeImage = new BitmapImage(new Uri(BasePath + @"\Tag Images\Tag" + i.ToString() + ".png"));
+                    b8Data.Image = new BitmapImage(new Uri(BasePath + @"\Tag Images\SmallTag" + i.ToString() + ".png"));
+                    sb1.AddPushButton(newb);
+                }
+
                 PushButtonData b11Data = new PushButtonData("Tag Settings", "Tag Settings", AddInPath, "Intech.TagSettings");
                 b11Data.LargeImage = new BitmapImage(new Uri(IconPath));
-                PushButton pb7 = TaggingPanel.AddStackedItems(b10Data, b11Data) as PushButton;
+                PushButton pb3 = TaggingPanel.AddItem(b11Data) as PushButton;
 
-                
             }
+        }
+
+        public AW.RibbonItem GetButton(string tabName, string panelName, string itemName)
+        {
+            AW.RibbonControl ribbon = AW.ComponentManager.Ribbon;
+            foreach (AW.RibbonTab tab in ribbon.Tabs)
+            {
+                if (tab.Name == tabName)
+                {
+                    foreach (AW.RibbonPanel panel in tab.Panels)
+                    {
+                        if (panel.Source.Title == panelName)
+                        {
+                            return panel.FindItem("CustomCtrl_%CustomCtrl_%" + tabName + "%" + panelName + "%" + itemName, true);
+                        }
+                    }
+                }
+            }
+            return null;
         }
     }
 }
