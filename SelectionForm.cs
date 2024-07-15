@@ -5,6 +5,8 @@ using System.Diagnostics;
 using System.IO;
 using System.Web;
 using System.Data;
+using System.Linq;
+using System.Xml.Linq;
 
 
 namespace Intech
@@ -38,8 +40,12 @@ namespace Intech
         }
         protected void checkedListBox_SelectedIndexChanged(object sender, EventArgs e)
         {
-            int index = checkedListBox.SelectedIndex;
-            checkedListBox.SetItemChecked(index, !checkedListBox.GetItemChecked(index));
+            try 
+            {
+                int index = checkedListBox.SelectedIndex;
+                checkedListBox.SetItemChecked(index, !checkedListBox.GetItemChecked(index)); 
+            }
+            catch { }
         }
 
         protected void checkedListBox_ItemCheck(object sender, ItemCheckEventArgs e)
@@ -82,15 +88,34 @@ namespace Intech
         public void SearchBar_TextChanged(object sender, EventArgs e)
         {
             var dv = checkedListBox.DataSource as DataView;
-            string filter;
-            Debug.WriteLine(textBox1.Text.Trim().Length);
+            string filter="";
             if (textBox1.Text.Trim().Length > 0)
             {
-                filter = $"Item LIKE '{textBox1.Text}*'";
+                //filter = $"Item LIKE '{textBox1.Text}*'";
+                foreach (DataRow i in dv.Table.Rows)
+                {
+                    object[] Items = i.ItemArray;
+                    string name = Items[0].ToString();
+                    Debug.WriteLine(name);
+                    if (name.IndexOf(textBox1.Text, StringComparison.OrdinalIgnoreCase) >= 0)
+                        filter = filter + $"(Item LIKE '{name}*') OR ";
+                }
+                if (filter == "")
+                { 
+                    filter = $"(Item LIKE 'doesnotexcist*')";
+                }
+                else
+                {
+                    int length = filter.Count() - 4;
+                    filter = filter.Substring(0, length);
+                    Debug.WriteLine(filter);
+                }
+                
+
             }
             else
             {
-                filter = null;
+            filter = null;
             }
 
             dv.RowFilter = filter;
