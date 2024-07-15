@@ -42,14 +42,21 @@ namespace Intech
             Allschedules= new FilteredElementCollector(doc).OfClass(typeof(ViewSchedule)).Cast<ViewSchedule>().ToList();
             List<ViewSchedule> schedules= new List<ViewSchedule>();
             List<string> txtschedules = new List<string>();
-            foreach (ViewSchedule i in Allschedules) 
-            { 
-                if (!i.IsTemplate) 
+            foreach (ViewSchedule i in Allschedules)
+            {
+                if (!i.IsTemplate)
                 {
-                    schedules.Add(i);
-                    txtschedules.Add(i.Name);
-
-                } 
+                    if (i.LookupParameter("IMC_ExportReady") == null)
+                    {
+                        schedules.Add(i);
+                        txtschedules.Add(i.Name);
+                    }
+                    else if (i.LookupParameter("IMC_ExportReady").AsString() != "" && i.LookupParameter("IMC_ExportComplete").AsString() == "")
+                    {
+                        schedules.Add(i);
+                        txtschedules.Add(i.Name);
+                    }
+                }
             }
 
             SelectionForm selectionForm = new SelectionForm(txtschedules);
@@ -305,6 +312,10 @@ namespace Intech
 
                             }
                         }
+                        Transaction complete = new Transaction(doc, "Change Complete Parameter");
+                        complete.Start();
+                        vs2.LookupParameter("IMC_ExportComplete").Set("Complete");
+                        complete.Commit();
                     }
 
                 }

@@ -38,7 +38,8 @@ namespace Intech
         }
         protected void checkedListBox_SelectedIndexChanged(object sender, EventArgs e)
         {
-
+            int index = checkedListBox.SelectedIndex;
+            checkedListBox.SetItemChecked(index, !checkedListBox.GetItemChecked(index));
         }
 
         protected void checkedListBox_ItemCheck(object sender, ItemCheckEventArgs e)

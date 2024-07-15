@@ -1,9 +1,7 @@
 ﻿using Autodesk.Revit.Attributes;
 using Autodesk.Revit.DB;
 using Autodesk.Revit.UI;
-using OfficeOpenXml;
-using OfficeOpenXml.Style;
-using OfficeOpenXml.Table;
+
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -27,7 +25,6 @@ namespace Intech
             Document doc = uiapp.ActiveUIDocument.Document;
             Transaction trans = new Transaction(doc);
             UIDocument uidoc = commandData.Application.ActiveUIDocument;
-            ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
 
             List<ViewSchedule> Allschedules;//list of scheuled
             List<ViewSchedule> selected = new List<ViewSchedule>();  //List of selected schedules
@@ -43,12 +40,7 @@ namespace Intech
             {
                 if (!i.IsTemplate)
                 {
-                    if (i.LookupParameter("IMC_ExportReady") != null)
-                    {
-                        schedules.Add(i);
-                        txtschedules.Add(i.Name);
-                    }
-                    else if (i.LookupParameter("IMC_ExportReady").AsString() != "" && i.LookupParameter("IMC_ExportComplete").AsString() == "")
+                    if (i.Name.IndexOf("tigerstop", StringComparison.OrdinalIgnoreCase) >= 0)
                     {
                         schedules.Add(i);
                         txtschedules.Add(i.Name);
