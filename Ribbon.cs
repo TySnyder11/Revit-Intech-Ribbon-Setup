@@ -142,8 +142,9 @@ namespace Intech
                 for (int i = 1; i <= 10; i++)
                 {
                     PushButtonData newb = new PushButtonData("Tag" + i.ToString(), "Tag" + i.ToString(), AddInPath, "Intech.Tag" + i.ToString());
-                    b8Data.LargeImage = new BitmapImage(new Uri(BasePath + @"\Tag Images\Tag" + i.ToString() + ".png"));
-                    b8Data.Image = new BitmapImage(new Uri(BasePath + @"\Tag Images\SmallTag" + i.ToString() + ".png"));
+                    newb.LargeImage = new BitmapImage(new Uri(BasePath + @"Tag Images\Tag" + i.ToString() + ".png"));
+                    newb.Image = new BitmapImage(new Uri(BasePath + @"Tag Images\SmallTag" + i.ToString() + ".png"));
+                    Debug.WriteLine("Search " + BasePath + @"\Tag Images\Tag" + i.ToString() + ".png");
                     sb1.AddPushButton(newb);
                 }
 
