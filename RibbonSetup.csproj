@@ -86,7 +86,20 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="BOMExport.cs" />
-    <Compile Include="Class1.cs" />
+    <Compile Include="Dependent View.cs" />
+    <Compile Include="DependentViewForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="DependentViewForm.Designer.cs">
+      <DependentUpon>DependentViewForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="SheetCreate.cs" />
+    <Compile Include="SheetCreateForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="SheetCreateForm.Designer.cs">
+      <DependentUpon>SheetCreateForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="TagTools.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
@@ -116,6 +129,9 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <EmbeddedResource Include="DependentViewForm.resx">
+      <DependentUpon>DependentViewForm.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
@@ -127,9 +143,14 @@
       <DependentUpon>TagSetting.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <None Include="Resources\IMC-Logo1.png" />
+  </ItemGroup>
   <ItemGroup>
     <None Include="Resources\IMC-Logo.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\IMC-Logo2.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

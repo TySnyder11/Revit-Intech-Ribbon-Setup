@@ -43,11 +43,12 @@ namespace Intech
             this.checkedListBox.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
+            this.checkedListBox.CheckOnClick = true;
             this.checkedListBox.FormattingEnabled = true;
-            this.checkedListBox.Location = new System.Drawing.Point(7, 39);
+            this.checkedListBox.Location = new System.Drawing.Point(10, 48);
             this.checkedListBox.Margin = new System.Windows.Forms.Padding(4);
             this.checkedListBox.Name = "checkedListBox";
-            this.checkedListBox.Size = new System.Drawing.Size(565, 361);
+            this.checkedListBox.Size = new System.Drawing.Size(558, 361);
             this.checkedListBox.TabIndex = 10;
             this.checkedListBox.SelectedIndexChanged += new System.EventHandler(this.checkedListBox_SelectedIndexChanged);
             // 
@@ -90,7 +91,7 @@ namespace Intech
             this.button1.UseVisualStyleBackColor = true;
             this.button1.Click += new System.EventHandler(this.checkAll_Click);
             // 
-            // SearchBar
+            // textBox1
             // 
             this.textBox1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
