@@ -122,6 +122,7 @@ namespace Intech
                     TaskDialog.Show("Error writing to CSV file: ", ex.ToString());
                 }
             }
+
             return Result.Succeeded;
 
         }
