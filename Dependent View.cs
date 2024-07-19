@@ -98,7 +98,7 @@ namespace Intech
                     {
                         ElementId NewViewID = i.Duplicate(ViewDuplicateOption.AsDependent);
                         Element NewView = doc.GetElement(NewViewID);
-                        NewView.Name = i.Name + "- Area " + x.Name;
+                        NewView.Name = i.Name + " - " + x.Name;
                         createdViews.Add(NewView);
                     }
                     catch (Exception ex)

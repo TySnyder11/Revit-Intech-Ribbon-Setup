@@ -319,7 +319,11 @@ namespace Intech
                     {
                         Transaction complete = new Transaction(doc, "Change Complete Parameter");
                         complete.Start();
-                        i.LookupParameter("IMC_ExportComplete").Set(1);
+                        try
+                        {
+                            i.LookupParameter("IMC_ExportComplete").Set(1);
+                        }
+                        catch { }
                         complete.Commit();
                     }
                 }

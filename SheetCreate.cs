@@ -13,7 +13,6 @@ namespace Intech
     [Transaction(TransactionMode.Manual)]
     [Regeneration(RegenerationOption.Manual)]
 
-    //Settings
     public class SheetCreate : IExternalCommand
     {
 
@@ -25,6 +24,26 @@ namespace Intech
         public static void ContinueToCreate (List<Element> planViews)
         {
             
+        }
+
+        private Result Finish(ExternalCommandData commandData, ref string message, ElementSet elements)
+        {
+            return Result.Succeeded; 
+        }
+    }
+
+    [Transaction(TransactionMode.Manual)]
+    [Regeneration(RegenerationOption.Manual)]
+
+    //Settings
+    public class SheetSettingsMenu : IExternalCommand
+    {
+
+        public Result Execute(ExternalCommandData commandData, ref string message, ElementSet elements)
+        {
+            SheetSettings sheetSettings = new SheetSettings();
+            sheetSettings.ShowDialog();
+            return Result.Succeeded;
         }
     }
 }

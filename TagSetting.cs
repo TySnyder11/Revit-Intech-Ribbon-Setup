@@ -58,7 +58,7 @@ namespace Intech
             dt.Columns.Add(LeColumn);
 
             //Get Columns
-            if (Columns[Columns.Count - 1] == "") {Columns.RemoveAt(Columns.Count-1);}
+            if (Columns[Columns.Count - 1] == "") { Columns.RemoveAt(Columns.Count - 1); }
             foreach (string i in Columns)
             {
                 List<string> rows = i.Split('\t').ToList();
@@ -77,6 +77,7 @@ namespace Intech
             }
 
             dataGridView1.DataSource = dt;
+
         }
         private void ExportDialog1_FileOk(object sender, CancelEventArgs e)
         {
