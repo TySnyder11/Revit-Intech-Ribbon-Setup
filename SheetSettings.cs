@@ -10,15 +10,23 @@ using System.Windows.Forms;
 using System.IO;
 using System.Diagnostics;
 using System.Xml;
+using Autodesk.Revit.UI;
+using Autodesk.Revit.DB;
 
 namespace Intech
 {
-    public partial class SheetSettings : Form
+    public partial class SheetSettings : System.Windows.Forms.Form
     {
-        public SheetSettings()
+        Dictionary<string, List<string>> titleblockFamily = new Dictionary<string, List<string>>();
+        public SheetSettings(ExternalCommandData commandData)
         {
             InitializeComponent();
             this.CenterToParent();
+
+            UIApplication uiapp = commandData.Application;
+            Document doc = uiapp.ActiveUIDocument.Document;
+            Transaction trans = new Transaction(doc);
+            UIDocument uidoc = commandData.Application.ActiveUIDocument;
 
             //Get txt Path
             string BasePath = typeof(RibbonTab).Assembly.Location.Replace("RibbonSetup.dll", "SheetSettings.txt");
@@ -44,7 +52,7 @@ namespace Intech
                         TitleBlockType.Text = rows[3];
                     }
                 }
-                else if(Columns[0].Contains("Nonstandard Level Info"))
+                else if (Columns[0].Contains("Nonstandard Level Info"))
                 {
                     Columns.RemoveAt(0);
                     Columns.RemoveAt(0);
@@ -58,7 +66,7 @@ namespace Intech
                         x++;
                     }
                 }
-                else if(Columns[0].Contains("Nonstandard Scopebox Info"))
+                else if (Columns[0].Contains("Nonstandard Scopebox Info"))
                 {
                     Columns.RemoveAt(0);
                     Columns.RemoveAt(0);
@@ -115,6 +123,31 @@ namespace Intech
                     }
                 }
             }
+
+            List<Element> titleblocktypes = new FilteredElementCollector(doc)
+            .OfCategory(BuiltInCategory.OST_TitleBlocks)
+            .WhereElementIsElementType()
+            .ToElements() as List<Element>;
+
+            foreach (FamilySymbol i in titleblocktypes)
+            {
+                if (!titleblockFamily.Keys.Contains(i.FamilyName))
+                {
+                    titleblockFamily.Add(i.FamilyName, new List<string>());
+                    titleblockFamily[i.FamilyName].Add(i.Name);
+                }
+                else if (titleblockFamily.Keys.Contains(i.Category.Name) && !titleblockFamily[i.Category.Name].Contains(i.Name))
+                {
+                    titleblockFamily[i.Category.Name].Add(i.Name);
+                }
+            }
+
+            foreach (string i in titleblockFamily.Keys)
+                TitleBlockFamily.Items.Add(i);
+
+            if (TitleBlockFamily.Text != "")
+                foreach (string i in titleblockFamily[TitleBlockFamily.Text])
+                    TitleBlockType.Items.Add(i);
         }
 
         private void Import_Click(object sender, EventArgs e)

@@ -9,7 +9,6 @@ using System.Diagnostics;
 using System.Linq;
 using System.Windows;
 using System.Windows.Forms;
-using TitleBlockSetup;
 namespace Intech
 {
     [Transaction(TransactionMode.Manual)]
@@ -18,17 +17,6 @@ namespace Intech
     //Settings
     public class DependentView : IExternalCommand
     {
-        public Dictionary<string, (int, int)> sizes = new Dictionary<string, (int, int)>
-        {
-            { " 1/4\" " + "= 1\"" + "-0' ", (53979, 48) },
-            { " 1/8\" " + "= 1\"" + "-0' ", (1547, 96) },
-            { " 1/16\" " + "= 1\"" + "-0' ", (1103312, 192) },
-            { " 3/4\" " + "= 1\"" + "-0' ", (54016, 16) },
-            { " 3/8\" " + "= 1\"" + "-0' ", (476405, 32) },
-            { " 3/16\" " + "= 1\"" + "-0' ", (1103309, 64) },
-            { " 3/32\" " + "= 1\"" + "-0' ", (54457, 128) },
-            { " 1\" " + " = 40\"" + "-0' ", (1547, 480) }
-        };
 
         public Result Execute(ExternalCommandData commandData, ref string message, ElementSet elements)
         {
@@ -43,6 +31,8 @@ namespace Intech
                 .OfCategory(BuiltInCategory.OST_VolumeOfInterest).
                 WhereElementIsNotElementType().
                 ToElements() as List<Element>;
+
+            var sizes = SettingsRead.Scale();
 
             DependentViewForm dependentViewForm = new DependentViewForm(planViews, areaList, sizes.Keys.ToList());
 
@@ -118,12 +108,10 @@ namespace Intech
                     tranDependentView.Commit();
                     tranDependentView.Start();
                     Debug.WriteLine(dependentViewForm.OverallView.SelectedItem.ToString());
-                    (NewView as Autodesk.Revit.DB.View).Scale = sizes[dependentViewForm.OverallView.SelectedItem.ToString()].Item2;
+                    (NewView as Autodesk.Revit.DB.View).Scale = int.Parse(sizes[dependentViewForm.OverallView.SelectedItem.ToString()].Item2);
                 }
             }
             tranDependentView.Commit();
-            if(dependentViewForm.CreateSheet.Checked)
-                SheetCreate.ContinueToCreate(createdViews);
 
             return Result.Succeeded;
         }

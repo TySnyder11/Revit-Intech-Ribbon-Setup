@@ -86,6 +86,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="BOMExport.cs" />
+    <Compile Include="SettingsRead.cs" />
     <Compile Include="Dependent View.cs" />
     <Compile Include="DependentViewForm.cs">
       <SubType>Form</SubType>

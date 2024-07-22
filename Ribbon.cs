@@ -84,6 +84,11 @@ namespace Intech
                 dvData.Image = new BitmapImage(new Uri(IconPath));
                 dvData.LargeImage = new BitmapImage(new Uri(IconPath));
                 PushButton dv = SheetPanel.AddItem(dvData) as PushButton;
+                PushButtonData scData = new PushButtonData("Sheet Create", "Sheet Create", AddInPath, "Intech.SheetCreate");
+                scData.ToolTip = "Create dependent views for a plan view.";
+                scData.Image = new BitmapImage(new Uri(IconPath));
+                scData.LargeImage = new BitmapImage(new Uri(IconPath));
+                PushButton sc = SheetPanel.AddItem(scData) as PushButton;
                 PushButtonData ssData = new PushButtonData("Sheet Settings", "Sheet Settings", AddInPath, "Intech.SheetSettingsMenu");
                 ssData.ToolTip = "Create dependent views for a plan view.";
                 ssData.Image = new BitmapImage(new Uri(IconPath));
