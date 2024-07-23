@@ -32,7 +32,7 @@
             this.PlanViewLable = new System.Windows.Forms.Label();
             this.label3 = new System.Windows.Forms.Label();
             this.SearchBox = new System.Windows.Forms.TextBox();
-            this.checkedListBox2 = new System.Windows.Forms.CheckedListBox();
+            this.ParameterCheckList = new System.Windows.Forms.CheckedListBox();
             this.Parameters = new System.Windows.Forms.Label();
             this.textBox1 = new System.Windows.Forms.TextBox();
             this.pictureBox1 = new System.Windows.Forms.PictureBox();
@@ -65,7 +65,7 @@
             this.PlanViewCheckList.FormattingEnabled = true;
             this.PlanViewCheckList.Location = new System.Drawing.Point(12, 28);
             this.PlanViewCheckList.Name = "PlanViewCheckList";
-            this.PlanViewCheckList.Size = new System.Drawing.Size(264, 242);
+            this.PlanViewCheckList.Size = new System.Drawing.Size(299, 259);
             this.PlanViewCheckList.TabIndex = 0;
             // 
             // PlanViewLable
@@ -81,7 +81,7 @@
             // 
             this.label3.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(13, 302);
+            this.label3.Location = new System.Drawing.Point(13, 320);
             this.label3.Name = "label3";
             this.label3.Size = new System.Drawing.Size(50, 16);
             this.label3.TabIndex = 7;
@@ -91,27 +91,27 @@
             // 
             this.SearchBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.SearchBox.Location = new System.Drawing.Point(69, 298);
+            this.SearchBox.Location = new System.Drawing.Point(69, 316);
             this.SearchBox.Name = "SearchBox";
-            this.SearchBox.Size = new System.Drawing.Size(207, 22);
+            this.SearchBox.Size = new System.Drawing.Size(242, 22);
             this.SearchBox.TabIndex = 6;
             this.SearchBox.TextChanged += new System.EventHandler(this.SearchBox_TextChanged);
             // 
-            // checkedListBox2
+            // ParameterCheckList
             // 
-            this.checkedListBox2.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            this.ParameterCheckList.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.checkedListBox2.FormattingEnabled = true;
-            this.checkedListBox2.Location = new System.Drawing.Point(301, 224);
-            this.checkedListBox2.Name = "checkedListBox2";
-            this.checkedListBox2.Size = new System.Drawing.Size(304, 140);
-            this.checkedListBox2.TabIndex = 8;
+            this.ParameterCheckList.FormattingEnabled = true;
+            this.ParameterCheckList.Location = new System.Drawing.Point(336, 226);
+            this.ParameterCheckList.Name = "ParameterCheckList";
+            this.ParameterCheckList.Size = new System.Drawing.Size(304, 157);
+            this.ParameterCheckList.TabIndex = 8;
             // 
             // Parameters
             // 
             this.Parameters.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.Parameters.AutoSize = true;
-            this.Parameters.Location = new System.Drawing.Point(298, 205);
+            this.Parameters.Location = new System.Drawing.Point(333, 206);
             this.Parameters.Name = "Parameters";
             this.Parameters.Size = new System.Drawing.Size(143, 16);
             this.Parameters.TabIndex = 9;
@@ -120,7 +120,7 @@
             // textBox1
             // 
             this.textBox1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.textBox1.Location = new System.Drawing.Point(302, 80);
+            this.textBox1.Location = new System.Drawing.Point(337, 80);
             this.textBox1.Name = "textBox1";
             this.textBox1.Size = new System.Drawing.Size(303, 22);
             this.textBox1.TabIndex = 10;
@@ -129,7 +129,7 @@
             // 
             this.pictureBox1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.pictureBox1.Image = global::TitleBlockSetup.Properties.Resources.IMC_Logo;
-            this.pictureBox1.Location = new System.Drawing.Point(12, 392);
+            this.pictureBox1.Location = new System.Drawing.Point(12, 410);
             this.pictureBox1.Name = "pictureBox1";
             this.pictureBox1.Size = new System.Drawing.Size(85, 66);
             this.pictureBox1.TabIndex = 11;
@@ -139,7 +139,7 @@
             // 
             this.SheetNameLable.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.SheetNameLable.AutoSize = true;
-            this.SheetNameLable.Location = new System.Drawing.Point(299, 60);
+            this.SheetNameLable.Location = new System.Drawing.Point(334, 60);
             this.SheetNameLable.Name = "SheetNameLable";
             this.SheetNameLable.Size = new System.Drawing.Size(82, 16);
             this.SheetNameLable.TabIndex = 12;
@@ -149,7 +149,7 @@
             // 
             this.TitleBlockFamilyLable.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.TitleBlockFamilyLable.AutoSize = true;
-            this.TitleBlockFamilyLable.Location = new System.Drawing.Point(299, 105);
+            this.TitleBlockFamilyLable.Location = new System.Drawing.Point(334, 105);
             this.TitleBlockFamilyLable.Name = "TitleBlockFamilyLable";
             this.TitleBlockFamilyLable.Size = new System.Drawing.Size(113, 16);
             this.TitleBlockFamilyLable.TabIndex = 13;
@@ -159,7 +159,7 @@
             // 
             this.TitleBlockFamily.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.TitleBlockFamily.FormattingEnabled = true;
-            this.TitleBlockFamily.Location = new System.Drawing.Point(301, 126);
+            this.TitleBlockFamily.Location = new System.Drawing.Point(336, 126);
             this.TitleBlockFamily.Name = "TitleBlockFamily";
             this.TitleBlockFamily.Size = new System.Drawing.Size(304, 24);
             this.TitleBlockFamily.TabIndex = 15;
@@ -168,7 +168,7 @@
             // MiddleSheetNumber
             // 
             this.MiddleSheetNumber.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.MiddleSheetNumber.Location = new System.Drawing.Point(335, 34);
+            this.MiddleSheetNumber.Location = new System.Drawing.Point(370, 34);
             this.MiddleSheetNumber.Name = "MiddleSheetNumber";
             this.MiddleSheetNumber.Size = new System.Drawing.Size(18, 22);
             this.MiddleSheetNumber.TabIndex = 16;
@@ -177,7 +177,7 @@
             // 
             this.label2.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(355, 36);
+            this.label2.Location = new System.Drawing.Point(390, 36);
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(30, 16);
             this.label2.TabIndex = 18;
@@ -187,7 +187,7 @@
             // 
             this.label4.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.label4.AutoSize = true;
-            this.label4.Location = new System.Drawing.Point(299, 13);
+            this.label4.Location = new System.Drawing.Point(334, 13);
             this.label4.Name = "label4";
             this.label4.Size = new System.Drawing.Size(93, 16);
             this.label4.TabIndex = 19;
@@ -198,7 +198,7 @@
             this.label5.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.label5.AutoSize = true;
             this.label5.ForeColor = System.Drawing.SystemColors.ControlDarkDark;
-            this.label5.Location = new System.Drawing.Point(390, 29);
+            this.label5.Location = new System.Drawing.Point(425, 29);
             this.label5.Name = "label5";
             this.label5.Size = new System.Drawing.Size(154, 16);
             this.label5.TabIndex = 20;
@@ -207,7 +207,7 @@
             // TradeAbriviation
             // 
             this.TradeAbriviation.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.TradeAbriviation.Location = new System.Drawing.Point(298, 34);
+            this.TradeAbriviation.Location = new System.Drawing.Point(333, 34);
             this.TradeAbriviation.Name = "TradeAbriviation";
             this.TradeAbriviation.Size = new System.Drawing.Size(18, 22);
             this.TradeAbriviation.TabIndex = 21;
@@ -216,7 +216,7 @@
             // 
             this.label1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(319, 37);
+            this.label1.Location = new System.Drawing.Point(354, 37);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(14, 16);
             this.label1.TabIndex = 22;
@@ -227,7 +227,7 @@
             this.label6.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.label6.AutoSize = true;
             this.label6.ForeColor = System.Drawing.SystemColors.ControlDarkDark;
-            this.label6.Location = new System.Drawing.Point(395, 43);
+            this.label6.Location = new System.Drawing.Point(430, 43);
             this.label6.Name = "label6";
             this.label6.Size = new System.Drawing.Size(111, 16);
             this.label6.TabIndex = 23;
@@ -236,61 +236,66 @@
             // Create
             // 
             this.Create.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.Create.Location = new System.Drawing.Point(533, 410);
+            this.Create.Location = new System.Drawing.Point(568, 428);
             this.Create.Name = "Create";
             this.Create.Size = new System.Drawing.Size(75, 23);
             this.Create.TabIndex = 24;
             this.Create.Text = "Create";
             this.Create.UseVisualStyleBackColor = true;
+            this.Create.Click += new System.EventHandler(this.Create_Click);
             // 
             // Cancel
             // 
             this.Cancel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.Cancel.Location = new System.Drawing.Point(533, 439);
+            this.Cancel.Location = new System.Drawing.Point(568, 457);
             this.Cancel.Name = "Cancel";
             this.Cancel.Size = new System.Drawing.Size(75, 23);
             this.Cancel.TabIndex = 25;
             this.Cancel.Text = "Cancel";
             this.Cancel.UseVisualStyleBackColor = true;
+            this.Cancel.Click += new System.EventHandler(this.Cancel_Click);
             // 
             // LevelOverride
             // 
             this.LevelOverride.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.LevelOverride.AutoSize = true;
-            this.LevelOverride.Location = new System.Drawing.Point(12, 330);
+            this.LevelOverride.Location = new System.Drawing.Point(12, 348);
             this.LevelOverride.Name = "LevelOverride";
             this.LevelOverride.Size = new System.Drawing.Size(117, 20);
             this.LevelOverride.TabIndex = 26;
             this.LevelOverride.Text = "Level Override";
             this.LevelOverride.UseVisualStyleBackColor = true;
+            this.LevelOverride.CheckedChanged += new System.EventHandler(this.LevelOverride_CheckedChanged);
             // 
             // AreaOverride
             // 
             this.AreaOverride.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.AreaOverride.AutoSize = true;
-            this.AreaOverride.Location = new System.Drawing.Point(12, 356);
+            this.AreaOverride.Location = new System.Drawing.Point(12, 374);
             this.AreaOverride.Name = "AreaOverride";
             this.AreaOverride.Size = new System.Drawing.Size(113, 20);
             this.AreaOverride.TabIndex = 27;
             this.AreaOverride.Text = "Area Override";
             this.AreaOverride.UseVisualStyleBackColor = true;
+            this.AreaOverride.CheckedChanged += new System.EventHandler(this.AreaOverride_CheckedChanged);
             // 
             // TitleBlockType
             // 
             this.TitleBlockType.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.TitleBlockType.FormattingEnabled = true;
-            this.TitleBlockType.Location = new System.Drawing.Point(301, 178);
+            this.TitleBlockType.Location = new System.Drawing.Point(336, 178);
             this.TitleBlockType.Name = "TitleBlockType";
             this.TitleBlockType.Size = new System.Drawing.Size(304, 24);
             this.TitleBlockType.TabIndex = 29;
+            this.TitleBlockType.SelectedIndexChanged += new System.EventHandler(this.TitleBlockType_SelectedIndexChanged);
             // 
             // Titleblock
             // 
             this.Titleblock.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.Titleblock.AutoSize = true;
-            this.Titleblock.Location = new System.Drawing.Point(299, 157);
+            this.Titleblock.Location = new System.Drawing.Point(334, 157);
             this.Titleblock.Name = "Titleblock";
-            this.Titleblock.Size = new System.Drawing.Size(131, 20);
+            this.Titleblock.Size = new System.Drawing.Size(105, 16);
             this.Titleblock.TabIndex = 28;
             this.Titleblock.Text = "Title Block Type";
             // 
@@ -299,9 +304,9 @@
             this.AreaOverrideComboBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.AreaOverrideComboBox.FormattingEnabled = true;
-            this.AreaOverrideComboBox.Location = new System.Drawing.Point(128, 352);
+            this.AreaOverrideComboBox.Location = new System.Drawing.Point(128, 372);
             this.AreaOverrideComboBox.Name = "AreaOverrideComboBox";
-            this.AreaOverrideComboBox.Size = new System.Drawing.Size(148, 24);
+            this.AreaOverrideComboBox.Size = new System.Drawing.Size(183, 24);
             this.AreaOverrideComboBox.TabIndex = 30;
             this.AreaOverrideComboBox.Visible = false;
             // 
@@ -310,9 +315,9 @@
             this.LevelOverrideComboBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.LevelOverrideComboBox.FormattingEnabled = true;
-            this.LevelOverrideComboBox.Location = new System.Drawing.Point(128, 326);
+            this.LevelOverrideComboBox.Location = new System.Drawing.Point(128, 346);
             this.LevelOverrideComboBox.Name = "LevelOverrideComboBox";
-            this.LevelOverrideComboBox.Size = new System.Drawing.Size(148, 24);
+            this.LevelOverrideComboBox.Size = new System.Drawing.Size(183, 24);
             this.LevelOverrideComboBox.TabIndex = 31;
             this.LevelOverrideComboBox.Visible = false;
             // 
@@ -320,7 +325,7 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(617, 470);
+            this.ClientSize = new System.Drawing.Size(652, 488);
             this.Controls.Add(this.LevelOverrideComboBox);
             this.Controls.Add(this.AreaOverrideComboBox);
             this.Controls.Add(this.TitleBlockType);
@@ -342,7 +347,7 @@
             this.Controls.Add(this.pictureBox1);
             this.Controls.Add(this.textBox1);
             this.Controls.Add(this.Parameters);
-            this.Controls.Add(this.checkedListBox2);
+            this.Controls.Add(this.ParameterCheckList);
             this.Controls.Add(this.label3);
             this.Controls.Add(this.SearchBox);
             this.Controls.Add(this.PlanViewLable);
@@ -350,6 +355,7 @@
             this.MinimumSize = new System.Drawing.Size(580, 379);
             this.Name = "SheetCreateForm";
             this.Text = "SheetCreateForm";
+            this.Load += new System.EventHandler(this.SheetCreateForm_Load);
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
@@ -362,7 +368,7 @@
         private System.Windows.Forms.Label PlanViewLable;
         private System.Windows.Forms.Label label3;
         private System.Windows.Forms.TextBox SearchBox;
-        private System.Windows.Forms.CheckedListBox checkedListBox2;
+        private System.Windows.Forms.CheckedListBox ParameterCheckList;
         private System.Windows.Forms.Label Parameters;
         private System.Windows.Forms.TextBox textBox1;
         private System.Windows.Forms.PictureBox pictureBox1;
