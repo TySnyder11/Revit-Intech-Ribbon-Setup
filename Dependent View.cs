@@ -86,15 +86,16 @@ namespace Intech
                 {
                     try
                     {
-                        ElementId NewViewID = i.Duplicate(ViewDuplicateOption.AsDependent);
-                        Element NewView = doc.GetElement(NewViewID);
-                        NewView.Name = i.Name + " - " + x.Name;
-                        createdViews.Add(NewView);
+                    ElementId NewViewID = i.Duplicate(ViewDuplicateOption.AsDependent);
+                    Element NewView = doc.GetElement(NewViewID);
+                    NewView.Name = i.Name + " - " + x.Name;
+                    createdViews.Add(NewView);
+
+                    (NewView as Element).get_Parameter(BuiltInParameter.VIEWER_VOLUME_OF_INTEREST_CROP).Set(x.Id);
                     }
                     catch (Exception ex)
                     {
                         TaskDialog.Show("Error", ex.ToString());
-                        continue;
                     }
                 }
 

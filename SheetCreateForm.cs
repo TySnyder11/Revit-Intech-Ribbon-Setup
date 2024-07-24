@@ -78,7 +78,7 @@ namespace Intech
             if (TitleBlockFamily.Text != "")
                 foreach (Element i in titleblockFamily[TitleBlockFamily.Text])
                 {
-                    TitleBlockType.Items.Add(i.Name);
+                    TitleBlockType.Items.Add(i.Name.Replace('\n','\0'));
                     if (TitleBlockType.Text.Contains(i.Name))
                     {
                         temp.Start();
@@ -91,7 +91,7 @@ namespace Intech
 
                         foreach(Parameter p in title_block[0].GetOrderedParameters())
                             if (p.StorageType == StorageType.Integer)
-                            ParameterCheckList.Items.Add(p.Definition.Name);
+                                ParameterCheckList.Items.Add(p.Definition.Name);
 
                         temp.RollBack();
                     }

@@ -34,7 +34,7 @@
             this.SearchBox = new System.Windows.Forms.TextBox();
             this.ParameterCheckList = new System.Windows.Forms.CheckedListBox();
             this.Parameters = new System.Windows.Forms.Label();
-            this.textBox1 = new System.Windows.Forms.TextBox();
+            this.SheetName = new System.Windows.Forms.TextBox();
             this.pictureBox1 = new System.Windows.Forms.PictureBox();
             this.SheetNameLable = new System.Windows.Forms.Label();
             this.TitleBlockFamilyLable = new System.Windows.Forms.Label();
@@ -117,13 +117,13 @@
             this.Parameters.TabIndex = 9;
             this.Parameters.Text = "Title Block Parameters";
             // 
-            // textBox1
+            // SheetName
             // 
-            this.textBox1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.textBox1.Location = new System.Drawing.Point(337, 80);
-            this.textBox1.Name = "textBox1";
-            this.textBox1.Size = new System.Drawing.Size(303, 22);
-            this.textBox1.TabIndex = 10;
+            this.SheetName.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.SheetName.Location = new System.Drawing.Point(337, 80);
+            this.SheetName.Name = "SheetName";
+            this.SheetName.Size = new System.Drawing.Size(303, 22);
+            this.SheetName.TabIndex = 10;
             // 
             // pictureBox1
             // 
@@ -345,7 +345,7 @@
             this.Controls.Add(this.TitleBlockFamilyLable);
             this.Controls.Add(this.SheetNameLable);
             this.Controls.Add(this.pictureBox1);
-            this.Controls.Add(this.textBox1);
+            this.Controls.Add(this.SheetName);
             this.Controls.Add(this.Parameters);
             this.Controls.Add(this.ParameterCheckList);
             this.Controls.Add(this.label3);
@@ -364,31 +364,31 @@
 
         #endregion
 
-        private System.Windows.Forms.CheckedListBox PlanViewCheckList;
+        public System.Windows.Forms.CheckedListBox PlanViewCheckList;
         private System.Windows.Forms.Label PlanViewLable;
         private System.Windows.Forms.Label label3;
         private System.Windows.Forms.TextBox SearchBox;
-        private System.Windows.Forms.CheckedListBox ParameterCheckList;
-        private System.Windows.Forms.Label Parameters;
-        private System.Windows.Forms.TextBox textBox1;
+        public System.Windows.Forms.CheckedListBox ParameterCheckList;
+        public System.Windows.Forms.Label Parameters;
+        public System.Windows.Forms.TextBox SheetName;
         private System.Windows.Forms.PictureBox pictureBox1;
         private System.Windows.Forms.Label SheetNameLable;
         private System.Windows.Forms.Label TitleBlockFamilyLable;
-        private System.Windows.Forms.ComboBox TitleBlockFamily;
-        private System.Windows.Forms.TextBox MiddleSheetNumber;
+        public System.Windows.Forms.ComboBox TitleBlockFamily;
+        public System.Windows.Forms.TextBox MiddleSheetNumber;
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.Label label4;
         private System.Windows.Forms.Label label5;
-        private System.Windows.Forms.TextBox TradeAbriviation;
+        public System.Windows.Forms.TextBox TradeAbriviation;
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.Label label6;
         private System.Windows.Forms.Button Create;
         private System.Windows.Forms.Button Cancel;
-        private System.Windows.Forms.CheckBox LevelOverride;
-        private System.Windows.Forms.CheckBox AreaOverride;
-        private System.Windows.Forms.ComboBox TitleBlockType;
+        public System.Windows.Forms.CheckBox LevelOverride;
+        public System.Windows.Forms.CheckBox AreaOverride;
+        public System.Windows.Forms.ComboBox TitleBlockType;
         private System.Windows.Forms.Label Titleblock;
-        private System.Windows.Forms.ComboBox AreaOverrideComboBox;
-        private System.Windows.Forms.ComboBox LevelOverrideComboBox;
+        public System.Windows.Forms.ComboBox AreaOverrideComboBox;
+        public System.Windows.Forms.ComboBox LevelOverrideComboBox;
     }
 }
