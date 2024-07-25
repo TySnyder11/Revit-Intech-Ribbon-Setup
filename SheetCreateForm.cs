@@ -19,6 +19,7 @@ namespace Intech
     {
         Dictionary<string, List<Element>> titleblockFamily = new Dictionary<string, List<Element>>();
         Document doc;
+        Dictionary<string,string> disciplinevalue;
         public SheetCreateForm(ExternalCommandData commandData)
         {
             UIApplication uiapp = commandData.Application;
@@ -52,6 +53,10 @@ namespace Intech
             if (baseInput.SheetNumber != "") MiddleSheetNumber.Text = baseInput.SheetNumber;
             if (baseInput.titleBlockFamily != "") TitleBlockFamily.Text = baseInput.titleBlockFamily;
             if (baseInput.titleBlockType != "") TitleBlockType.Text = baseInput.titleBlockType;
+
+            disciplinevalue = SettingsRead.Discipline() ;
+            foreach (var i in disciplinevalue.Keys)
+                Disipline.Items.Add(i);
 
             List<Element> titleblocktypes = new FilteredElementCollector(doc)
                 .OfCategory(BuiltInCategory.OST_TitleBlocks)

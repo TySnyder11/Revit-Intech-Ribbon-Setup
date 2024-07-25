@@ -252,7 +252,6 @@ namespace Intech
             }
             public bool AllowElement(Element element)
             {
-                foreach (string i in categories) Debug.WriteLine(i);
                 if (element.Category == null)
                 {
                     return false;

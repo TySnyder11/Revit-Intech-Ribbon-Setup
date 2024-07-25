@@ -186,7 +186,7 @@ namespace Intech
             var data = GetData();
             string path = typeof(RibbonTab).Assembly.Location.Replace(@"RibbonSetup.dll", @"SheetSettings.txt");
             string[] lines = System.IO.File.ReadAllLines(path);
-            var newLines = new string[] { lines[0] }.Append(data);
+            var newLines = new string[] { data };
             System.IO.File.WriteAllLines(path, newLines);
             this.Close();
         }
