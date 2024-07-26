@@ -8,7 +8,6 @@ using System.Data;
 using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
-using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -19,8 +18,7 @@ namespace Intech
     {
         Dictionary<string, List<Element>> titleblockFamily = new Dictionary<string, List<Element>>();
         Document doc;
-        Dictionary<string,string> disciplinevalue;
-        public SheetCreateForm(ExternalCommandData commandData)
+        public SheetCreateForm(ExternalCommandData commandData, List<Element> selectedElements)
         {
             UIApplication uiapp = commandData.Application;
             doc = uiapp.ActiveUIDocument.Document;
@@ -54,9 +52,18 @@ namespace Intech
             if (baseInput.titleBlockFamily != "") TitleBlockFamily.Text = baseInput.titleBlockFamily;
             if (baseInput.titleBlockType != "") TitleBlockType.Text = baseInput.titleBlockType;
 
-            disciplinevalue = SettingsRead.Discipline() ;
-            foreach (var i in disciplinevalue.Keys)
-                Disipline.Items.Add(i);
+            var disciplinevalue = SettingsRead.Discipline() ;
+            foreach (string i in disciplinevalue.Keys)
+                Discipline.Items.Add(i);
+
+            var subDisciplinevalue = SettingsRead.SubDiscipline();
+            if (subDisciplinevalue.Item2)
+            {
+                SubDiscipline.Visible = true;
+                SubDisciplineLabel.Visible = true;
+                foreach (string i in subDisciplinevalue.Item1)
+                    SubDiscipline.Items.Add(i);
+            }
 
             List<Element> titleblocktypes = new FilteredElementCollector(doc)
                 .OfCategory(BuiltInCategory.OST_TitleBlocks)
@@ -95,8 +102,15 @@ namespace Intech
                             .ToElements();
 
                         foreach(Parameter p in title_block[0].GetOrderedParameters())
+                        {
                             if (p.StorageType == StorageType.Integer)
-                                ParameterCheckList.Items.Add(p.Definition.Name);
+                            {
+                                if (p.AsInteger() == 1)
+                                    ParameterCheckList.Items.Add(p.Definition.Name, true);
+                                else
+                                    ParameterCheckList.Items.Add(p.Definition.Name);
+                            }
+                        }
 
                         temp.RollBack();
                     }
@@ -232,7 +246,10 @@ namespace Intech
                             .ToElements();
 
                         foreach (Parameter p in title_block[0].GetOrderedParameters())
-                            ParameterCheckList.Items.Add(p.Definition.Name);
+                            if (p.AsInteger() == 1)
+                                ParameterCheckList.Items.Add(p.Definition.Name, true);
+                            else
+                                ParameterCheckList.Items.Add(p.Definition.Name);
 
                         temp.RollBack();
                     }

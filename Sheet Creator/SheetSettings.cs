@@ -104,7 +104,7 @@ namespace Intech
                     foreach (string i in Columns)
                     {
                         List<string> rows = i.Split('\t').ToList();
-                        DisciplineGrid.Rows.Add(rows[0], rows[1]);
+                        DisciplineGrid.Rows.Add(rows[0], rows[1], rows[2]);
                         x++;
                     }
                 }
@@ -209,7 +209,8 @@ namespace Intech
                 {
                     for (int col = 0; col < LevelGrid.Rows[row].Cells.Count; col++)
                     {
-                        string value = LevelGrid.Rows[row].Cells[col].Value.ToString();
+                        string value = LevelGrid.Rows[row].Cells[col].Value.ToString().Replace("\n","");
+
                         if (col == 0) { levelData += "\n" + value; }
                         else { levelData += '\t' + value; }
                     }
@@ -226,7 +227,7 @@ namespace Intech
                 {
                     for (int col = 0; col < AreaGrid.Rows[row].Cells.Count; col++)
                     {
-                        string value = AreaGrid.Rows[row].Cells[col].Value.ToString();
+                        string value = AreaGrid.Rows[row].Cells[col].Value.ToString().Replace("\n", "");
                         if (col == 0) { areaData += "\n" + value; }
                         else { areaData += '\t' + value; }
                     }
@@ -243,7 +244,7 @@ namespace Intech
                 {
                     for (int col = 0; col < ScaleGrid.Rows[row].Cells.Count; col++)
                     {
-                        string value = ScaleGrid.Rows[row].Cells[col].Value.ToString();
+                        string value = ScaleGrid.Rows[row].Cells[col].Value.ToString().Replace("\n", "");
                         if (col == 0) { scaleData += "\n" + value; }
                         else { scaleData += '\t' + value; }
                     }
@@ -260,7 +261,7 @@ namespace Intech
                 {
                     for (int col = 0; col < DisciplineGrid.Rows[row].Cells.Count; col++)
                     {
-                        string value = DisciplineGrid.Rows[row].Cells[col].Value.ToString();
+                        string value = DisciplineGrid.Rows[row].Cells[col].Value.ToString().Replace("\n", "");
                         if (col == 0) { disciplineData += "\n" + value; }
                         else { disciplineData += '\t' + value; }
                     }
@@ -277,7 +278,7 @@ namespace Intech
                 {
                     for (int col = 0; col < SubDisciplineGrid.Rows[row].Cells.Count; col++)
                     {
-                        string value = SubDisciplineGrid.Rows[row].Cells[col].Value.ToString();
+                        string value = SubDisciplineGrid.Rows[row].Cells[col].Value.ToString().Replace("\n", "");
                         if (col == 0) { subDisciplineData += "\n" + value; }
                         else { subDisciplineData += '\t' + value; }
                     }

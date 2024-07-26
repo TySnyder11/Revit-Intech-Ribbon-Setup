@@ -94,7 +94,7 @@ namespace Intech
             Dictionary<string, (string, string)> nonstandardLevels = new Dictionary<string, (string, string)>();
 
             //Get txt Path
-            string BasePath = typeof(string).Assembly.Location.Replace("RibbonSetup.dll", "SheetSettings.txt");
+            string BasePath = typeof(RibbonTab).Assembly.Location.Replace("RibbonSetup.dll", "SheetSettings.txt");
 
             //Get Rows
             string fileContents = File.ReadAllText(BasePath);
@@ -127,7 +127,7 @@ namespace Intech
             Dictionary<string, (string, string)> nonstandardArea = new Dictionary<string, (string, string)>();
 
             //Get txt Path
-            string BasePath = typeof(string).Assembly.Location.Replace("RibbonSetup.dll", "SheetSettings.txt");
+            string BasePath = typeof(RibbonTab).Assembly.Location.Replace("RibbonSetup.dll", "SheetSettings.txt");
 
             //Get Rows
             string fileContents = File.ReadAllText(BasePath);
@@ -153,13 +153,13 @@ namespace Intech
             return nonstandardArea;
         }
 
-        public static Dictionary<string, string> Discipline()
+        public static Dictionary<string, (string, string)> Discipline()
         {
 
-            Dictionary<string, string> discipline = new Dictionary<string, string>();
+            Dictionary<string, (string, string)> discipline = new Dictionary<string, (string, string)>();
 
             //Get txt Path
-            string BasePath = typeof(string).Assembly.Location.Replace("RibbonSetup.dll", "SheetSettings.txt");
+            string BasePath = typeof(RibbonTab).Assembly.Location.Replace("RibbonSetup.dll", "SheetSettings.txt");
 
             //Get Rows
             string fileContents = File.ReadAllText(BasePath);
@@ -177,7 +177,7 @@ namespace Intech
                     foreach (string i in Columns)
                     {
                         List<string> rows = i.Split('\t').ToList();
-                        discipline.Add(rows[0], rows[1]);
+                        discipline.Add(rows[0], (rows[1], rows[2]));
                         x++;
                     }
                 }
@@ -185,14 +185,14 @@ namespace Intech
             return discipline;
         }
 
-        public static (Dictionary<string, string>, bool) SubDiscipline()
+        public static (List<string>, bool) SubDiscipline()
         {
 
-            Dictionary<string, string> subDiscipline = new Dictionary<string, string>();
+            List<string> subDiscipline = new List<string>();
             bool check = false;
 
             //Get txt Path
-            string BasePath = typeof(string).Assembly.Location.Replace("RibbonSetup.dll", "SheetSettings.txt");
+            string BasePath = typeof(RibbonTab).Assembly.Location.Replace("RibbonSetup.dll", "SheetSettings.txt");
 
             //Get Rows
             string fileContents = File.ReadAllText(BasePath);
@@ -210,7 +210,7 @@ namespace Intech
                     foreach (string i in Columns)
                     {
                         List<string> rows = i.Split('\t').ToList();
-                        subDiscipline.Add(rows[0], rows[1]);
+                        subDiscipline.Add(rows[0]);
                         x++;
                     }
                 }
@@ -218,7 +218,6 @@ namespace Intech
                 {
                     Columns.RemoveAt(0);
                     Columns.RemoveAt(0);
-                    Columns.RemoveAt(Columns.Count - 1);
                     Columns.RemoveAt(Columns.Count - 1);
                     int x = 0;
                     foreach (string i in Columns)

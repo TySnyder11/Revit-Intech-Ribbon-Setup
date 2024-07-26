@@ -92,47 +92,104 @@ namespace Intech
                 }
 
 
-
+                string areaNumber = "";
+                var nonStandardAreas = SettingsRead.NonstandardArea();
                 //Set area parameter
                 if (form.AreaOverride.Checked)
-                    title_block[0].LookupParameter(form.AreaOverrideComboBox.Text).Set(1);
+                {
+                    if (nonStandardAreas.Keys.Contains(planview.get_Parameter(BuiltInParameter.VIEWER_VOLUME_OF_INTEREST_CROP).AsValueString()))
+                        foreach (string key in nonStandardAreas.Keys)
+                        {
+                            if (key.Contains(form.AreaOverrideComboBox.Text))
+                            {
+                                areaNumber = nonStandardAreas[key].Item2;
+                                title_block[0].LookupParameter(nonStandardAreas[key].Item1).Set(1);
+                            }
+                        }
+                    else
+                    {
+                        string par = form.AreaOverrideComboBox.Text;
+                        string[] area = par.Split(' ');
+                        areaNumber = area[area.Count() - 1];
+                        foreach (Parameter p in title_block[0].Parameters)
+                            if (p.Definition.Name.Contains(area[area.Count() - 1]))
+                                p.Set(1);
+                    }
+                }
+                else if (nonStandardAreas.Keys.Contains(planview.get_Parameter(BuiltInParameter.VIEWER_VOLUME_OF_INTEREST_CROP).AsValueString()))
+                    foreach (string key in nonStandardAreas.Keys)
+                    {
+                        if (key.Contains(form.AreaOverrideComboBox.Text))
+                        {
+                            areaNumber = nonStandardAreas[key].Item2;
+                            title_block[0].LookupParameter(nonStandardAreas[key].Item1).Set(1);
+                        }
+                    }
                 else
                 {
                     string par = planview.get_Parameter(BuiltInParameter.VIEWER_VOLUME_OF_INTEREST_CROP).AsValueString();
                     string[] area = par.Split(' ');
+                    areaNumber = area[area.Count() - 1];
                     foreach (Parameter p in title_block[0].Parameters)
                         if (p.Definition.Name.Contains(area[area.Count() - 1]))
                             p.Set(1);
                 }
 
-                string LevelNumber = "";
-                var nonStandardAreas = SettingsRead.NonstandardLevels();
+                string levelNumber = "";
+                var nonStandardLevels = SettingsRead.NonstandardLevels();
                 //Set Level parameter
                 if (form.LevelOverride.Checked)
-                    title_block[0].LookupParameter(form.LevelOverrideComboBox.Text).Set(1);
-                else if (nonStandardAreas.Keys.Contains(planview.LookupParameter("Associated Level").AsValueString()))
-                    foreach (string key in nonStandardAreas.Keys)
-                    {
-                        if (key.IndexOf(planview.LookupParameter("Associated Level").AsValueString(), StringComparison.OrdinalIgnoreCase) >= 0)
+                {
+                    if (nonStandardLevels.Keys.Contains(form.LevelOverrideComboBox.Text))
+                        foreach (string key in nonStandardLevels.Keys)
                         {
-                            LevelNumber = nonStandardAreas[key].Item2;
-                            levelParameter.Add(title_block[0].LookupParameter(nonStandardAreas[key].Item1));
-
+                            if (key.Contains(form.LevelOverrideComboBox.Text))
+                            {
+                                levelNumber = nonStandardLevels[key].Item2.Replace("\n","");
+                                levelParameter.Add(title_block[0].LookupParameter(nonStandardLevels[key].Item1));
+                            }
+                        }
+                    else
+                    {
+                        string par = form.LevelOverrideComboBox.Text;
+                        string[] area = par.Split(' ');
+                        areaNumber = area[area.Count() - 1];
+                        foreach (Parameter p in title_block[0].Parameters)
+                            if (p.Definition.Name.Contains(area[area.Count() - 1]))
+                                p.Set(1);
+                    }
+                }
+                else if (nonStandardLevels.Keys.Contains(planview.LookupParameter("Associated Level").AsValueString()))
+                    foreach (string key in nonStandardLevels.Keys)
+                    {
+                        if (key.Contains(form.LevelOverrideComboBox.Text))
+                        {
+                            levelNumber = nonStandardLevels[key].Item2.Replace("\n", "");
+                            levelParameter.Add(title_block[0].LookupParameter(nonStandardLevels[key].Item1));
                         }
                     }
-
                 else
                 {
                     string par = planview.LookupParameter("Associated Level").AsValueString();
                     string[] level = par.Split(' ');
+                    levelNumber = level[level.Count() - 1];
                     foreach (Parameter p in title_block[0].Parameters)
                         if (p.Definition.Name.Contains("Level"))
                             if (p.Definition.Name.Contains(level[level.Count() - 1]))
                                 levelParameter.Add(p);
-                    //title_block[0].LookupParameter(p.Definition.Name).Set(1);
                 }
 
-                //newsheet.SheetNumber = form.TradeAbriviation.Text + form.disciplinevalue[Disipline.Text] + form.MiddleSheetNumber.Text;
+                var DisciplineValue = SettingsRead.Discipline();
+                newsheet.LookupParameter("Discipline").Set(form.Discipline.Text);
+                string e = DisciplineValue[form.Discipline.Text].Item2.Replace("\r", "");
+                title_block[0].LookupParameter(e).Set(1);
+
+                var subDisiplineValue = SettingsRead.SubDiscipline();
+                if (!string.IsNullOrEmpty(form.SubDiscipline.Text) || subDisiplineValue.Item2)
+                    newsheet.LookupParameter("subDiscipline").Set(form.SubDiscipline.Text);
+
+                string numb = form.TradeAbriviation.Text + DisciplineValue[form.Discipline.Text].Item1.ToString().Replace("\r","") + form.MiddleSheetNumber.Text + levelNumber + areaNumber;
+                newsheet.SheetNumber = numb;
 
                 XYZ xYZ = new XYZ();
                 BoundingBoxXYZ boundingBoxXYZ = title_block[0].get_BoundingBox(newsheet);
@@ -193,6 +250,13 @@ namespace Intech
             SheetSettings sheetSettings = new SheetSettings(commandData);
             sheetSettings.ShowDialog();
             return Result.Succeeded;
+        }
+    }
+
+    public class SheetActualCreate
+    {
+        public void Execute(ExternalCommandData commandData, )
+        { 
         }
     }
 }

@@ -51,6 +51,7 @@
             this.RevitScaleValue = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.DisciplineTab = new System.Windows.Forms.TabPage();
             this.SubDisciplineGrid = new System.Windows.Forms.DataGridView();
+            this.dataGridViewTextBoxColumn4 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.SubDisciplineCheck = new System.Windows.Forms.CheckBox();
             this.DisciplineGrid = new System.Windows.Forms.DataGridView();
             this.DisciplineName = new System.Windows.Forms.DataGridViewTextBoxColumn();
@@ -73,7 +74,7 @@
             this.Confirm = new System.Windows.Forms.Button();
             this.Export = new System.Windows.Forms.Button();
             this.Import = new System.Windows.Forms.Button();
-            this.dataGridViewTextBoxColumn4 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.TitleBlockParameterDiscipline = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.SheetTabController.SuspendLayout();
             this.BaseControlTab.SuspendLayout();
             this.tabControl2.SuspendLayout();
@@ -101,7 +102,7 @@
             this.SheetTabController.Location = new System.Drawing.Point(0, 2);
             this.SheetTabController.Name = "SheetTabController";
             this.SheetTabController.SelectedIndex = 0;
-            this.SheetTabController.Size = new System.Drawing.Size(661, 381);
+            this.SheetTabController.Size = new System.Drawing.Size(699, 374);
             this.SheetTabController.TabIndex = 0;
             // 
             // BaseControlTab
@@ -307,25 +308,31 @@
             this.DisciplineTab.Controls.Add(this.DisciplineGrid);
             this.DisciplineTab.Location = new System.Drawing.Point(4, 25);
             this.DisciplineTab.Name = "DisciplineTab";
-            this.DisciplineTab.Size = new System.Drawing.Size(653, 352);
+            this.DisciplineTab.Size = new System.Drawing.Size(691, 345);
             this.DisciplineTab.TabIndex = 2;
             this.DisciplineTab.Text = "Discipline Tab";
             this.DisciplineTab.UseVisualStyleBackColor = true;
             // 
             // SubDisciplineGrid
             // 
-            this.SubDisciplineGrid.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
+            this.SubDisciplineGrid.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.SubDisciplineGrid.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             this.SubDisciplineGrid.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
             this.dataGridViewTextBoxColumn4});
-            this.SubDisciplineGrid.Location = new System.Drawing.Point(339, 33);
+            this.SubDisciplineGrid.Location = new System.Drawing.Point(471, 33);
             this.SubDisciplineGrid.Name = "SubDisciplineGrid";
             this.SubDisciplineGrid.RowHeadersWidth = 51;
             this.SubDisciplineGrid.RowTemplate.Height = 24;
-            this.SubDisciplineGrid.Size = new System.Drawing.Size(305, 314);
+            this.SubDisciplineGrid.Size = new System.Drawing.Size(211, 307);
             this.SubDisciplineGrid.TabIndex = 4;
+            // 
+            // dataGridViewTextBoxColumn4
+            // 
+            this.dataGridViewTextBoxColumn4.HeaderText = "Sub Discipline";
+            this.dataGridViewTextBoxColumn4.MinimumWidth = 6;
+            this.dataGridViewTextBoxColumn4.Name = "dataGridViewTextBoxColumn4";
+            this.dataGridViewTextBoxColumn4.Width = 125;
             // 
             // SubDisciplineCheck
             // 
@@ -333,7 +340,7 @@
             this.SubDisciplineCheck.AutoSize = true;
             this.SubDisciplineCheck.Checked = true;
             this.SubDisciplineCheck.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.SubDisciplineCheck.Location = new System.Drawing.Point(339, 7);
+            this.SubDisciplineCheck.Location = new System.Drawing.Point(471, 7);
             this.SubDisciplineCheck.Name = "SubDisciplineCheck";
             this.SubDisciplineCheck.Size = new System.Drawing.Size(136, 20);
             this.SubDisciplineCheck.TabIndex = 3;
@@ -348,12 +355,13 @@
             this.DisciplineGrid.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             this.DisciplineGrid.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
             this.DisciplineName,
-            this.DisciplineNumber});
+            this.DisciplineNumber,
+            this.TitleBlockParameterDiscipline});
             this.DisciplineGrid.Location = new System.Drawing.Point(8, 5);
             this.DisciplineGrid.Name = "DisciplineGrid";
             this.DisciplineGrid.RowHeadersWidth = 51;
             this.DisciplineGrid.RowTemplate.Height = 24;
-            this.DisciplineGrid.Size = new System.Drawing.Size(305, 342);
+            this.DisciplineGrid.Size = new System.Drawing.Size(457, 335);
             this.DisciplineGrid.TabIndex = 0;
             // 
             // DisciplineName
@@ -506,7 +514,7 @@
             // Cancel
             // 
             this.Cancel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.Cancel.Location = new System.Drawing.Point(577, 394);
+            this.Cancel.Location = new System.Drawing.Point(615, 387);
             this.Cancel.Name = "Cancel";
             this.Cancel.Size = new System.Drawing.Size(75, 23);
             this.Cancel.TabIndex = 1;
@@ -517,7 +525,7 @@
             // Confirm
             // 
             this.Confirm.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.Confirm.Location = new System.Drawing.Point(496, 394);
+            this.Confirm.Location = new System.Drawing.Point(534, 387);
             this.Confirm.Name = "Confirm";
             this.Confirm.Size = new System.Drawing.Size(75, 23);
             this.Confirm.TabIndex = 3;
@@ -527,7 +535,8 @@
             // 
             // Export
             // 
-            this.Export.Location = new System.Drawing.Point(12, 394);
+            this.Export.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.Export.Location = new System.Drawing.Point(12, 387);
             this.Export.Name = "Export";
             this.Export.Size = new System.Drawing.Size(75, 23);
             this.Export.TabIndex = 4;
@@ -537,7 +546,8 @@
             // 
             // Import
             // 
-            this.Import.Location = new System.Drawing.Point(93, 394);
+            this.Import.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.Import.Location = new System.Drawing.Point(93, 387);
             this.Import.Name = "Import";
             this.Import.Size = new System.Drawing.Size(75, 23);
             this.Import.TabIndex = 5;
@@ -545,18 +555,18 @@
             this.Import.UseVisualStyleBackColor = true;
             this.Import.Click += new System.EventHandler(this.Import_Click);
             // 
-            // dataGridViewTextBoxColumn4
+            // TitleBlockParameterDiscipline
             // 
-            this.dataGridViewTextBoxColumn4.HeaderText = "Sub Discipline";
-            this.dataGridViewTextBoxColumn4.MinimumWidth = 6;
-            this.dataGridViewTextBoxColumn4.Name = "dataGridViewTextBoxColumn4";
-            this.dataGridViewTextBoxColumn4.Width = 125;
+            this.TitleBlockParameterDiscipline.HeaderText = "Title Block Parameter";
+            this.TitleBlockParameterDiscipline.MinimumWidth = 6;
+            this.TitleBlockParameterDiscipline.Name = "TitleBlockParameterDiscipline";
+            this.TitleBlockParameterDiscipline.Width = 125;
             // 
             // SheetSettings
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(660, 429);
+            this.ClientSize = new System.Drawing.Size(698, 422);
             this.Controls.Add(this.Export);
             this.Controls.Add(this.Import);
             this.Controls.Add(this.Confirm);
@@ -632,5 +642,6 @@
         private System.Windows.Forms.Button Export;
         private System.Windows.Forms.Button Import;
         private System.Windows.Forms.DataGridViewTextBoxColumn dataGridViewTextBoxColumn4;
+        private System.Windows.Forms.DataGridViewTextBoxColumn TitleBlockParameterDiscipline;
     }
 }

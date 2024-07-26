@@ -54,10 +54,10 @@
             this.Titleblock = new System.Windows.Forms.Label();
             this.AreaOverrideComboBox = new System.Windows.Forms.ComboBox();
             this.LevelOverrideComboBox = new System.Windows.Forms.ComboBox();
-            this.Disipline = new System.Windows.Forms.ComboBox();
+            this.Discipline = new System.Windows.Forms.ComboBox();
             this.label7 = new System.Windows.Forms.Label();
             this.SubDiscipline = new System.Windows.Forms.ComboBox();
-            this.label8 = new System.Windows.Forms.Label();
+            this.SubDisciplineLabel = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.SuspendLayout();
             // 
@@ -342,15 +342,15 @@
             this.LevelOverrideComboBox.TabIndex = 31;
             this.LevelOverrideComboBox.Visible = false;
             // 
-            // Disipline
+            // Discipline
             // 
-            this.Disipline.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.Disipline.FormattingEnabled = true;
-            this.Disipline.Location = new System.Drawing.Point(387, 410);
-            this.Disipline.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
-            this.Disipline.Name = "Disipline";
-            this.Disipline.Size = new System.Drawing.Size(304, 24);
-            this.Disipline.TabIndex = 33;
+            this.Discipline.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.Discipline.FormattingEnabled = true;
+            this.Discipline.Location = new System.Drawing.Point(387, 410);
+            this.Discipline.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            this.Discipline.Name = "Discipline";
+            this.Discipline.Size = new System.Drawing.Size(304, 24);
+            this.Discipline.TabIndex = 33;
             // 
             // label7
             // 
@@ -373,16 +373,17 @@
             this.SubDiscipline.TabIndex = 35;
             this.SubDiscipline.Visible = false;
             // 
-            // label8
+            // SubDisciplineLabel
             // 
-            this.label8.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.label8.AutoSize = true;
-            this.label8.Location = new System.Drawing.Point(384, 438);
-            this.label8.Name = "label8";
-            this.label8.Size = new System.Drawing.Size(93, 16);
-            this.label8.TabIndex = 34;
-            this.label8.Text = "Sub Discipline";
-            this.label8.Visible = false;
+            this.SubDisciplineLabel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.SubDisciplineLabel.AutoSize = true;
+            this.SubDisciplineLabel.Location = new System.Drawing.Point(384, 438);
+            this.SubDisciplineLabel.Name = "SubDisciplineLabel";
+            this.SubDisciplineLabel.Size = new System.Drawing.Size(93, 16);
+            this.SubDisciplineLabel.TabIndex = 34;
+            this.SubDisciplineLabel.Text = "Sub Discipline";
+            this.SubDisciplineLabel.UseMnemonic = false;
+            this.SubDisciplineLabel.Visible = false;
             // 
             // SheetCreateForm
             // 
@@ -390,8 +391,8 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(703, 569);
             this.Controls.Add(this.SubDiscipline);
-            this.Controls.Add(this.label8);
-            this.Controls.Add(this.Disipline);
+            this.Controls.Add(this.SubDisciplineLabel);
+            this.Controls.Add(this.Discipline);
             this.Controls.Add(this.label7);
             this.Controls.Add(this.LevelOverrideComboBox);
             this.Controls.Add(this.AreaOverrideComboBox);
@@ -458,10 +459,9 @@
         private System.Windows.Forms.Label Titleblock;
         public System.Windows.Forms.ComboBox AreaOverrideComboBox;
         public System.Windows.Forms.ComboBox LevelOverrideComboBox;
-        public System.Windows.Forms.ComboBox Disipline;
+        public System.Windows.Forms.ComboBox Discipline;
         private System.Windows.Forms.Label label7;
         public System.Windows.Forms.ComboBox SubDiscipline;
-        private System.Windows.Forms.Label label8;
-        public string SheetNumber;
+        private System.Windows.Forms.Label SubDisciplineLabel;
     }
 }
