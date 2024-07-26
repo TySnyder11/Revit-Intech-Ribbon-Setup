@@ -35,7 +35,7 @@ namespace Intech
 
             var planViews = GetViewsNotOnSheets(doc);
 
-            foreach (var item in planViews) dt.Rows.Add(item.Name, false);
+            foreach (var item in planViews)
 
             dt.AcceptChanges();
 
