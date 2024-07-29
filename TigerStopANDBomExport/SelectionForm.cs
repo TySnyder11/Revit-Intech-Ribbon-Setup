@@ -91,7 +91,6 @@ namespace Intech
                 {
                     object[] Items = i.ItemArray;
                     string name = Items[0].ToString();
-                    Debug.WriteLine(name);
                     if (name.IndexOf(textBox1.Text, StringComparison.OrdinalIgnoreCase) >= 0)
                         filter = filter + $"(Item LIKE '{name}*') OR ";
                 }
@@ -105,8 +104,6 @@ namespace Intech
                     filter = filter.Substring(0, length);
                     Debug.WriteLine(filter);
                 }
-                
-
             }
             else
             {

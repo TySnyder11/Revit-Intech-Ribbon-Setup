@@ -18,7 +18,7 @@ namespace Intech
     {
         Dictionary<string, List<Element>> titleblockFamily = new Dictionary<string, List<Element>>();
         Document doc;
-        public SheetCreateForm(ExternalCommandData commandData, List<Element> selectedElements)
+        public SheetCreateForm(ExternalCommandData commandData, List<ViewPlan> selectedView)
         {
             UIApplication uiapp = commandData.Application;
             doc = uiapp.ActiveUIDocument.Document;
@@ -35,7 +35,9 @@ namespace Intech
 
             var planViews = GetViewsNotOnSheets(doc);
 
+           
             foreach (var item in planViews)
+                dt.Rows.Add(item.Name, false);
 
             dt.AcceptChanges();
 
@@ -129,6 +131,23 @@ namespace Intech
                             .ToElements();
             foreach (Element area in areas)
                 AreaOverrideComboBox.Items.Add(area.Name);
+
+            List<int> indexes = new List<int>();
+            foreach ( ViewPlan viewPlan in selectedView)
+            {
+                int i =  0;
+                foreach (DataRowView r in PlanViewCheckList.Items)
+                {
+                    string item = r[0].ToString();
+                    if(item == viewPlan.Name)
+                    {
+                        indexes.Add(i);
+                    }
+                    i++;
+                }
+            }
+            foreach (int i in indexes)
+                PlanViewCheckList.SetItemChecked(i, true);
         }
 
         public static IEnumerable<Autodesk.Revit.DB.ViewPlan> GetViewsNotOnSheets(Document doc)
@@ -267,7 +286,7 @@ namespace Intech
 
         private void Cancel_Click(object sender, EventArgs e)
         {
-            PlanViewCheckList.Items.Clear();
+            SheetName.Clear();
             this.Close();
         }
 

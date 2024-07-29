@@ -16,17 +16,39 @@ namespace Intech
 
         public Result Execute(ExternalCommandData commandData, ref string message, ElementSet elements)
         {
+            return SheetActualCreate.Run( commandData, new List <ViewPlan> ());
+        }
+    }
+
+    [Transaction(TransactionMode.Manual)]
+    [Regeneration(RegenerationOption.Manual)]
+    //Settings
+    public class SheetSettingsMenu : IExternalCommand
+    {
+
+        public Result Execute(ExternalCommandData commandData, ref string message, ElementSet elements)
+        {
+            SheetSettings sheetSettings = new SheetSettings(commandData);
+            sheetSettings.ShowDialog();
+            return Result.Succeeded;
+        }
+    }
+
+    public class SheetActualCreate
+    {
+        public static Result Run(ExternalCommandData commandData, List<ViewPlan> Selected)
+        {
             UIApplication uiapp = commandData.Application;
             Document doc = uiapp.ActiveUIDocument.Document;
             Transaction trans = new Transaction(doc, "Create Sheet");
             UIDocument uidoc = commandData.Application.ActiveUIDocument;
 
-            SheetCreateForm form = new SheetCreateForm(commandData);
+            SheetCreateForm form = new SheetCreateForm(commandData, Selected);
             form.ShowDialog();
 
-            if  (
-                form.PlanViewCheckList.CheckedItems.Count == 0||
-                string.IsNullOrEmpty(form.TradeAbriviation.Text)||
+            if (
+                form.PlanViewCheckList.CheckedItems.Count == 0 ||
+                string.IsNullOrEmpty(form.TradeAbriviation.Text) ||
                 string.IsNullOrEmpty(form.MiddleSheetNumber.Text) ||
                 string.IsNullOrEmpty(form.SheetName.Text) ||
                 string.IsNullOrEmpty(form.TitleBlockFamily.Text) ||
@@ -145,7 +167,7 @@ namespace Intech
                         {
                             if (key.Contains(form.LevelOverrideComboBox.Text))
                             {
-                                levelNumber = nonStandardLevels[key].Item2.Replace("\n","");
+                                levelNumber = nonStandardLevels[key].Item2.Replace("\n", "");
                                 levelParameter.Add(title_block[0].LookupParameter(nonStandardLevels[key].Item1));
                             }
                         }
@@ -188,17 +210,17 @@ namespace Intech
                 if (!string.IsNullOrEmpty(form.SubDiscipline.Text) || subDisiplineValue.Item2)
                     newsheet.LookupParameter("subDiscipline").Set(form.SubDiscipline.Text);
 
-                string numb = form.TradeAbriviation.Text + DisciplineValue[form.Discipline.Text].Item1.ToString().Replace("\r","") + form.MiddleSheetNumber.Text + levelNumber + areaNumber;
+                string numb = form.TradeAbriviation.Text + DisciplineValue[form.Discipline.Text].Item1.ToString().Replace("\r", "") + form.MiddleSheetNumber.Text + levelNumber + areaNumber;
                 newsheet.SheetNumber = numb;
 
                 XYZ xYZ = new XYZ();
                 BoundingBoxXYZ boundingBoxXYZ = title_block[0].get_BoundingBox(newsheet);
                 XYZ max = boundingBoxXYZ.Max;
                 XYZ min = boundingBoxXYZ.Min;
-                double X = (max.X+min.X) / 2;
+                double X = (max.X + min.X) / 2;
                 double Y = (max.Y + min.Y) / 2;
 
-                XYZ viewportxyz = new XYZ(X,Y,0);
+                XYZ viewportxyz = new XYZ(X, Y, 0);
 
                 Viewport viewport = Viewport.Create(doc, newsheet.Id, planview.Id, viewportxyz);
                 viewports.Add(viewport);
@@ -210,20 +232,20 @@ namespace Intech
 
             foreach (Parameter p in levelParameter)
                 p.Set(1);
-           
+
             int x = 0;
             foreach (Viewport viewport in viewports)
             {
 
                 var scales = SettingsRead.Scale();
-                
+
                 ElementId sheetId = viewport.SheetId;
                 string sheetscale = viewsheets[x].get_Parameter(BuiltInParameter.SHEET_SCALE).AsValueString();
                 try
                 {
                     viewport.ChangeTypeId(new ElementId(int.Parse(scales[sheetscale.Remove(0, 1).Remove(sheetscale.Length - 2, 1)].Item1)));
                 }
-                catch 
+                catch
                 {
                     List<ElementId> workTypes = viewport.GetValidTypes() as List<ElementId>;
                     string stringworking = "";
@@ -234,29 +256,8 @@ namespace Intech
             }
 
             trans.Commit();
-            
+
             return Result.Succeeded;
-        }
-    }
-
-    [Transaction(TransactionMode.Manual)]
-    [Regeneration(RegenerationOption.Manual)]
-    //Settings
-    public class SheetSettingsMenu : IExternalCommand
-    {
-
-        public Result Execute(ExternalCommandData commandData, ref string message, ElementSet elements)
-        {
-            SheetSettings sheetSettings = new SheetSettings(commandData);
-            sheetSettings.ShowDialog();
-            return Result.Succeeded;
-        }
-    }
-
-    public class SheetActualCreate
-    {
-        public void Execute(ExternalCommandData commandData, )
-        { 
         }
     }
 }

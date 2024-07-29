@@ -43,7 +43,7 @@ namespace Intech
                     if (i.Name.IndexOf("tigerstop", StringComparison.OrdinalIgnoreCase) >= 0)
                     {
                         schedules.Add(i);
-                        txtschedules.Add(i.Name);
+                        txtschedules.Add(i.Name.Replace("'",""));
                     }
                 }
             }
@@ -59,7 +59,7 @@ namespace Intech
                 foreach (ViewSchedule w in schedules)
                 {
                     //if schedule name is in the CheckedItems list, add schedule to selected list.
-                    if (w.Name.Equals((selectionForm.checkedListBox.CheckedItems[x] as DataRowView).Row[0]))
+                    if (w.Name.Replace("'", "").Equals((selectionForm.checkedListBox.CheckedItems[x] as DataRowView).Row[0]))
                     {
                         selected.Add(w);
                     }

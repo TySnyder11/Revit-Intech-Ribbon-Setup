@@ -39,7 +39,7 @@ namespace Intech
             // Create a form to select schedules.
             DialogResult result2 = System.Windows.Forms.DialogResult.None;
             
-            Allschedules= new FilteredElementCollector(doc).OfClass(typeof(ViewSchedule)).Cast<ViewSchedule>().ToList();
+            Allschedules= new FilteredElementCollector(doc).OfClass(typeof(ViewSchedule)).WhereElementIsNotElementType().Cast<ViewSchedule>().ToList();
             List<ViewSchedule> schedules= new List<ViewSchedule>();
             List<string> txtschedules = new List<string>();
             foreach (ViewSchedule i in Allschedules)
@@ -49,14 +49,13 @@ namespace Intech
                     if (i.LookupParameter("IMC_ExportReady") == null)
                     {
                         schedules.Add(i);
-                        txtschedules.Add(i.Name);
+                        txtschedules.Add(i.Name.Replace("'", ""));
                     }
 
-                    else if (
-                        ( i.LookupParameter("IMC_ExportReady").AsInteger() == 1) && i.LookupParameter("IMC_ExportComplete").AsInteger() == 0)
+                    else if ( i.LookupParameter("IMC_ExportReady").AsInteger() == 1 && i.LookupParameter("IMC_ExportComplete").AsInteger() == 0)
                     {
                         schedules.Add(i);
-                        txtschedules.Add(i.Name);
+                        txtschedules.Add(i.Name.Replace("'", ""));
                     }
                 }
             }
@@ -75,7 +74,7 @@ namespace Intech
                     foreach (ViewSchedule w in schedules)
                     {
                         //if schedule name is in the CheckedItems list, add schedule to selected list.
-                        if (w.Name.Equals((selectionForm.checkedListBox.CheckedItems[x] as DataRowView).Row[0]))
+                        if (w.Name.Replace("'","").Equals((selectionForm.checkedListBox.CheckedItems[x] as DataRowView).Row[0]))
                         {
                             selected.Add(w);
                         }
@@ -126,7 +125,7 @@ namespace Intech
             char[] alpha = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".ToCharArray();
             try
             {
-                return alpha[a - 1];
+                return alpha[a];
             }
             catch (IndexOutOfRangeException e)
             {
@@ -139,7 +138,7 @@ namespace Intech
 
         }
 
-        public static void GetScheduleData(ViewSchedule vs, System.String filePath)
+        public static DataTable GetScheduleData(ViewSchedule vs)
         {
 
             TableData table = vs.GetTableData();
@@ -149,43 +148,28 @@ namespace Intech
 
             //valueData.Add(viewSchedule.Name);
 
-            List<List<string>> scheduleData = new List<List<string>>();
-            for (int i = 0; i < nRows; i++)
-            {
-                List<string> rowData = new List<string>();
+            DataTable scheduleData = new DataTable();
 
-                for (int j = 0; j < nColumns; j++)
-                {
-                    rowData.Add("\"" + vs.GetCellText(SectionType.Body, i, j).Replace("\"", "\"\"") + "\"");//added text qualifiers (the quotations)
-                }
-                scheduleData.Add(rowData);
+            for (int i = 0; i < nColumns; i++)
+            {
+                scheduleData.Columns.Add(vs.GetCellText(SectionType.Body, 0, i));
             }
 
-            customExport(scheduleData, filePath);
-            
-        }
-
-        static void customExport(List<List<string>> scheduleData, string filePath)
-        {
-
-
-            try
+            for (int x = 0; x < nRows; x++)
             {
-                using (StreamWriter file = new StreamWriter(filePath))
+                DataRow newRow = scheduleData.NewRow();
+                scheduleData.Rows.Add(newRow);
+                for (int y = 0; y < nColumns; y++)
                 {
-                    foreach (List<string> row in scheduleData)
-                    {
-                        file.WriteLine(string.Join(",", row)); //EOL serquence
-                    }
+                    string data=vs.GetCellText(SectionType.Body, x, y);
+                    scheduleData.Rows[x][y] = data;
 
                 }
+            }
 
-            }
-            catch (Exception ex)
-            {
-                TaskDialog.Show("Error writing to CSV file: ", ex.ToString());
-            }
+            return scheduleData;
         }
+
         public static Result exportSchedulesToCSV(Document doc, ref string message, string saveFolder, DialogResult result,
                                 List<ViewSchedule> schedules,
                                 List<ViewSchedule> selected
@@ -233,13 +217,14 @@ namespace Intech
                             ExcelWorksheet copiedWorksheet = newPackage.Workbook.Worksheets.Add(name, templateWorksheet);
 
                             //export data to csv
-                            GetScheduleData(vs2, csvFileName);
+                            //GetScheduleData(vs2, csvFileName);
+
                             //Add header
                             copiedWorksheet.Cells["A1"].Value = vs2.Name;
                             // Define the range where you want to start loading the data (e.g., C1)
                             ExcelRangeBase startCell = copiedWorksheet.Cells["A2"];
                             // Load data from the CSV, skipping the first row and setting the second row as the column headers.
-                            var range = copiedWorksheet.Cells[startCell.Address].LoadFromText(new FileInfo(csvFileName), format);
+                            ExcelRangeBase range = copiedWorksheet.Cells[startCell.Address].LoadFromDataTable(GetScheduleData(vs2));
 
 
                             //add's image inside the header
@@ -251,9 +236,14 @@ namespace Intech
                             while (!string.IsNullOrWhiteSpace(copiedWorksheet.Cells[2, currentColumn].Text))
                             {
                                 currentColumn++; // Move to the next row
-                            }           
+                            }
+                            TableData tableData = vs2.GetTableData();
+                            TableSectionData section = tableData.GetSectionData(SectionType.Body);
+                            int nRows = section.NumberOfRows;
+                            int nColumns = section.NumberOfColumns;
+                            Debug.WriteLine(nRows);
 
-                            string merger = "A1:" + IndexToColumn(currentColumn - 1) + "1"; //Format example "A1:E1"
+                            string merger = "A1:" + IndexToColumn(nColumns - 1) + "1"; //Format example "A1:E1"
                             copiedWorksheet.Cells[merger].Merge = true;
                             // Create a new ExcelStyle object to define cell formatting.
                             ExcelStyle cellStyle = copiedWorksheet.Cells[merger].Style;
@@ -268,16 +258,18 @@ namespace Intech
                             cellStyle.Border.Left.Style = ExcelBorderStyle.Medium;
                             cellStyle.Border.Right.Style = ExcelBorderStyle.Medium;
 
-                            TableData tableData = vs2.GetTableData();
-                            TableSectionData section = tableData.GetSectionData(SectionType.Body);
-                            int nRows = section.NumberOfRows;
-                            Debug.WriteLine(nRows);
-
                             //Add a table onto the data
-                            string merger2 = "A2:" + IndexToColumn(currentColumn - 1) + (nRows+1); //get data range
+                            string merger2 = "A2:" + IndexToColumn(nColumns-1) + (nRows+1); //get data range
                             Debug.WriteLine(merger2);
 
                             var dataRange = copiedWorksheet.Cells[merger2];
+
+                            dataRange.Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+                            cellStyle.Border.Top.Style = ExcelBorderStyle.Medium;
+                            cellStyle.Border.Bottom.Style = ExcelBorderStyle.Medium;
+                            cellStyle.Border.Left.Style = ExcelBorderStyle.Medium;
+                            cellStyle.Border.Right.Style = ExcelBorderStyle.Medium;
+
                             ExcelTable table = copiedWorksheet.Tables.Add(dataRange, "Table" + tableNum);
                             table.TableStyle = OfficeOpenXml.Table.TableStyles.Medium1;
                             table.ShowHeader = true;
@@ -319,11 +311,8 @@ namespace Intech
                     {
                         Transaction complete = new Transaction(doc, "Change Complete Parameter");
                         complete.Start();
-                        try
-                        {
+                        if (i.LookupParameter("IMC_ExportComplete") != null) 
                             i.LookupParameter("IMC_ExportComplete").Set(1);
-                        }
-                        catch { }
                         complete.Commit();
                     }
                 }

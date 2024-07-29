@@ -75,7 +75,7 @@ namespace Intech
                 }
             }
 
-            List<Element> createdViews = new List<Element>();
+            List<ViewPlan> createdViews = new List<ViewPlan>();
 
             Transaction tranDependentView = new Transaction(doc, "create dependent views");
             tranDependentView.Start();
@@ -89,7 +89,7 @@ namespace Intech
                     ElementId NewViewID = i.Duplicate(ViewDuplicateOption.AsDependent);
                     Element NewView = doc.GetElement(NewViewID);
                     NewView.Name = i.Name + " - " + x.Name;
-                    createdViews.Add(NewView);
+                    createdViews.Add(NewView as ViewPlan);
 
                     (NewView as Element).get_Parameter(BuiltInParameter.VIEWER_VOLUME_OF_INTEREST_CROP).Set(x.Id);
                     }
@@ -105,7 +105,7 @@ namespace Intech
                     ElementId NewViewID = i.Duplicate(ViewDuplicateOption.Duplicate);
                     Element NewView = doc.GetElement(NewViewID);
                     NewView.Name = i.Name + " - OVERALL";
-                    createdViews.Add(NewView);
+                    createdViews.Add(NewView as ViewPlan);
                     tranDependentView.Commit();
                     tranDependentView.Start();
                     Debug.WriteLine(dependentViewForm.OverallView.SelectedItem.ToString());
@@ -113,6 +113,9 @@ namespace Intech
                 }
             }
             tranDependentView.Commit();
+
+            if (dependentViewForm.CreateSheet.Checked)
+                SheetActualCreate.Run(commandData, createdViews);
 
             return Result.Succeeded;
         }
