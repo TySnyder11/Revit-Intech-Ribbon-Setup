@@ -59,22 +59,22 @@
             this.TitleBlockParameterDiscipline = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.LevelTab = new System.Windows.Forms.TabPage();
             this.LevelGrid = new System.Windows.Forms.DataGridView();
-            this.dataGridViewTextBoxColumn1 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.dataGridViewTextBoxColumn2 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.dataGridViewTextBoxColumn3 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.label9 = new System.Windows.Forms.Label();
             this.label8 = new System.Windows.Forms.Label();
             this.AreaTab = new System.Windows.Forms.TabPage();
             this.AreaGrid = new System.Windows.Forms.DataGridView();
-            this.ScopeBoxName = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.TitleBlockParameterArea = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.SheetNumberNumberArea = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.label11 = new System.Windows.Forms.Label();
             this.label10 = new System.Windows.Forms.Label();
             this.Cancel = new System.Windows.Forms.Button();
             this.Confirm = new System.Windows.Forms.Button();
             this.Export = new System.Windows.Forms.Button();
             this.Import = new System.Windows.Forms.Button();
+            this.LevelName = new System.Windows.Forms.DataGridViewComboBoxColumn();
+            this.dataGridViewTextBoxColumn2 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.dataGridViewTextBoxColumn3 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.ScopeBoxName = new System.Windows.Forms.DataGridViewComboBoxColumn();
+            this.TitleBlockParameterArea = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.SheetNumberNumberArea = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.SheetTabController.SuspendLayout();
             this.BaseControlTab.SuspendLayout();
             this.tabControl2.SuspendLayout();
@@ -407,7 +407,7 @@
             | System.Windows.Forms.AnchorStyles.Right)));
             this.LevelGrid.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             this.LevelGrid.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
-            this.dataGridViewTextBoxColumn1,
+            this.LevelName,
             this.dataGridViewTextBoxColumn2,
             this.dataGridViewTextBoxColumn3});
             this.LevelGrid.Location = new System.Drawing.Point(11, 42);
@@ -416,27 +416,6 @@
             this.LevelGrid.RowTemplate.Height = 24;
             this.LevelGrid.Size = new System.Drawing.Size(630, 306);
             this.LevelGrid.TabIndex = 3;
-            // 
-            // dataGridViewTextBoxColumn1
-            // 
-            this.dataGridViewTextBoxColumn1.HeaderText = "Level Name";
-            this.dataGridViewTextBoxColumn1.MinimumWidth = 6;
-            this.dataGridViewTextBoxColumn1.Name = "dataGridViewTextBoxColumn1";
-            this.dataGridViewTextBoxColumn1.Width = 125;
-            // 
-            // dataGridViewTextBoxColumn2
-            // 
-            this.dataGridViewTextBoxColumn2.HeaderText = "Title Block Parameter";
-            this.dataGridViewTextBoxColumn2.MinimumWidth = 6;
-            this.dataGridViewTextBoxColumn2.Name = "dataGridViewTextBoxColumn2";
-            this.dataGridViewTextBoxColumn2.Width = 125;
-            // 
-            // dataGridViewTextBoxColumn3
-            // 
-            this.dataGridViewTextBoxColumn3.HeaderText = "Sheet Number Value (M11__A1)";
-            this.dataGridViewTextBoxColumn3.MinimumWidth = 6;
-            this.dataGridViewTextBoxColumn3.Name = "dataGridViewTextBoxColumn3";
-            this.dataGridViewTextBoxColumn3.Width = 125;
             // 
             // label9
             // 
@@ -481,27 +460,6 @@
             this.AreaGrid.RowTemplate.Height = 24;
             this.AreaGrid.Size = new System.Drawing.Size(694, 346);
             this.AreaGrid.TabIndex = 3;
-            // 
-            // ScopeBoxName
-            // 
-            this.ScopeBoxName.HeaderText = "Scope Box Name";
-            this.ScopeBoxName.MinimumWidth = 6;
-            this.ScopeBoxName.Name = "ScopeBoxName";
-            this.ScopeBoxName.Width = 125;
-            // 
-            // TitleBlockParameterArea
-            // 
-            this.TitleBlockParameterArea.HeaderText = "Title Block Parameter";
-            this.TitleBlockParameterArea.MinimumWidth = 6;
-            this.TitleBlockParameterArea.Name = "TitleBlockParameterArea";
-            this.TitleBlockParameterArea.Width = 125;
-            // 
-            // SheetNumberNumberArea
-            // 
-            this.SheetNumberNumberArea.HeaderText = "Sheet Number Area Value (M111__)";
-            this.SheetNumberNumberArea.MinimumWidth = 6;
-            this.SheetNumberNumberArea.Name = "SheetNumberNumberArea";
-            this.SheetNumberNumberArea.Width = 125;
             // 
             // label11
             // 
@@ -564,6 +522,52 @@
             this.Import.Text = "Import";
             this.Import.UseVisualStyleBackColor = true;
             this.Import.Click += new System.EventHandler(this.Import_Click);
+            // 
+            // LevelName
+            // 
+            this.LevelName.HeaderText = "Level Name";
+            this.LevelName.MinimumWidth = 6;
+            this.LevelName.Name = "LevelName";
+            this.LevelName.Resizable = System.Windows.Forms.DataGridViewTriState.True;
+            this.LevelName.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic;
+            this.LevelName.Width = 125;
+            // 
+            // dataGridViewTextBoxColumn2
+            // 
+            this.dataGridViewTextBoxColumn2.HeaderText = "Title Block Parameter";
+            this.dataGridViewTextBoxColumn2.MinimumWidth = 6;
+            this.dataGridViewTextBoxColumn2.Name = "dataGridViewTextBoxColumn2";
+            this.dataGridViewTextBoxColumn2.Width = 125;
+            // 
+            // dataGridViewTextBoxColumn3
+            // 
+            this.dataGridViewTextBoxColumn3.HeaderText = "Sheet Number Value (M11__A1)";
+            this.dataGridViewTextBoxColumn3.MinimumWidth = 6;
+            this.dataGridViewTextBoxColumn3.Name = "dataGridViewTextBoxColumn3";
+            this.dataGridViewTextBoxColumn3.Width = 125;
+            // 
+            // ScopeBoxName
+            // 
+            this.ScopeBoxName.HeaderText = "Scope Box Name";
+            this.ScopeBoxName.MinimumWidth = 6;
+            this.ScopeBoxName.Name = "ScopeBoxName";
+            this.ScopeBoxName.Resizable = System.Windows.Forms.DataGridViewTriState.True;
+            this.ScopeBoxName.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic;
+            this.ScopeBoxName.Width = 125;
+            // 
+            // TitleBlockParameterArea
+            // 
+            this.TitleBlockParameterArea.HeaderText = "Title Block Parameter";
+            this.TitleBlockParameterArea.MinimumWidth = 6;
+            this.TitleBlockParameterArea.Name = "TitleBlockParameterArea";
+            this.TitleBlockParameterArea.Width = 125;
+            // 
+            // SheetNumberNumberArea
+            // 
+            this.SheetNumberNumberArea.HeaderText = "Sheet Number Area Value (M111__)";
+            this.SheetNumberNumberArea.MinimumWidth = 6;
+            this.SheetNumberNumberArea.Name = "SheetNumberNumberArea";
+            this.SheetNumberNumberArea.Width = 125;
             // 
             // SheetSettings
             // 
@@ -628,14 +632,8 @@
         private System.Windows.Forms.Label label10;
         private System.Windows.Forms.Label label11;
         private System.Windows.Forms.DataGridView AreaGrid;
-        private System.Windows.Forms.DataGridViewTextBoxColumn ScopeBoxName;
-        private System.Windows.Forms.DataGridViewTextBoxColumn TitleBlockParameterArea;
-        private System.Windows.Forms.DataGridViewTextBoxColumn SheetNumberNumberArea;
         private System.Windows.Forms.DataGridView ScaleGrid;
         private System.Windows.Forms.DataGridView LevelGrid;
-        private System.Windows.Forms.DataGridViewTextBoxColumn dataGridViewTextBoxColumn1;
-        private System.Windows.Forms.DataGridViewTextBoxColumn dataGridViewTextBoxColumn2;
-        private System.Windows.Forms.DataGridViewTextBoxColumn dataGridViewTextBoxColumn3;
         private System.Windows.Forms.DataGridViewTextBoxColumn DisciplineName;
         private System.Windows.Forms.DataGridViewTextBoxColumn DisciplineNumber;
         private System.Windows.Forms.DataGridViewTextBoxColumn Scale;
@@ -646,5 +644,11 @@
         private System.Windows.Forms.Button Import;
         private System.Windows.Forms.DataGridViewTextBoxColumn dataGridViewTextBoxColumn4;
         private System.Windows.Forms.DataGridViewTextBoxColumn TitleBlockParameterDiscipline;
+        private System.Windows.Forms.DataGridViewComboBoxColumn LevelName;
+        private System.Windows.Forms.DataGridViewTextBoxColumn dataGridViewTextBoxColumn2;
+        private System.Windows.Forms.DataGridViewTextBoxColumn dataGridViewTextBoxColumn3;
+        private System.Windows.Forms.DataGridViewComboBoxColumn ScopeBoxName;
+        private System.Windows.Forms.DataGridViewTextBoxColumn TitleBlockParameterArea;
+        private System.Windows.Forms.DataGridViewTextBoxColumn SheetNumberNumberArea;
     }
 }
