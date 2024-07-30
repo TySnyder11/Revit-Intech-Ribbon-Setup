@@ -106,6 +106,8 @@ namespace Intech
             string elemCategory = element.Category.Name;
             FabricationPart fab = element as FabricationPart;
             LocationCurve el = element.Location as LocationCurve;
+
+            //get position of part
             XYZ xyz;
             if (fab != null)
             {
@@ -216,6 +218,8 @@ namespace Intech
             return (1);
 
         }
+
+        //get center of fabricated part
         protected static XYZ getCenterByConnectors(FabricationPart part)
         {
             var connectors = part.ConnectorManager.Connectors.OfType<Connector>().ToList();
@@ -243,6 +247,8 @@ namespace Intech
 
             return elbowCenterByIntersection;
         }
+
+        //filter what you are allowed to select
         public class SelectionFilter : ISelectionFilter
         {
             List<string> categories;

@@ -217,13 +217,13 @@ namespace Intech
                 if (Columns[0].Contains("Sub Discipline check"))
                 {
                     Columns.RemoveAt(0);
-                    Columns.RemoveAt(0);
+                    Columns.RemoveAt(Columns.Count - 1);
                     Columns.RemoveAt(Columns.Count - 1);
                     int x = 0;
                     foreach (string i in Columns)
                     {
                         List<string> rows = i.Split('\t').ToList();
-                        if (rows[0] == "True") check = true;
+                        if (rows[0].Replace("\r", "") == "True") check = true;
                         x++;
                     }
                 }

@@ -13,7 +13,7 @@ namespace Intech
     [Regeneration(RegenerationOption.Manual)]
     public class SheetCreateInit : IExternalCommand
     {
-
+        //Run without previously selected sheets
         public Result Execute(ExternalCommandData commandData, ref string message, ElementSet elements)
         {
             return SheetActualCreate.Run( commandData, new List <ViewPlan> ());
@@ -25,7 +25,7 @@ namespace Intech
     //Settings
     public class SheetSettingsMenu : IExternalCommand
     {
-
+        //Open settings
         public Result Execute(ExternalCommandData commandData, ref string message, ElementSet elements)
         {
             SheetSettings sheetSettings = new SheetSettings(commandData);
@@ -43,9 +43,11 @@ namespace Intech
             Transaction trans = new Transaction(doc, "Create Sheet");
             UIDocument uidoc = commandData.Application.ActiveUIDocument;
 
+            //start forn
             SheetCreateForm form = new SheetCreateForm(commandData, Selected);
             form.ShowDialog();
 
+            //check required boxes are filled
             if (
                 form.PlanViewCheckList.CheckedItems.Count == 0 ||
                 string.IsNullOrEmpty(form.TradeAbriviation.Text) ||
@@ -56,6 +58,7 @@ namespace Intech
                 )
                 return Result.Cancelled;
 
+            //collect all plan viwes in project that are not templates
             List<Element> AllViews = new FilteredElementCollector(doc)
                 .OfClass(typeof(ViewPlan))
                 .WhereElementIsNotElementType()
@@ -63,6 +66,7 @@ namespace Intech
 
             List<Element> selectedViews = new List<Element>();
 
+            //find the view with the same name as the selected
             foreach (DataRowView selectedName in form.PlanViewCheckList.CheckedItems)
                 foreach (Element element in AllViews)
                 {
@@ -70,6 +74,7 @@ namespace Intech
                         selectedViews.Add(element);
                 }
 
+            //set up lists for later
             List<Viewport> viewports = new List<Viewport>();
             List<Parameter> levelParameter = new List<Parameter>();
             List<ViewSheet> viewsheets = new List<ViewSheet>();
@@ -77,26 +82,30 @@ namespace Intech
             trans.Start();
             foreach (Element planview in selectedViews)
             {
+                //get all title blocks
                 var alltitle_blocks = new FilteredElementCollector(doc)
                             .OfCategory(BuiltInCategory.OST_TitleBlocks)
                             .WhereElementIsElementType()
                             .ToElements();
 
+                //get title block from selected string
                 Element titleblock = null;
                 foreach (FamilySymbol element in alltitle_blocks)
                     if (element.FamilyName.Contains(form.TitleBlockFamily.Text) && form.TitleBlockType.Text.Contains(element.Name))
                         titleblock = element;
 
+                //make sure title block was found
                 if (titleblock == null)
                 {
                     TaskDialog.Show("Failed", "Could not find title block. If you are using your base select title block in settings make sure it is in this project.");
                     return Result.Failed;
                 }
 
+                //create sheet
                 ViewSheet newsheet = ViewSheet.Create(doc, titleblock.Id);
                 viewsheets.Add(newsheet);
                 newsheet.Name = form.SheetName.Text;
-
+                //Number sheet on or near line 233
 
 
                 var title_block = new FilteredElementCollector(doc, newsheet.Id)
@@ -134,8 +143,11 @@ namespace Intech
                         string[] area = par.Split(' ');
                         areaNumber = area[area.Count() - 1];
                         foreach (Parameter p in title_block[0].Parameters)
+                        {
+                            string[] areaREF = p.Definition.Name.Split('-');
                             if (p.Definition.Name.Contains(area[area.Count() - 1]))
                                 p.Set(1);
+                        }
                     }
                 }
                 else if (nonStandardAreas.Keys.Contains(planview.get_Parameter(BuiltInParameter.VIEWER_VOLUME_OF_INTEREST_CROP).AsValueString()))
@@ -153,8 +165,12 @@ namespace Intech
                     string[] area = par.Split(' ');
                     areaNumber = area[area.Count() - 1];
                     foreach (Parameter p in title_block[0].Parameters)
-                        if (p.Definition.Name.Contains(area[area.Count() - 1]))
+                    {
+                        string[] areaREF = p.Definition.Name.Split('-');
+                        if (areaREF[1].Equals(area[area.Count() - 1]))
                             p.Set(1);
+                    }
+                        
                 }
 
                 string levelNumber = "";
@@ -201,18 +217,25 @@ namespace Intech
                                 levelParameter.Add(p);
                 }
 
+                //set discipline
                 var DisciplineValue = SettingsRead.Discipline();
-                newsheet.LookupParameter("Discipline").Set(form.Discipline.Text);
-                string e = DisciplineValue[form.Discipline.Text].Item2.Replace("\r", "");
-                title_block[0].LookupParameter(e).Set(1);
-
+                if (!string.IsNullOrEmpty(form.Discipline.Text))
+                {
+                    newsheet.LookupParameter("Discipline").Set(form.Discipline.Text);
+                    string e = DisciplineValue[form.Discipline.Text].Item2.Replace("\r", "");
+                    title_block[0].LookupParameter(e).Set(1);
+                }
+               
+                //set sub discipline
                 var subDisiplineValue = SettingsRead.SubDiscipline();
                 if (!string.IsNullOrEmpty(form.SubDiscipline.Text) || subDisiplineValue.Item2)
                     newsheet.LookupParameter("Discipline Order").Set(form.SubDiscipline.Text);
 
+                //Set sheet number
                 string numb = form.TradeAbriviation.Text + DisciplineValue[form.Discipline.Text].Item1.ToString().Replace("\r", "") + form.MiddleSheetNumber.Text + levelNumber + areaNumber;
                 newsheet.SheetNumber = numb;
 
+                //get center of sheet
                 XYZ xYZ = new XYZ();
                 BoundingBoxXYZ boundingBoxXYZ = title_block[0].get_BoundingBox(newsheet);
                 XYZ max = boundingBoxXYZ.Max;
@@ -222,6 +245,7 @@ namespace Intech
 
                 XYZ viewportxyz = new XYZ(X, Y, 0);
 
+                //create view port
                 Viewport viewport = Viewport.Create(doc, newsheet.Id, planview.Id, viewportxyz);
                 viewports.Add(viewport);
             }
@@ -230,23 +254,27 @@ namespace Intech
             trans.Commit();
             trans.Start();
 
+            //set previously stored level parameters to true due to needing transaction reload
             foreach (Parameter p in levelParameter)
                 p.Set(1);
 
             int x = 0;
             foreach (Viewport viewport in viewports)
             {
-
+                //read scales from settings
                 var scales = SettingsRead.Scale();
 
+                //get scale from planview
                 ElementId sheetId = viewport.SheetId;
                 string sheetscale = viewsheets[x].get_Parameter(BuiltInParameter.SHEET_SCALE).AsValueString();
                 try
                 {
+                    //change viewport to correct scale
                     viewport.ChangeTypeId(new ElementId(int.Parse(scales[sheetscale.Remove(0, 1).Remove(sheetscale.Length - 2, 1)].Item1)));
                 }
                 catch
                 {
+                    //in case the viewport IDs breaks this will give you the new element IDs you need (they will break in revit 2025 or 2026 due to revit changing elements from a 32 bit system to 64 bit)
                     List<ElementId> workTypes = viewport.GetValidTypes() as List<ElementId>;
                     string stringworking = "";
                     foreach (ElementId workType in workTypes) stringworking += doc.GetElement(workType).Name + "   " + workType.ToString() + "\n";
