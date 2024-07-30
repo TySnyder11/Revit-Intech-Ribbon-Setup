@@ -208,7 +208,7 @@ namespace Intech
 
                 var subDisiplineValue = SettingsRead.SubDiscipline();
                 if (!string.IsNullOrEmpty(form.SubDiscipline.Text) || subDisiplineValue.Item2)
-                    newsheet.LookupParameter("subDiscipline").Set(form.SubDiscipline.Text);
+                    newsheet.LookupParameter("Discipline Order").Set(form.SubDiscipline.Text);
 
                 string numb = form.TradeAbriviation.Text + DisciplineValue[form.Discipline.Text].Item1.ToString().Replace("\r", "") + form.MiddleSheetNumber.Text + levelNumber + areaNumber;
                 newsheet.SheetNumber = numb;
@@ -254,9 +254,10 @@ namespace Intech
                 }
                 x++;
             }
-
+            
             trans.Commit();
 
+            TaskDialog.Show("Success", "Sheets Created");
             return Result.Succeeded;
         }
     }

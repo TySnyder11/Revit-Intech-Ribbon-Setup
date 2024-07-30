@@ -18,13 +18,14 @@ namespace Intech
     public partial class SheetSettings : System.Windows.Forms.Form
     {
         Dictionary<string, List<string>> titleblockFamily = new Dictionary<string, List<string>>();
+        Document doc;
         public SheetSettings(ExternalCommandData commandData)
         {
             InitializeComponent();
             this.CenterToParent();
 
             UIApplication uiapp = commandData.Application;
-            Document doc = uiapp.ActiveUIDocument.Document;
+            doc = uiapp.ActiveUIDocument.Document;
             Transaction trans = new Transaction(doc);
             UIDocument uidoc = commandData.Application.ActiveUIDocument;
 
@@ -146,8 +147,13 @@ namespace Intech
                 TitleBlockFamily.Items.Add(i);
 
             if (TitleBlockFamily.Text != "")
-                foreach (string i in titleblockFamily[TitleBlockFamily.Text])
-                    TitleBlockType.Items.Add(i);
+                try
+                {
+                    foreach (string i in titleblockFamily[TitleBlockFamily.Text])
+                        TitleBlockType.Items.Add(i);
+                }
+                catch { }
+
         }
 
         private void Import_Click(object sender, EventArgs e)
@@ -300,6 +306,28 @@ namespace Intech
         private void Cancel_Click(object sender, EventArgs e)
         {
             this.Close();
+        }
+
+        private void TitleBlockType_SelectedIndexChanged(object sender, EventArgs e)
+        {
+
+        }
+
+        private void BaseControlTab_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void TitleBlockFamily_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            TitleBlockType.Items.Clear();
+            TitleBlockType.Text = "";
+            Transaction temp = new Transaction(doc, "Temp");
+            if (TitleBlockFamily.Text != "")
+                foreach (string i in titleblockFamily[TitleBlockFamily.Text])
+                {
+                    TitleBlockType.Items.Add(i);
+                }
         }
     }
 }

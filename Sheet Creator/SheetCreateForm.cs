@@ -90,33 +90,37 @@ namespace Intech
 
             Transaction temp = new Transaction(doc, "Temp");
             if (TitleBlockFamily.Text != "")
-                foreach (Element i in titleblockFamily[TitleBlockFamily.Text])
+                try
                 {
-                    TitleBlockType.Items.Add(i.Name.Replace('\n','\0'));
-                    if (TitleBlockType.Text.Contains(i.Name))
+                    foreach (Element i in titleblockFamily[TitleBlockFamily.Text])
                     {
-                        temp.Start();
-                        ViewSheet sheet = ViewSheet.Create(doc, i.Id);
-
-                        var title_block = new FilteredElementCollector(doc, sheet.Id)
-                            .OfCategory(BuiltInCategory.OST_TitleBlocks)
-                            .WhereElementIsNotElementType()
-                            .ToElements();
-
-                        foreach(Parameter p in title_block[0].GetOrderedParameters())
+                        TitleBlockType.Items.Add(i.Name.Replace('\n', '\0'));
+                        if (TitleBlockType.Text.Contains(i.Name))
                         {
-                            if (p.StorageType == StorageType.Integer)
-                            {
-                                if (p.AsInteger() == 1)
-                                    ParameterCheckList.Items.Add(p.Definition.Name, true);
-                                else
-                                    ParameterCheckList.Items.Add(p.Definition.Name);
-                            }
-                        }
+                            temp.Start();
+                            ViewSheet sheet = ViewSheet.Create(doc, i.Id);
 
-                        temp.RollBack();
+                            var title_block = new FilteredElementCollector(doc, sheet.Id)
+                                .OfCategory(BuiltInCategory.OST_TitleBlocks)
+                                .WhereElementIsNotElementType()
+                                .ToElements();
+
+                            foreach (Parameter p in title_block[0].GetOrderedParameters())
+                            {
+                                if (p.StorageType == StorageType.Integer)
+                                {
+                                    if (p.AsInteger() == 1)
+                                        ParameterCheckList.Items.Add(p.Definition.Name, true);
+                                    else
+                                        ParameterCheckList.Items.Add(p.Definition.Name);
+                                }
+                            }
+
+                            temp.RollBack();
+                        }
                     }
                 }
+                catch { }
 
             var levels = new FilteredElementCollector(doc)
                             .OfClass(typeof(Level))
@@ -210,7 +214,10 @@ namespace Intech
                 filter = null;
             }
 
-            dv.RowFilter = filter;
+            if (string.IsNullOrEmpty(filter))
+                dv.RowFilter = "";
+            else if (filter.Length < 30000)
+                dv.RowFilter = filter;
 
             for (var i = 0; i < PlanViewCheckList.Items.Count; i++)
             {
@@ -230,21 +237,6 @@ namespace Intech
                 foreach (Element i in titleblockFamily[TitleBlockFamily.Text])
                 {
                     TitleBlockType.Items.Add(i.Name);
-                    if (TitleBlockType.Text.Contains(i.Name))
-                    {
-                        temp.Start();
-                        ViewSheet sheet = ViewSheet.Create(doc, i.Id);
-
-                        var title_block = new FilteredElementCollector(doc, sheet.Id)
-                            .OfCategory(BuiltInCategory.OST_TitleBlocks)
-                            .WhereElementIsNotElementType()
-                            .ToElements();
-
-                        foreach (Parameter p in title_block[0].GetOrderedParameters())
-                            ParameterCheckList.Items.Add(p.Definition.Name);
-
-                        temp.RollBack();
-                    }
                 }
         }
 

@@ -38,7 +38,10 @@ namespace Intech
 
             PlanViewCheckBox.ItemCheck += PlanViewCheckBox_ItemCheck;
 
-            foreach (Element i in areaList) AreaCheckBox.Items.Add(i.Name);
+            List<string> list = new List<string>();
+            foreach (Element i in areaList) list.Add(i.Name);
+            list.Sort();
+            foreach (string i in list) AreaCheckBox.Items.Add(i);
 
             foreach (string i in scales) OverallView.Items.Add(i);
         }
@@ -82,7 +85,10 @@ namespace Intech
                 filter = null;
             }
 
-            dv.RowFilter = filter;
+            if (string.IsNullOrEmpty(filter))
+                dv.RowFilter = "";
+            else if (filter.Length < 30000)
+                dv.RowFilter = filter;
 
             for (var i = 0; i < PlanViewCheckBox.Items.Count; i++)
             {
@@ -111,7 +117,6 @@ namespace Intech
 
         private void button2_Click(object sender, EventArgs e)
         {
-            SearchBox.Text = "↓Yσ9○•d";
             this.Close();
         }
 

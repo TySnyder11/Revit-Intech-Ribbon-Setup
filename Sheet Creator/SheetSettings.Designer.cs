@@ -56,6 +56,7 @@
             this.DisciplineGrid = new System.Windows.Forms.DataGridView();
             this.DisciplineName = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.DisciplineNumber = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.TitleBlockParameterDiscipline = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.LevelTab = new System.Windows.Forms.TabPage();
             this.LevelGrid = new System.Windows.Forms.DataGridView();
             this.dataGridViewTextBoxColumn1 = new System.Windows.Forms.DataGridViewTextBoxColumn();
@@ -74,7 +75,6 @@
             this.Confirm = new System.Windows.Forms.Button();
             this.Export = new System.Windows.Forms.Button();
             this.Import = new System.Windows.Forms.Button();
-            this.TitleBlockParameterDiscipline = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.SheetTabController.SuspendLayout();
             this.BaseControlTab.SuspendLayout();
             this.tabControl2.SuspendLayout();
@@ -122,10 +122,11 @@
             this.BaseControlTab.Location = new System.Drawing.Point(4, 25);
             this.BaseControlTab.Name = "BaseControlTab";
             this.BaseControlTab.Padding = new System.Windows.Forms.Padding(3);
-            this.BaseControlTab.Size = new System.Drawing.Size(653, 352);
+            this.BaseControlTab.Size = new System.Drawing.Size(691, 345);
             this.BaseControlTab.TabIndex = 0;
             this.BaseControlTab.Text = "Base Controls";
             this.BaseControlTab.UseVisualStyleBackColor = true;
+            this.BaseControlTab.Click += new System.EventHandler(this.BaseControlTab_Click);
             // 
             // TitleBlockType
             // 
@@ -134,6 +135,7 @@
             this.TitleBlockType.Name = "TitleBlockType";
             this.TitleBlockType.Size = new System.Drawing.Size(121, 24);
             this.TitleBlockType.TabIndex = 25;
+            this.TitleBlockType.SelectedIndexChanged += new System.EventHandler(this.TitleBlockType_SelectedIndexChanged);
             // 
             // label7
             // 
@@ -160,6 +162,7 @@
             this.TitleBlockFamily.Name = "TitleBlockFamily";
             this.TitleBlockFamily.Size = new System.Drawing.Size(121, 24);
             this.TitleBlockFamily.TabIndex = 22;
+            this.TitleBlockFamily.SelectedIndexChanged += new System.EventHandler(this.TitleBlockFamily_SelectedIndexChanged);
             // 
             // label5
             // 
@@ -258,7 +261,7 @@
             this.ScaleTab.Location = new System.Drawing.Point(4, 25);
             this.ScaleTab.Name = "ScaleTab";
             this.ScaleTab.Padding = new System.Windows.Forms.Padding(3);
-            this.ScaleTab.Size = new System.Drawing.Size(653, 352);
+            this.ScaleTab.Size = new System.Drawing.Size(691, 345);
             this.ScaleTab.TabIndex = 1;
             this.ScaleTab.Text = "Scale Tab";
             this.ScaleTab.UseVisualStyleBackColor = true;
@@ -378,6 +381,13 @@
             this.DisciplineNumber.Name = "DisciplineNumber";
             this.DisciplineNumber.Width = 125;
             // 
+            // TitleBlockParameterDiscipline
+            // 
+            this.TitleBlockParameterDiscipline.HeaderText = "Title Block Parameter";
+            this.TitleBlockParameterDiscipline.MinimumWidth = 6;
+            this.TitleBlockParameterDiscipline.Name = "TitleBlockParameterDiscipline";
+            this.TitleBlockParameterDiscipline.Width = 125;
+            // 
             // LevelTab
             // 
             this.LevelTab.Controls.Add(this.LevelGrid);
@@ -385,7 +395,7 @@
             this.LevelTab.Controls.Add(this.label8);
             this.LevelTab.Location = new System.Drawing.Point(4, 25);
             this.LevelTab.Name = "LevelTab";
-            this.LevelTab.Size = new System.Drawing.Size(653, 352);
+            this.LevelTab.Size = new System.Drawing.Size(691, 345);
             this.LevelTab.TabIndex = 3;
             this.LevelTab.Text = "Nonstandard Level Tab";
             this.LevelTab.UseVisualStyleBackColor = true;
@@ -453,7 +463,7 @@
             this.AreaTab.Controls.Add(this.label10);
             this.AreaTab.Location = new System.Drawing.Point(4, 25);
             this.AreaTab.Name = "AreaTab";
-            this.AreaTab.Size = new System.Drawing.Size(653, 352);
+            this.AreaTab.Size = new System.Drawing.Size(691, 345);
             this.AreaTab.TabIndex = 4;
             this.AreaTab.Text = "Nonstandard Area Tag";
             this.AreaTab.UseVisualStyleBackColor = true;
@@ -554,13 +564,6 @@
             this.Import.Text = "Import";
             this.Import.UseVisualStyleBackColor = true;
             this.Import.Click += new System.EventHandler(this.Import_Click);
-            // 
-            // TitleBlockParameterDiscipline
-            // 
-            this.TitleBlockParameterDiscipline.HeaderText = "Title Block Parameter";
-            this.TitleBlockParameterDiscipline.MinimumWidth = 6;
-            this.TitleBlockParameterDiscipline.Name = "TitleBlockParameterDiscipline";
-            this.TitleBlockParameterDiscipline.Width = 125;
             // 
             // SheetSettings
             // 

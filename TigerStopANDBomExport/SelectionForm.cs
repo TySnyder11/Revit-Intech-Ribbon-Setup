@@ -109,8 +109,10 @@ namespace Intech
             {
             filter = null;
             }
-
-            dv.RowFilter = filter;
+            if (string.IsNullOrEmpty(filter))
+                dv.RowFilter = "";
+            else if (filter.Length < 30000)
+                dv.RowFilter = filter;
 
             for (var i = 0; i < checkedListBox.Items.Count; i++)
             {
