@@ -12,6 +12,7 @@ using System.Diagnostics;
 using System.Xml;
 using Autodesk.Revit.UI;
 using Autodesk.Revit.DB;
+using System.Security.Principal;
 
 namespace Intech
 {
@@ -66,6 +67,16 @@ namespace Intech
                         LevelGrid.Rows.Add(rows[0], rows[1], rows[2]);
                         x++;
                     }
+                    var levels = new FilteredElementCollector(doc)
+                            .OfClass(typeof(Level))
+                            .WhereElementIsNotElementType()
+                            .ToElements();
+                    List<string> datasource = new List<string>
+                    {
+                        ""
+                    };
+                    foreach (Element i in levels) datasource.Add(i.Name);
+                    (LevelGrid.Columns[0] as DataGridViewComboBoxColumn).DataSource = datasource;
                 }
                 else if (Columns[0].Contains("Nonstandard Scopebox Info"))
                 {
@@ -80,6 +91,16 @@ namespace Intech
                         AreaGrid.Rows.Add(rows[0], rows[1], rows[2]);
                         x++;
                     }
+                    var areas = new FilteredElementCollector(doc)
+                            .OfCategory(BuiltInCategory.OST_VolumeOfInterest)
+                            .WhereElementIsNotElementType()
+                            .ToElements();
+                    List<string> datasource = new List<string>
+                    {
+                        ""
+                    };
+                    foreach (Element i in areas) datasource.Add(i.Name);
+                    (AreaGrid.Columns[0] as DataGridViewComboBoxColumn).DataSource = datasource;
                 }
                 else if (Columns[0].Contains("Sheet Sub Discipline"))
                 {
@@ -215,8 +236,9 @@ namespace Intech
                 {
                     for (int col = 0; col < LevelGrid.Rows[row].Cells.Count; col++)
                     {
-                        string value = LevelGrid.Rows[row].Cells[col].Value.ToString().Replace("\n","");
-
+                        string value;
+                        if (LevelGrid.Rows[row].Cells[col].Value == null) value = "";
+                        else value = LevelGrid.Rows[row].Cells[col].Value.ToString().Replace("\n", "");
                         if (col == 0) { levelData += "\n" + value; }
                         else { levelData += '\t' + value; }
                     }
@@ -233,7 +255,10 @@ namespace Intech
                 {
                     for (int col = 0; col < AreaGrid.Rows[row].Cells.Count; col++)
                     {
-                        string value = AreaGrid.Rows[row].Cells[col].Value.ToString().Replace("\n", "");
+
+                        string value;
+                        if (AreaGrid.Rows[row].Cells[col].Value == null) value = "";
+                        else value = AreaGrid.Rows[row].Cells[col].Value.ToString().Replace("\n", "");
                         if (col == 0) { areaData += "\n" + value; }
                         else { areaData += '\t' + value; }
                     }
