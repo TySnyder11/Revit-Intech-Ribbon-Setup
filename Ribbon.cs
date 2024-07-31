@@ -68,9 +68,9 @@ namespace Intech
             Debug.WriteLine("Search " + IconPath);
 
             //Create different panels
-            Autodesk.Revit.UI.RibbonPanel SheetPanel = application.CreateRibbonPanel(tabName, "Sheets");
-            Autodesk.Revit.UI.RibbonPanel TaggingPanel = application.CreateRibbonPanel(tabName, "Tagging");
-            Autodesk.Revit.UI.RibbonPanel ExportPanel = application.CreateRibbonPanel(tabName, "Exports");
+            RibbonPanel SheetPanel = application.CreateRibbonPanel(tabName, "Sheets");
+            RibbonPanel TaggingPanel = application.CreateRibbonPanel(tabName, "Tagging");
+            RibbonPanel ExportPanel = application.CreateRibbonPanel(tabName, "Exports");
 
             //Sheets Ribbon
             {

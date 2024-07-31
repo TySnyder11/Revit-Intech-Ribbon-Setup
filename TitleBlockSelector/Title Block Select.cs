@@ -20,20 +20,19 @@ namespace Intech
             UIDocument uidoc = commandData.Application.ActiveUIDocument;
 
             //Get element ID of selected
-            Selection selected = uidoc.Selection;
             ICollection<ElementId> selectedIds = uidoc.Selection.GetElementIds();
 
+            //filter out all elements that is not a sheet
+            var sheet = new FilteredElementCollector(doc, selectedIds).OfCategory(BuiltInCategory.OST_Sheets).WhereElementIsNotElementType().ToElementIds();
+
             //Make sure you have something selected
-            if (selectedIds.Count == 0)
+            if (sheet.Count == 0)
             {
-                return Result.Failed; ;
+                return Result.Failed;
             }
 
             //Define title block list
             IList<ElementId> tb = new List<ElementId>();
-
-            //filter out all elements that is not a sheet
-            var sheet = new FilteredElementCollector(doc, selectedIds).OfCategory(BuiltInCategory.OST_Sheets).WhereElementIsNotElementType().ToElementIds();
 
             //for each sheet get the title block inside and add to title block list
             foreach (ElementId i in sheet)
@@ -44,13 +43,11 @@ namespace Intech
                     tb.Add(f);
                 }
             }
-            //Debugging
-            Debug.WriteLine(tb);
 
             //Set selection to new element id and print on debug screen to make sure selected element Id has changes
             uidoc.Selection.SetElementIds(tb);
 
-            return Autodesk.Revit.UI.Result.Succeeded;
+            return Result.Succeeded;
         }
     }
 }

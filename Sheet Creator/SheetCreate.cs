@@ -6,7 +6,6 @@ using System.Collections.Generic;
 using System.Data;
 using System.Diagnostics;
 using System.Linq;
-using static OfficeOpenXml.ExcelErrorValue;
 namespace Intech
 {
     [Transaction(TransactionMode.Manual)]
@@ -33,7 +32,7 @@ namespace Intech
             return Result.Succeeded;
         }
     }
-
+    
     public class SheetActualCreate
     {
         public static Result Run(ExternalCommandData commandData, List<ViewPlan> Selected)
@@ -125,6 +124,7 @@ namespace Intech
 
                 string areaNumber = "";
                 var nonStandardAreas = SettingsRead.NonstandardArea();
+                string o = planview.get_Parameter(BuiltInParameter.VIEWER_VOLUME_OF_INTEREST_CROP).AsValueString();
                 //Set area parameter
                 if (form.AreaOverride.Checked)
                 {
@@ -153,7 +153,7 @@ namespace Intech
                 else if (nonStandardAreas.Keys.Contains(planview.get_Parameter(BuiltInParameter.VIEWER_VOLUME_OF_INTEREST_CROP).AsValueString()))
                     foreach (string key in nonStandardAreas.Keys)
                     {
-                        if (key.Contains(form.AreaOverrideComboBox.Text))
+                        if (key.Equals(planview.get_Parameter(BuiltInParameter.VIEWER_VOLUME_OF_INTEREST_CROP).AsValueString()))
                         {
                             areaNumber = nonStandardAreas[key].Item2;
                             title_block[0].LookupParameter(nonStandardAreas[key].Item1).Set(1);
@@ -167,7 +167,8 @@ namespace Intech
                     foreach (Parameter p in title_block[0].Parameters)
                     {
                         string[] areaREF = p.Definition.Name.Split('-');
-                        if (areaREF[1].Equals(area[area.Count() - 1]))
+                        if (areaREF.Length == 0) ;
+                        else if (areaREF[areaREF.Count() - 1].Equals(area[area.Count() - 1]))
                             p.Set(1);
                     }
                         
@@ -181,7 +182,7 @@ namespace Intech
                     if (nonStandardLevels.Keys.Contains(form.LevelOverrideComboBox.Text))
                         foreach (string key in nonStandardLevels.Keys)
                         {
-                            if (key.Contains(form.LevelOverrideComboBox.Text))
+                            if (key.Equals(form.LevelOverrideComboBox.Text))
                             {
                                 levelNumber = nonStandardLevels[key].Item2.Replace("\n", "");
                                 levelParameter.Add(title_block[0].LookupParameter(nonStandardLevels[key].Item1));
@@ -200,7 +201,7 @@ namespace Intech
                 else if (nonStandardLevels.Keys.Contains(planview.LookupParameter("Associated Level").AsValueString()))
                     foreach (string key in nonStandardLevels.Keys)
                     {
-                        if (key.Contains(form.LevelOverrideComboBox.Text))
+                        if (key.Equals(planview.LookupParameter("Associated Level").AsValueString()))
                         {
                             levelNumber = nonStandardLevels[key].Item2.Replace("\n", "");
                             levelParameter.Add(title_block[0].LookupParameter(nonStandardLevels[key].Item1));
@@ -222,8 +223,12 @@ namespace Intech
                 if (!string.IsNullOrEmpty(form.Discipline.Text))
                 {
                     newsheet.LookupParameter("Discipline").Set(form.Discipline.Text);
-                    string e = DisciplineValue[form.Discipline.Text].Item2.Replace("\r", "");
-                    title_block[0].LookupParameter(e).Set(1);
+                    try
+                    {
+                        string e = DisciplineValue[form.Discipline.Text].Item2.Replace("\r", "");
+                        title_block[0].LookupParameter(e).Set(1);
+                    }
+                    catch { }
                 }
                
                 //set sub discipline
@@ -232,7 +237,7 @@ namespace Intech
                     newsheet.LookupParameter("Discipline Order").Set(form.SubDiscipline.Text);
 
                 //Set sheet number
-                string numb = form.TradeAbriviation.Text + DisciplineValue[form.Discipline.Text].Item1.ToString().Replace("\r", "") + form.MiddleSheetNumber.Text + levelNumber + areaNumber;
+                string numb = form.TradeAbriviation.Text + DisciplineValue[form.Discipline.Text].Item1.ToString().Replace("\r", "") + form.MiddleSheetNumber.Text + levelNumber + "." + areaNumber;
                 newsheet.SheetNumber = numb;
 
                 //get center of sheet

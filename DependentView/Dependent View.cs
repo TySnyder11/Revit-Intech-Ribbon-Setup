@@ -32,7 +32,6 @@ namespace Intech
                 .OfCategory(BuiltInCategory.OST_VolumeOfInterest).
                 WhereElementIsNotElementType().
                 ToElements() as List<Element>;
-
             //collect scale information
             var sizes = SettingsRead.Scale();
 

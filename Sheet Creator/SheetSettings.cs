@@ -67,16 +67,6 @@ namespace Intech
                         LevelGrid.Rows.Add(rows[0], rows[1], rows[2]);
                         x++;
                     }
-                    var levels = new FilteredElementCollector(doc)
-                            .OfClass(typeof(Level))
-                            .WhereElementIsNotElementType()
-                            .ToElements();
-                    List<string> datasource = new List<string>
-                    {
-                        ""
-                    };
-                    foreach (Element i in levels) datasource.Add(i.Name);
-                    (LevelGrid.Columns[0] as DataGridViewComboBoxColumn).DataSource = datasource;
                 }
                 else if (Columns[0].Contains("Nonstandard Scopebox Info"))
                 {
@@ -91,16 +81,6 @@ namespace Intech
                         AreaGrid.Rows.Add(rows[0], rows[1], rows[2]);
                         x++;
                     }
-                    var areas = new FilteredElementCollector(doc)
-                            .OfCategory(BuiltInCategory.OST_VolumeOfInterest)
-                            .WhereElementIsNotElementType()
-                            .ToElements();
-                    List<string> datasource = new List<string>
-                    {
-                        ""
-                    };
-                    foreach (Element i in areas) datasource.Add(i.Name);
-                    (AreaGrid.Columns[0] as DataGridViewComboBoxColumn).DataSource = datasource;
                 }
                 else if (Columns[0].Contains("Sheet Sub Discipline"))
                 {

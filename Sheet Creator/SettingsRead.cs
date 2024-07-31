@@ -135,7 +135,7 @@ namespace Intech
             {
                 e.Replace("@", "");
                 List<string> Columns = e.Split('\n').ToList();
-                if (Columns[0].Contains("Nonstandard Area Info"))
+                if (Columns[0].Contains("Nonstandard Scopebox Info"))
                 {
                     Columns.RemoveAt(0);
                     Columns.RemoveAt(0);

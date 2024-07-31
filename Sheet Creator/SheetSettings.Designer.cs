@@ -69,10 +69,10 @@
             this.Confirm = new System.Windows.Forms.Button();
             this.Export = new System.Windows.Forms.Button();
             this.Import = new System.Windows.Forms.Button();
-            this.LevelName = new System.Windows.Forms.DataGridViewComboBoxColumn();
+            this.LevelName = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.dataGridViewTextBoxColumn2 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.dataGridViewTextBoxColumn3 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.ScopeBoxName = new System.Windows.Forms.DataGridViewComboBoxColumn();
+            this.ScopeBoxName = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.TitleBlockParameterArea = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.SheetNumberNumberArea = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.SheetTabController.SuspendLayout();
@@ -458,7 +458,7 @@
             this.AreaGrid.Name = "AreaGrid";
             this.AreaGrid.RowHeadersWidth = 51;
             this.AreaGrid.RowTemplate.Height = 24;
-            this.AreaGrid.Size = new System.Drawing.Size(694, 346);
+            this.AreaGrid.Size = new System.Drawing.Size(682, 301);
             this.AreaGrid.TabIndex = 3;
             // 
             // label11
@@ -529,7 +529,6 @@
             this.LevelName.MinimumWidth = 6;
             this.LevelName.Name = "LevelName";
             this.LevelName.Resizable = System.Windows.Forms.DataGridViewTriState.True;
-            this.LevelName.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic;
             this.LevelName.Width = 125;
             // 
             // dataGridViewTextBoxColumn2
@@ -552,7 +551,6 @@
             this.ScopeBoxName.MinimumWidth = 6;
             this.ScopeBoxName.Name = "ScopeBoxName";
             this.ScopeBoxName.Resizable = System.Windows.Forms.DataGridViewTriState.True;
-            this.ScopeBoxName.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic;
             this.ScopeBoxName.Width = 125;
             // 
             // TitleBlockParameterArea
@@ -644,10 +642,10 @@
         private System.Windows.Forms.Button Import;
         private System.Windows.Forms.DataGridViewTextBoxColumn dataGridViewTextBoxColumn4;
         private System.Windows.Forms.DataGridViewTextBoxColumn TitleBlockParameterDiscipline;
-        private System.Windows.Forms.DataGridViewComboBoxColumn LevelName;
+        private System.Windows.Forms.DataGridViewTextBoxColumn LevelName;
         private System.Windows.Forms.DataGridViewTextBoxColumn dataGridViewTextBoxColumn2;
         private System.Windows.Forms.DataGridViewTextBoxColumn dataGridViewTextBoxColumn3;
-        private System.Windows.Forms.DataGridViewComboBoxColumn ScopeBoxName;
+        private System.Windows.Forms.DataGridViewTextBoxColumn ScopeBoxName;
         private System.Windows.Forms.DataGridViewTextBoxColumn TitleBlockParameterArea;
         private System.Windows.Forms.DataGridViewTextBoxColumn SheetNumberNumberArea;
     }

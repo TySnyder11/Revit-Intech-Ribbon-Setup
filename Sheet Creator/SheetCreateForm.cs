@@ -166,11 +166,11 @@ namespace Intech
             HashSet<ElementId> viewsOnSheets = new HashSet<ElementId>(sheets.SelectMany(x => x.GetAllPlacedViews()));
 
             //  Return the views that aren't placed on a sheet
-            IEnumerable<Autodesk.Revit.DB.ViewPlan> views = new FilteredElementCollector(doc)
+            IEnumerable<ViewPlan> views = new FilteredElementCollector(doc)
                         .OfClass(typeof(ViewPlan))
                         .Cast<ViewPlan>()
                         .Where(x => !x.IsTemplate);
-            foreach (Autodesk.Revit.DB.ViewPlan view in views)
+            foreach (ViewPlan view in views)
             {
                 if (!viewsOnSheets.Contains(view.Id))
                     yield return view;
