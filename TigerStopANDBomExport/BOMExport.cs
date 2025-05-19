@@ -24,14 +24,9 @@ namespace Intech
             UIApplication uiApp = commandData.Application;
             Document doc = uiApp.ActiveUIDocument.Document;
 
-            if (doc == null)
-            {
-                TaskDialog.Show("Error", "No active document found.");
-                return Result.Failed;
-            }
             //utility.GetScheduleData(doc); //temp test
             string baseFolder = string.Empty;
-            List<ViewSchedule> Allschedules;//list of scheuled
+            List<ViewSchedule> Allschedules;//list of scheduled
             List<ViewSchedule> selected = new List<ViewSchedule>();  //List of selected schedules
             Dictionary<ViewSchedule, string> displayNames = new Dictionary<ViewSchedule, string>(); //to display proper name in the checkedlistbox.
 
@@ -169,6 +164,29 @@ namespace Intech
 
             return scheduleData;
         }
+        static int numOfHeaders;
+        public static void addToHeader(int columns, ExcelWorksheet excel, string text) {
+
+            Debug.Print("A" + numOfHeaders.ToString());
+            excel.Cells["A" + numOfHeaders.ToString()].Value = text;
+
+            string merger = "A" + numOfHeaders.ToString() + ":" + IndexToColumn(columns - 1) + numOfHeaders; //Format example "A1:E1"
+            Debug.Print(merger);
+            excel.Cells[merger].Merge = true;
+            // Create a new ExcelStyle object to define cell formatting.
+            ExcelStyle cellStyle = excel.Cells[merger].Style;
+
+            // Set cell properties.
+            cellStyle.Font.Bold = true;
+            cellStyle.Font.Name = "Calibri";
+            cellStyle.Font.Size = 14;
+            cellStyle.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+            cellStyle.Border.Top.Style = ExcelBorderStyle.Medium;
+            cellStyle.Border.Bottom.Style = ExcelBorderStyle.Medium;
+            cellStyle.Border.Left.Style = ExcelBorderStyle.Medium;
+            cellStyle.Border.Right.Style = ExcelBorderStyle.Medium;
+            numOfHeaders += 1;
+        }
 
         public static Result exportSchedulesToCSV(Document doc, ref string message, string saveFolder, DialogResult result,
                                 List<ViewSchedule> schedules,
@@ -216,13 +234,24 @@ namespace Intech
                             string csvFileName = fullPath + @"\" + name + @".csv";
                             ExcelWorksheet copiedWorksheet = newPackage.Workbook.Worksheets.Add(name, templateWorksheet);
 
+                            TableData tableData = vs2.GetTableData();
+                            TableSectionData section = tableData.GetSectionData(SectionType.Body);
+                            TableSectionData header = tableData.GetSectionData(SectionType.Header);
+                            int nRows = section.NumberOfRows;
+                            int nColumns = section.NumberOfColumns;
+
                             //export data to csv
                             //GetScheduleData(vs2, csvFileName);
 
                             //Add header
-                            copiedWorksheet.Cells["A1"].Value = vs2.Name;
+                            numOfHeaders = 1;
+                            for (int i = 0; i < header.NumberOfRows; i++) {
+                                Debug.Print(vs2.GetCellText(SectionType.Header, 0, i));
+                                addToHeader(nColumns, copiedWorksheet, vs2.GetCellText(SectionType.Header, i, 0));
+                            }
                             // Define the range where you want to start loading the data (e.g., C1)
-                            ExcelRangeBase startCell = copiedWorksheet.Cells["A2"];
+
+                            ExcelRangeBase startCell = copiedWorksheet.Cells["A"  + numOfHeaders];
                             // Load data from the CSV, skipping the first row and setting the second row as the column headers.
                             ExcelRangeBase range = copiedWorksheet.Cells[startCell.Address].LoadFromDataTable(GetScheduleData(vs2));
 
@@ -237,38 +266,17 @@ namespace Intech
                             {
                                 currentColumn++; // Move to the next row
                             }
-                            TableData tableData = vs2.GetTableData();
-                            TableSectionData section = tableData.GetSectionData(SectionType.Body);
-                            int nRows = section.NumberOfRows;
-                            int nColumns = section.NumberOfColumns;
+                            Debug.WriteLine(numOfHeaders);
                             Debug.WriteLine(nRows);
 
-                            string merger = "A1:" + IndexToColumn(nColumns - 1) + "1"; //Format example "A1:E1"
-                            copiedWorksheet.Cells[merger].Merge = true;
-                            // Create a new ExcelStyle object to define cell formatting.
-                            ExcelStyle cellStyle = copiedWorksheet.Cells[merger].Style;
-
-                            // Set cell properties.
-                            cellStyle.Font.Bold = true;
-                            cellStyle.Font.Name = "Calibri";
-                            cellStyle.Font.Size = 14;
-                            cellStyle.HorizontalAlignment = ExcelHorizontalAlignment.Center;
-                            cellStyle.Border.Top.Style = ExcelBorderStyle.Medium;
-                            cellStyle.Border.Bottom.Style = ExcelBorderStyle.Medium;
-                            cellStyle.Border.Left.Style = ExcelBorderStyle.Medium;
-                            cellStyle.Border.Right.Style = ExcelBorderStyle.Medium;
 
                             //Add a table onto the data
-                            string merger2 = "A2:" + IndexToColumn(nColumns-1) + (nRows+1); //get data range
-                            Debug.WriteLine(merger2);
+                            string tablerange = "A" + numOfHeaders + ":" + IndexToColumn(nColumns-1) + (nRows+1); //get data range
+                            Debug.WriteLine(tablerange);
 
-                            var dataRange = copiedWorksheet.Cells[merger2];
+                            var dataRange = copiedWorksheet.Cells[tablerange];
 
                             dataRange.Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
-                            cellStyle.Border.Top.Style = ExcelBorderStyle.Medium;
-                            cellStyle.Border.Bottom.Style = ExcelBorderStyle.Medium;
-                            cellStyle.Border.Left.Style = ExcelBorderStyle.Medium;
-                            cellStyle.Border.Right.Style = ExcelBorderStyle.Medium;
 
                             ExcelTable table = copiedWorksheet.Tables.Add(dataRange, "Table" + tableNum);
                             table.TableStyle = OfficeOpenXml.Table.TableStyles.Medium1;
