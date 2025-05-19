@@ -1,23 +1,16 @@
-﻿using System;
+﻿using Autodesk.Revit.DB;
+using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Data;
-using System.Diagnostics;
-using System.Drawing;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
-using Autodesk.Revit.DB;
-using Autodesk.Revit.UI;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 
 namespace Intech
 {
     public partial class DependentViewForm : System.Windows.Forms.Form
     {
         public DataTable dt = new DataTable();
-        public DependentViewForm( List<Element> planViewList, List<Element> areaList, List<string> scales )
+        public DependentViewForm(List<Element> planViewList, List<Element> areaList, List<string> scales)
         {
             InitializeComponent();
             this.CenterToParent();

@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RevitAddIns>
+ <AddIn Type="Application">
+       <Name>Intech Ribbon</Name>
+       <FullClassName>Intech.RibbonTab</FullClassName>
+       <Text>Intech Ribbon</Text>
+       <Description>Selects title block of selected sheets</Description>
+       <Assembly>.\IntechRibbon\RibbonSetup.dll</Assembly>
+       <AddInId>02e994db-8c60-4f26-aeee-2d759511c29a</AddInId>
+    <VendorId>INTECH</VendorId>
+    <VendorDescription>Intech Automation and Service</VendorDescription>
+ </AddIn>
+</RevitAddIns>
