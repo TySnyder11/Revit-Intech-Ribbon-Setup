@@ -1,6 +1,8 @@
 ﻿using Autodesk.Revit.DB;
 using Autodesk.Revit.UI;
 using OfficeOpenXml;
+using OfficeOpenXml.FormulaParsing;
+using OfficeOpenXml.FormulaParsing.Excel;
 using OfficeOpenXml.Style;
 using OfficeOpenXml.Table;
 using System;
@@ -79,23 +81,52 @@ namespace Intech
             schedule.GetTableData().GetSectionData(SectionType.Body).SetColumnWidthInPixels(0, nCol * 100);
 
             //Make cells and populate data
-            
+            for (int i = 1; i < nCol; i++)
+            {
+                tableData.InsertColumn(i);
+            }
+            for (int i = 1; i < nRow; i++)
+            {
+                tableData.InsertRow(i);
+            }
+
+            //Merge cells
+            foreach (String r in worksheet.MergedCells)
+            {
+                ExcelRange excelRange = worksheet.Cells[r];
+                TableMergedCell tableMergedCell = new TableMergedCell();
+                tableMergedCell.Left = excelRange.Start.Column - range.Start.Column;
+                tableMergedCell.Top = excelRange.Start.Row - range.Start.Row;
+                tableMergedCell.Right = excelRange.End.Column - range.Start.Column;
+                tableMergedCell.Bottom = excelRange.End.Row - range.Start.Row;
+                tableData.MergeCells(tableMergedCell);
+            }
+
+            //Go into each cell (format and add text)
             for (int i = 0; i < nCol; i++) {
-                if (i != 0) 
-                { 
-                    tableData.InsertColumn(i);
-                }
-                tableData.SetColumnWidthInPixels(i, 100); // Set column width
+                // Set column width
+                int width = (int)worksheet.Column(i + range.Start.Column).Width;
+                tableData.SetColumnWidthInPixels(i, width);
                 for (int j = 0; j < nRow; j++) {
-                    if (j != 0 && i == 0)
+                    if (i == 0)
                     {
-                        tableData.InsertRow(j);
+                        //Set row height
+                        int height = (int)worksheet.Row(j + range.Start.Row).Height;
+                        tableData.SetColumnWidthInPixels(i, height);
                     }
+
                     string text = range.GetCellValue<String>(j, i);
-                    if (text == null) {
-                        text = "";
+                    
+                    //Style cell
+                    ExcelStyle Style = worksheet.Cells[j + 1, i + 1].Style;
+                    TableCellStyle newStyle = new TableCellStyle();
+                    newStyle.TextSize = Style.Font.Size/ 0.013834867007874;
+                    newStyle.FontName = Style.Font.Name;
+                    tableData.SetCellStyle(newStyle);
+
+                    if (!string.IsNullOrEmpty(text)) {
+                        tableData.SetCellText(j, i, text);
                     }
-                    tableData.SetCellText(j, i, text);
                 }
             }
             return true;

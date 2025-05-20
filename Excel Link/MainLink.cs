@@ -31,6 +31,7 @@ namespace Intech
 
             t.Start();
             if (Excel.xlsxToSchedule(file, name) == false) {
+                t.RollBack();
                 return Result.Failed;
             }
             t.Commit();
