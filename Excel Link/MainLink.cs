@@ -24,8 +24,15 @@ namespace Intech
             string name = "test";
 
             string file = Excel.getExcelFile();
+            if (file == null)
+            {
+                return Result.Failed;
+            }
+
             t.Start();
-            Excel.xlsxToSchedule(file, name);
+            if (Excel.xlsxToSchedule(file, name) == false) {
+                return Result.Failed;
+            }
             t.Commit();
 
             return Result.Succeeded;
