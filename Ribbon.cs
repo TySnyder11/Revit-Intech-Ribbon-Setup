@@ -9,7 +9,6 @@ using AW = Autodesk.Windows;
 using System.Collections.Generic;
 using System.IO;
 
-
 namespace Intech
 {
     [Autodesk.Revit.Attributes.Transaction(Autodesk.Revit.Attributes.TransactionMode.Manual)]
@@ -17,11 +16,10 @@ namespace Intech
     [Autodesk.Revit.Attributes.Journaling(Autodesk.Revit.Attributes.JournalingMode.NoCommandData)]
     public class RibbonTab : IExternalApplication
     {
+
         // ExternalCommands assembly path
         static string AddInPath = typeof(RibbonTab).Assembly.Location;
         
-        // uiApplication
-        static UIApplication uiApplication = null;
 
         #region IExternalApplication Members
         public Autodesk.Revit.UI.Result OnStartup(UIControlledApplication application)
@@ -103,6 +101,11 @@ namespace Intech
                 b2Data.ToolTip = "Export schedules into Excel in a BOM format.";
                 b2Data.LargeImage = new BitmapImage(new Uri(ExcelLogo));
                 PushButton pb2 = ExportPanel.AddItem(b2Data) as PushButton;
+
+                PushButtonData b4Data = new PushButtonData("Import", "Excel Import", AddInPath, "Intech.linkUI");
+                b4Data.ToolTip = "Export schedules into Excel in a BOM format.";
+                b4Data.LargeImage = new BitmapImage(new Uri(ExcelLogo));
+                PushButton pb4 = ExportPanel.AddItem(b4Data) as PushButton;
 
                 String CSVIcon = BasePath + @"CSVIcon.jpg";
                 PushButtonData b3Data = new PushButtonData("TS Export", "TigerStop Export", AddInPath, "Intech.TigerStopExport");

@@ -334,5 +334,10 @@ namespace Intech
                     TitleBlockType.Items.Add(i);
                 }
         }
+
+        private void ScaleGrid_CellContentClick(object sender, DataGridViewCellEventArgs e)
+        {
+
+        }
     }
 }
