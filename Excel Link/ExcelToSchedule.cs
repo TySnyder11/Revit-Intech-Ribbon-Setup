@@ -58,7 +58,7 @@ namespace Intech
 
             //get xlsx data 
             ExcelPackage excel = new ExcelPackage(new FileInfo(xlsx));
-            ExcelWorksheet worksheet = excel.Workbook.Worksheets[1];
+            ExcelWorksheet worksheet = excel.Workbook.Worksheets[0];
 
             
             //get range to link
@@ -178,7 +178,7 @@ namespace Intech
                     newStyle.SetCellStyleOverrideOptions(options);
 
                     //font
-                    newStyle.TextSize = Style.Font.Size;
+                    newStyle.TextSize = Style.Font.Size - 0.5;
                     newStyle.FontName = Style.Font.Name;
                     newStyle.IsFontBold = Style.Font.Bold;
 
