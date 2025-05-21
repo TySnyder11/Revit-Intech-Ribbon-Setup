@@ -8,13 +8,9 @@ using OfficeOpenXml.Table;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Drawing;
 using System.IO;
-using System.IO.Packaging;
-using System.Linq;
-using System.Reflection;
 using System.Windows.Forms;
-using System.Windows.Media.Imaging;
-using AW = Autodesk.Windows;
 
 namespace Intech
 {
@@ -50,7 +46,7 @@ namespace Intech
 
         }
 
-        public static bool xlsxToSchedule(string xlsx, string name) {
+        public static bool xlsxToSchedule(string xlsx, string name, Transaction t) {
             ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
             //create schedule
             ViewSchedule schedule = createBlankSchedule(name);
@@ -58,9 +54,14 @@ namespace Intech
             //get table info
             TableSectionData tableData = schedule.GetTableData().GetSectionData(SectionType.Header);
 
+            Debug.Write(tableData.GetColumnWidthInPixels(0));
+            Debug.Write(schedule.GetTableData().GetSectionData(SectionType.Body).GetColumnWidthInPixels(0));
+
             //get xlsx data 
             ExcelPackage excel = new ExcelPackage(new FileInfo(xlsx));
             ExcelWorksheet worksheet = excel.Workbook.Worksheets[0];
+
+            //double scaleChange = 1.5;
             
             //get range to link
             ExcelNamedRange range = null;
@@ -77,9 +78,21 @@ namespace Intech
             int nCol = range.Columns;
             int nRow = range.Rows;
 
-            //set size
-            schedule.GetTableData().GetSectionData(SectionType.Body).SetColumnWidthInPixels(0, nCol * 100);
+            Double totalWidth = 0;
+            Double totalHeight = 0;
+            for (int i = range.Start.Column; i < nCol + range.Start.Column; i++)
+            {
+                totalWidth += worksheet.Column(i).Width;
+            }
+            for (int i = range.Start.Row; i < nRow + range.Start.Row; i++)
+            {
+                totalHeight += worksheet.Row(i).Height;
+            }
 
+            //set size
+            schedule.GetTableData().GetSectionData(SectionType.Body).SetColumnWidthInPixels(0, (int)(totalWidth));
+            Debug.WriteLine(schedule.GetTableData().GetSectionData(SectionType.Body).GetColumnWidthInPixels(0));
+            return true;
             //Make cells and populate data
             for (int i = 1; i < nCol; i++)
             {
@@ -102,34 +115,59 @@ namespace Intech
                 tableData.MergeCells(tableMergedCell);
             }
 
-            //Go into each cell (format and add text)
+            //add text
             for (int i = 0; i < nCol; i++) {
-                // Set column width
-                int width = (int)worksheet.Column(i + range.Start.Column).Width;
-                tableData.SetColumnWidthInPixels(i, width);
                 for (int j = 0; j < nRow; j++) {
-                    if (i == 0)
-                    {
-                        //Set row height
-                        int height = (int)worksheet.Row(j + range.Start.Row).Height;
-                        tableData.SetColumnWidthInPixels(i, height);
-                    }
+                    
 
                     string text = range.GetCellValue<String>(j, i);
-                    
-                    //Style cell
-                    ExcelStyle Style = worksheet.Cells[j + 1, i + 1].Style;
-                    TableCellStyle newStyle = new TableCellStyle();
-                    newStyle.TextSize = Style.Font.Size/ 0.013834867007874;
-                    newStyle.FontName = Style.Font.Name;
-                    tableData.SetCellStyle(newStyle);
-
-                    if (!string.IsNullOrEmpty(text)) {
+                    if (!string.IsNullOrEmpty(text))
+                    {
                         tableData.SetCellText(j, i, text);
                     }
                 }
             }
-            return true;
+
+            //Need to reload between text and formating
+            t.Commit();
+            t.Start();
+
+            //format
+            for (int i = 0; i < nCol; i++)
+            {
+                // Set column width
+                int width = (int)worksheet.Column(i + range.Start.Column).Width;
+                tableData.SetColumnWidthInPixels(i, width);
+                for (int j = 0; j < nRow; j++)
+                {
+                    //Style cell
+                    ExcelStyle Style = worksheet.Cells[j + 1, i + 1].Style;
+                    TableCellStyle newStyle = new TableCellStyle();
+                    TableCellStyleOverrideOptions options = new TableCellStyleOverrideOptions();
+                    options.SetAllOverrides(true);
+                    newStyle.ResetOverride();
+                    newStyle.SetCellStyleOverrideOptions(options);
+
+                    //font
+                    newStyle.TextSize = Style.Font.Size;
+                    newStyle.FontName = Style.Font.Name;
+                    newStyle.IsFontBold = Style.Font.Bold;
+
+                    //border
+                    //copyBorder(newStyle, Style.Border);
+                    
+                    //newPat.;
+                    //LinePatternElement.Create(doc,null);
+                    tableData.SetCellStyle(j ,i ,newStyle);
+                    if (i == 0)
+                    {
+                        //Set row height
+                        int height = (int)worksheet.Row(j + range.Start.Row).Height + 1;
+                        tableData.SetRowHeightInPixels(j, height);
+                    }
+                }
+            }
+                    return true;
         }
 
         private static ViewSchedule createBlankSchedule(string name) {
@@ -142,6 +180,45 @@ namespace Intech
             def.ShowTitle = true;
             def.ShowHeaders = false;
             return schedule;
+        }
+
+        private static void copyBorder(TableCellStyle scdB, Border excB) {
+            scdB.BorderTopLineStyle = getRevitBoarderIDFromExcel(excB.Top);
+            scdB.BorderBottomLineStyle = getRevitBoarderIDFromExcel(excB.Bottom);
+            scdB.BorderRightLineStyle = getRevitBoarderIDFromExcel(excB.Right);
+            scdB.BorderLeftLineStyle = getRevitBoarderIDFromExcel(excB.Left);
+        }
+
+        private static ElementId getRevitBoarderIDFromExcel(ExcelBorderItem border) {
+            Document doc = linkUI.doc;
+            FilteredElementCollector fec = new FilteredElementCollector(doc)
+                .OfClass(typeof(LinePatternElement));
+            LinePattern newPat = new LinePattern();
+            LinePatternSegment newseg = new LinePatternSegment();
+            return null;
+        }
+
+        private static ElementId createLineType(ExcelBorderItem border) {
+            string RGBstring = border.Color.Rgb;
+            if (RGBstring == "") {
+                RGBstring = "#000000";
+            }
+            System.Drawing.Color excColor = ColorTranslator.FromHtml(RGBstring);
+            Byte r = Convert.ToByte(excColor.R);
+            Byte g = Convert.ToByte(excColor.G);
+            Byte b = Convert.ToByte(excColor.B);
+            Autodesk.Revit.DB.Color color = new Autodesk.Revit.DB.Color(r, g, b);
+
+            Document doc = linkUI.doc;
+            Settings settings = doc.Settings;
+            Categories cats = settings.Categories;
+            Category lineCat = cats.get_Item(BuiltInCategory.OST_Lines);
+
+            Category lineStyleCat = cats.NewSubcategory(lineCat, "MyLineStyle");
+            lineStyleCat.LineColor = color;
+            lineStyleCat.SetLineWeight(2, GraphicsStyleType.Projection);
+
+            return lineStyleCat.Id;
         }
     }
 }

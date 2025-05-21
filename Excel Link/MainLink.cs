@@ -30,7 +30,7 @@ namespace Intech
             }
 
             t.Start();
-            if (Excel.xlsxToSchedule(file, name) == false) {
+            if (Excel.xlsxToSchedule(file, name, t) == false) {
                 t.RollBack();
                 return Result.Failed;
             }
