@@ -1,5 +1,6 @@
 ﻿using Autodesk.Revit.DB;
 using Autodesk.Revit.UI;
+using Autodesk.Revit.UI.Events;
 using OfficeOpenXml;
 using OfficeOpenXml.FormulaParsing;
 using OfficeOpenXml.FormulaParsing.Excel;
@@ -10,6 +11,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
 using System.IO;
+using System.Linq;
 using System.Windows.Forms;
 
 namespace Intech
@@ -54,14 +56,10 @@ namespace Intech
             //get table info
             TableSectionData tableData = schedule.GetTableData().GetSectionData(SectionType.Header);
 
-            Debug.Write(tableData.GetColumnWidthInPixels(0));
-            Debug.Write(schedule.GetTableData().GetSectionData(SectionType.Body).GetColumnWidthInPixels(0));
-
             //get xlsx data 
             ExcelPackage excel = new ExcelPackage(new FileInfo(xlsx));
-            ExcelWorksheet worksheet = excel.Workbook.Worksheets[0];
+            ExcelWorksheet worksheet = excel.Workbook.Worksheets[1];
 
-            //double scaleChange = 1.5;
             
             //get range to link
             ExcelNamedRange range = null;
@@ -77,22 +75,23 @@ namespace Intech
             }
             int nCol = range.Columns;
             int nRow = range.Rows;
+            List<int> hidden = new List<int>();
 
             Double totalWidth = 0;
-            Double totalHeight = 0;
             for (int i = range.Start.Column; i < nCol + range.Start.Column; i++)
             {
-                totalWidth += worksheet.Column(i).Width;
+                if (worksheet.Column(i + range.Start.Column).Hidden) 
+                {
+                    hidden.Add(i);
+                    continue;
+                }
+                totalWidth += worksheet.Column(i).Width * 7.5;
             }
-            for (int i = range.Start.Row; i < nRow + range.Start.Row; i++)
-            {
-                totalHeight += worksheet.Row(i).Height;
-            }
+            nCol -= hidden.Count;
 
             //set size
             schedule.GetTableData().GetSectionData(SectionType.Body).SetColumnWidthInPixels(0, (int)(totalWidth));
-            Debug.WriteLine(schedule.GetTableData().GetSectionData(SectionType.Body).GetColumnWidthInPixels(0));
-            return true;
+
             //Make cells and populate data
             for (int i = 1; i < nCol; i++)
             {
@@ -106,42 +105,72 @@ namespace Intech
             //Merge cells
             foreach (String r in worksheet.MergedCells)
             {
+                //Need to take account of hidden cells during indexing
                 ExcelRange excelRange = worksheet.Cells[r];
+                int startCol = excelRange.Start.Column;
+                int endCol = excelRange.End.Column;
+                int hBefore = 0;
+                int hInside = 0;
+                bool cont = true;
+                foreach (int i in hidden)
+                {
+                    if (i == startCol && i == endCol)
+                    {
+                        cont = false;
+                    }
+                    if (i <= startCol)
+                    {
+                        hBefore++;
+                        continue;
+                    }
+                    if (startCol < i && i < endCol)
+                    {
+                        hInside++;
+                        continue;
+                    }
+                }
+                if (!cont)
+                {
+                    continue;
+                }
+
+                //Merge
                 TableMergedCell tableMergedCell = new TableMergedCell();
-                tableMergedCell.Left = excelRange.Start.Column - range.Start.Column;
-                tableMergedCell.Top = excelRange.Start.Row - range.Start.Row;
-                tableMergedCell.Right = excelRange.End.Column - range.Start.Column;
-                tableMergedCell.Bottom = excelRange.End.Row - range.Start.Row;
+                tableMergedCell.Left = startCol + range.Start.Column - hBefore - 2;
+                tableMergedCell.Top = excelRange.Start.Row + range.Start.Row - 2;
+                tableMergedCell.Right = endCol + range.Start.Column - hBefore - hInside - 2;
+                tableMergedCell.Bottom = excelRange.End.Row + range.Start.Row - 2;
                 tableData.MergeCells(tableMergedCell);
             }
 
             //add text
+            int colIndex = 0;
             for (int i = 0; i < nCol; i++) {
+                // Set column width
+                int width = (int)(worksheet.Column(colIndex + range.Start.Column).Width * 7.5) + 5;
+                if (worksheet.Column(colIndex + range.Start.Column).Hidden) 
+                {
+                    i--;
+                    colIndex++;
+                    continue;
+                }
+                tableData.SetColumnWidthInPixels(i, width);
                 for (int j = 0; j < nRow; j++) {
-                    
+                    if (i == 0)
+                    {
+                        //Set row height
+                        int height = (int)worksheet.Row(j + range.Start.Row).Height * 4 / 3 + 5;
+                        tableData.SetRowHeightInPixels(j, height);
+                    }
 
-                    string text = range.GetCellValue<String>(j, i);
+                    string text = range.GetCellValue<String>(j, colIndex);
                     if (!string.IsNullOrEmpty(text))
                     {
                         tableData.SetCellText(j, i, text);
                     }
-                }
-            }
 
-            //Need to reload between text and formating
-            t.Commit();
-            t.Start();
-
-            //format
-            for (int i = 0; i < nCol; i++)
-            {
-                // Set column width
-                int width = (int)worksheet.Column(i + range.Start.Column).Width;
-                tableData.SetColumnWidthInPixels(i, width);
-                for (int j = 0; j < nRow; j++)
-                {
                     //Style cell
-                    ExcelStyle Style = worksheet.Cells[j + 1, i + 1].Style;
+                    ExcelStyle Style = worksheet.Cells[j + 1, colIndex + 1].Style;
                     TableCellStyle newStyle = new TableCellStyle();
                     TableCellStyleOverrideOptions options = new TableCellStyleOverrideOptions();
                     options.SetAllOverrides(true);
@@ -155,17 +184,12 @@ namespace Intech
 
                     //border
                     //copyBorder(newStyle, Style.Border);
-                    
+
                     //newPat.;
                     //LinePatternElement.Create(doc,null);
-                    tableData.SetCellStyle(j ,i ,newStyle);
-                    if (i == 0)
-                    {
-                        //Set row height
-                        int height = (int)worksheet.Row(j + range.Start.Row).Height + 1;
-                        tableData.SetRowHeightInPixels(j, height);
-                    }
+                    tableData.SetCellStyle(j, i, newStyle);
                 }
+                colIndex++;
             }
                     return true;
         }
@@ -214,7 +238,7 @@ namespace Intech
             Categories cats = settings.Categories;
             Category lineCat = cats.get_Item(BuiltInCategory.OST_Lines);
 
-            Category lineStyleCat = cats.NewSubcategory(lineCat, "MyLineStyle");
+            Category lineStyleCat = cats.NewSubcategory(lineCat, r+ " ," + g + " ," + b);
             lineStyleCat.LineColor = color;
             lineStyleCat.SetLineWeight(2, GraphicsStyleType.Projection);
 
