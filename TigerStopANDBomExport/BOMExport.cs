@@ -246,7 +246,6 @@ namespace Intech
                             //Add header
                             numOfHeaders = 1;
                             for (int i = 0; i < header.NumberOfRows; i++) {
-                                Debug.Print(vs2.GetCellText(SectionType.Header, 0, i));
                                 addToHeader(nColumns, copiedWorksheet, vs2.GetCellText(SectionType.Header, i, 0));
                             }
                             // Define the range where you want to start loading the data (e.g., C1)
