@@ -1,4 +1,5 @@
 ﻿using Autodesk.Revit.DB;
+using Autodesk.Revit.DB.Architecture;
 using Autodesk.Revit.UI;
 using Autodesk.Revit.UI.Events;
 using OfficeOpenXml;
@@ -145,23 +146,13 @@ namespace Intech
             //add text
             int colIndex = 0;
             for (int i = 0; i < nCol; i++) {
-                // Set column width
-                int width = (int)(worksheet.Column(colIndex + range.Start.Column).Width * 7.5) + 5;
                 if (worksheet.Column(colIndex + range.Start.Column).Hidden) 
                 {
                     i--;
                     colIndex++;
                     continue;
                 }
-                tableData.SetColumnWidthInPixels(i, width);
                 for (int j = 0; j < nRow; j++) {
-                    if (i == 0)
-                    {
-                        //Set row height
-                        int height = (int)worksheet.Row(j + range.Start.Row).Height * 4 / 3 + 5;
-                        tableData.SetRowHeightInPixels(j, height);
-                    }
-
                     string text = range.GetCellValue<String>(j, colIndex);
                     if (!string.IsNullOrEmpty(text))
                     {
@@ -177,16 +168,17 @@ namespace Intech
                     newStyle.SetCellStyleOverrideOptions(options);
 
                     //font
-                    newStyle.TextSize = Style.Font.Size - 0.5;
+                    newStyle.TextSize = roundFont(32, (int)Style.Font.Size);
                     newStyle.FontName = Style.Font.Name;
                     newStyle.IsFontBold = Style.Font.Bold;
+                    newStyle.TextColor = ExcelColorToRevit(Style.Font.Color);
 
                     //Text alignment
-                    HorizontalAlignmentStyle x = HorizontalAlignmentStyle.Center; //base case center
+                    HorizontalAlignmentStyle x = HorizontalAlignmentStyle.Left; //base case center
                     switch ((int)Style.HorizontalAlignment) 
                     {
-                        case 1: x = HorizontalAlignmentStyle.Left; break; // left
-                        case 2: break; // center
+                        case 1: break; // left
+                        case 2: x = HorizontalAlignmentStyle.Center; break; // center
                         case 4: x = HorizontalAlignmentStyle.Right; break; // right
                     }
                     newStyle.FontHorizontalAlignment = x;
@@ -196,9 +188,59 @@ namespace Intech
 
                     //border
                     copyBorder(newStyle, worksheet,j + 1, colIndex + 1);
+
+                    //check for notes cell and fix
+                    if (newStyle.FontHorizontalAlignment == HorizontalAlignmentStyle.Left && !string.IsNullOrEmpty(tableData.GetCellText(j, i)))
+                    {
+                        Font font = new Font(Style.Font.Name, (int)(Style.Font.Size ) + 1);
+
+                        using (Bitmap bitmap = new Bitmap(1, 1))
+                        using (Graphics graphics = Graphics.FromImage(bitmap))
+                        {
+                            //SizeF textSize = graphics.MeasureString(text, font);
+                            int textSize = System.Windows.Forms.TextRenderer.MeasureText(text, font).Width + 1;
+                            int cellwidth = tableData.GetColumnWidthInPixels(i);
+                            Debug.WriteLine(textSize);
+                            int p = i;
+                            int copyColumnIndex = colIndex + 1;
+                            while (textSize > cellwidth)
+                            {
+                                if (worksheet.Column(copyColumnIndex + range.Start.Column).Hidden)
+                                {
+                                    copyColumnIndex++;
+                                    continue;
+                                }
+
+                                p++;
+                                if (p >= nCol)
+                                {
+                                    break;
+                                }
+                                Debug.WriteLine(cellwidth);
+                                cellwidth += (int)(worksheet.Column(copyColumnIndex + range.Start.Column).Width * 7.5) + 5;
+                                
+                            }
+                            
+                            Debug.WriteLine(cellwidth);
+
+                            if (i != p)
+                            {
+                                TableMergedCell tableMergedCell = new TableMergedCell(j, i, j, p);
+                                tableData.MergeCells(tableMergedCell);
+                            }
+                        }
+                    }
  
                     tableData.SetCellStyle(j, i, newStyle);
+                    if (i == 0)
+                    {
+                        //Set row height
+                        int height = (int)(worksheet.Row(j + range.Start.Row).Height * 4 / 3);
+                        tableData.SetRowHeightInPixels(j, height);
+                    }
                 }
+                int width = (int)(worksheet.Column(colIndex + range.Start.Column).Width * 7.5);
+                tableData.SetColumnWidthInPixels(i, width);
                 colIndex++;
             }
                     return true;
@@ -284,17 +326,10 @@ namespace Intech
             CategoryNameMap graphicStyleCategories = lineCat.SubCategories;
 
             //get color
-            string RGBhex = border.Color.Rgb;
-            if (RGBhex == "")
-            {
-                RGBhex = "#000000";
-            }
-            int argb = Int32.Parse(RGBhex.Replace("#", ""), NumberStyles.HexNumber);
-            System.Drawing.Color excColor = System.Drawing.Color.FromArgb(argb);
-            Byte r = Convert.ToByte(excColor.R);
-            Byte g = Convert.ToByte(excColor.G);
-            Byte b = Convert.ToByte(excColor.B);
-            Autodesk.Revit.DB.Color color = new Autodesk.Revit.DB.Color(r, g, b);
+            Autodesk.Revit.DB.Color color = ExcelColorToRevit(border.Color);
+            int r = color.Red;
+            int g = color.Green;
+            int b = color.Blue;
 
             //get weight
             int weight = 0;
@@ -340,6 +375,36 @@ namespace Intech
             lineStyleCat.SetLineWeight(weight, GraphicsStyleType.Projection);
 
             return lineStyleCat.Id;
+        }
+
+        private static Autodesk.Revit.DB.Color ExcelColorToRevit(ExcelColor ExcColor)
+        {
+            string RGBhex = ExcColor.Rgb;
+            if (String.IsNullOrEmpty(RGBhex))
+            {
+                RGBhex = "#000000";
+            }
+            int argb = Int32.Parse(RGBhex.Replace("#", ""), NumberStyles.HexNumber);
+            System.Drawing.Color excColor = System.Drawing.Color.FromArgb(argb);
+            Byte r = Convert.ToByte(excColor.R);
+            Byte g = Convert.ToByte(excColor.G);
+            Byte b = Convert.ToByte(excColor.B);
+            Autodesk.Revit.DB.Color color = new Autodesk.Revit.DB.Color(r, g, b);
+            return color;
+        }
+
+        private static double roundIN(int ofanInch, double value)
+        {
+            double round = Math.Round(value * ofanInch) / ofanInch;
+            return round;
+        }
+
+        private static int roundFont(int ofonInch, int value)
+        {
+            double pixperinch = 96;
+            int pix = (int)Math.Round(roundIN(ofonInch, value * pixperinch) / pixperinch);
+            double ratio = value / pix;
+            return pix;
         }
     }
 }
