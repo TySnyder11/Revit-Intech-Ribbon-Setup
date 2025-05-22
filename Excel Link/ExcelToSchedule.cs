@@ -2,17 +2,16 @@
 using Autodesk.Revit.UI;
 using Autodesk.Revit.UI.Events;
 using OfficeOpenXml;
-using OfficeOpenXml.FormulaParsing;
-using OfficeOpenXml.FormulaParsing.Excel;
 using OfficeOpenXml.Style;
-using OfficeOpenXml.Table;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Windows.Forms;
+using System.Windows.Media.Media3D;
 
 namespace Intech
 {
@@ -182,11 +181,22 @@ namespace Intech
                     newStyle.FontName = Style.Font.Name;
                     newStyle.IsFontBold = Style.Font.Bold;
 
-                    //border
-                    //copyBorder(newStyle, Style.Border);
+                    //Text alignment
+                    HorizontalAlignmentStyle x = HorizontalAlignmentStyle.Center; //base case center
+                    switch ((int)Style.HorizontalAlignment) 
+                    {
+                        case 1: x = HorizontalAlignmentStyle.Left; break; // left
+                        case 2: break; // center
+                        case 4: x = HorizontalAlignmentStyle.Right; break; // right
+                    }
+                    newStyle.FontHorizontalAlignment = x;
 
-                    //newPat.;
-                    //LinePatternElement.Create(doc,null);
+                    //works due to there similar numbering for vert alignment
+                    newStyle.FontVerticalAlignment = (VerticalAlignmentStyle)((int)Style.VerticalAlignment * 4); 
+
+                    //border
+                    copyBorder(newStyle, worksheet,j + 1, colIndex + 1);
+ 
                     tableData.SetCellStyle(j, i, newStyle);
                 }
                 colIndex++;
@@ -206,41 +216,128 @@ namespace Intech
             return schedule;
         }
 
-        private static void copyBorder(TableCellStyle scdB, Border excB) {
-            scdB.BorderTopLineStyle = getRevitBoarderIDFromExcel(excB.Top);
-            scdB.BorderBottomLineStyle = getRevitBoarderIDFromExcel(excB.Bottom);
-            scdB.BorderRightLineStyle = getRevitBoarderIDFromExcel(excB.Right);
-            scdB.BorderLeftLineStyle = getRevitBoarderIDFromExcel(excB.Left);
+        private static void copyBorder(TableCellStyle scdB, ExcelWorksheet worksheet, int row, int column) {
+            Border excB = worksheet.Cells[row, column].Style.Border;
+            ElementId top = getRevitBoarderIDFromExcel(excB.Top);
+            try
+            {
+                if (top == null)
+                {
+                    top = getRevitBoarderIDFromExcel(worksheet.Cells[row - 1, column].Style.Border.Bottom);
+                }
+            }
+            catch { }
+            if (top != null)
+            {
+                scdB.BorderTopLineStyle = top;
+            }
+            ElementId bottom = getRevitBoarderIDFromExcel(excB.Bottom);
+            try
+            {
+                if (bottom == null)
+                {
+                    bottom = getRevitBoarderIDFromExcel(worksheet.Cells[row + 1, column].Style.Border.Top);
+                }
+            }
+            catch { }
+            if (bottom != null)
+            {
+                scdB.BorderBottomLineStyle = bottom;
+            }
+            ElementId right = getRevitBoarderIDFromExcel(excB.Right);
+            try
+            {
+                if (right == null)
+                {
+                    right = getRevitBoarderIDFromExcel(worksheet.Cells[row, column + 1].Style.Border.Left);
+                }
+            }
+            catch { }
+            if (right != null)
+            {
+                scdB.BorderRightLineStyle = right;
+            }
+            ElementId left = getRevitBoarderIDFromExcel(excB.Left);
+            try
+            {
+                if (left == null)
+                {
+                    left = getRevitBoarderIDFromExcel(worksheet.Cells[row, column - 1].Style.Border.Right);
+                }
+            }
+            catch { }
+            if (left != null)
+            {
+                scdB.BorderLeftLineStyle = left;
+            }
         }
 
         private static ElementId getRevitBoarderIDFromExcel(ExcelBorderItem border) {
-            Document doc = linkUI.doc;
-            FilteredElementCollector fec = new FilteredElementCollector(doc)
-                .OfClass(typeof(LinePatternElement));
-            LinePattern newPat = new LinePattern();
-            LinePatternSegment newseg = new LinePatternSegment();
-            return null;
-        }
-
-        private static ElementId createLineType(ExcelBorderItem border) {
-            string RGBstring = border.Color.Rgb;
-            if (RGBstring == "") {
-                RGBstring = "#000000";
+            if (border == null || border.Color.Rgb == null) 
+            {
+                return null;
             }
-            System.Drawing.Color excColor = ColorTranslator.FromHtml(RGBstring);
+
+            Document doc = linkUI.doc;
+            Categories categories = doc.Settings.Categories;
+            Category lineCat = categories.get_Item(BuiltInCategory.OST_Lines);
+            CategoryNameMap graphicStyleCategories = lineCat.SubCategories;
+
+            //get color
+            string RGBhex = border.Color.Rgb;
+            if (RGBhex == "")
+            {
+                RGBhex = "#000000";
+            }
+            int argb = Int32.Parse(RGBhex.Replace("#", ""), NumberStyles.HexNumber);
+            System.Drawing.Color excColor = System.Drawing.Color.FromArgb(argb);
             Byte r = Convert.ToByte(excColor.R);
             Byte g = Convert.ToByte(excColor.G);
             Byte b = Convert.ToByte(excColor.B);
             Autodesk.Revit.DB.Color color = new Autodesk.Revit.DB.Color(r, g, b);
 
-            Document doc = linkUI.doc;
-            Settings settings = doc.Settings;
-            Categories cats = settings.Categories;
-            Category lineCat = cats.get_Item(BuiltInCategory.OST_Lines);
+            //get weight
+            int weight = 0;
+            switch ((int)border.Style)
+            {
+                case 1: weight = 1; break;  //super thin
+                case 4: weight = 4; break;  //thin
+                case 11: weight = 6; break; //medium 
+                case 10: weight = 7; break; //thick
+                
+                default: weight = 4; break; //default (in case line type not recognized)
+            }
 
-            Category lineStyleCat = cats.NewSubcategory(lineCat, r+ " ," + g + " ," + b);
+            ElementId lineID = null;
+            foreach (Category cal in graphicStyleCategories)
+            {
+                if (cal.Name == "RGB " + r + " ," + g + " ," + b + ", Weight " + weight) 
+                {
+                    lineID = cal.Id;
+                }
+            }
+
+            //Create if not in project
+            if (lineID == null)
+            {
+                lineID = createLineType(weight, color);
+            }
+
+
+            return lineID;
+        }
+
+        private static ElementId createLineType(int weight, Autodesk.Revit.DB.Color color) {
+            int r = color.Red;
+            int g = color.Green;
+            int b = color.Blue;
+            Document doc = linkUI.doc;
+            Categories cats = doc.Settings.Categories;
+            Category lineCat = cats.get_Item(BuiltInCategory.OST_Lines);
+            CategoryNameMap graphicStyleCategory = lineCat.SubCategories;
+            Category lineStyleCat = cats.NewSubcategory(lineCat, "RGB " + r + " ," + g + " ," + b + ", Weight " + weight);
             lineStyleCat.LineColor = color;
-            lineStyleCat.SetLineWeight(2, GraphicsStyleType.Projection);
+            lineStyleCat.SetLineWeight(weight, GraphicsStyleType.Projection);
 
             return lineStyleCat.Id;
         }
