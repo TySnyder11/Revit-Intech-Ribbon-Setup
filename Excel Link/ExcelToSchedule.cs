@@ -257,53 +257,61 @@ namespace Intech
         private static void copyBorder(TableCellStyle scdB, ExcelWorksheet worksheet, int row, int column) {
             Border excB = worksheet.Cells[row, column].Style.Border;
             ElementId top = getRevitBoarderIDFromExcel(excB.Top);
-            try
+            int tRow = row;
+            if (tRow >= 2 && top == null)
             {
-                if (top == null)
-                {
-                    top = getRevitBoarderIDFromExcel(worksheet.Cells[row - 1, column].Style.Border.Bottom);
-                }
+                top = getRevitBoarderIDFromExcel(worksheet.Cells[tRow - 1, column].Style.Border.Bottom);
             }
-            catch { }
             if (top != null)
             {
                 scdB.BorderTopLineStyle = top;
             }
             ElementId bottom = getRevitBoarderIDFromExcel(excB.Bottom);
-            try
+            int bRow = row;
+            if (bRow <= worksheet.Rows.EndRow && bottom == null)
             {
-                if (bottom == null)
-                {
-                    bottom = getRevitBoarderIDFromExcel(worksheet.Cells[row + 1, column].Style.Border.Top);
-                }
+                bottom = getRevitBoarderIDFromExcel(worksheet.Cells[bRow + 1, column].Style.Border.Top);
             }
-            catch { }
             if (bottom != null)
             {
                 scdB.BorderBottomLineStyle = bottom;
             }
             ElementId right = getRevitBoarderIDFromExcel(excB.Right);
-            try
+            int rColumn = column + 1;
+            if (right == null)
             {
-                if (right == null)
+                while (
+                    (rColumn - 6 <= worksheet.Columns.EndColumn
+                    && worksheet.Column(rColumn).Hidden 
+                    || worksheet.Cells[row, column, row, rColumn].Merge))
                 {
-                    right = getRevitBoarderIDFromExcel(worksheet.Cells[row, column + 1].Style.Border.Left);
+                    rColumn++;
+                }
+                if (rColumn - 1 <= worksheet.Columns.EndColumn)
+                {
+                    right = getRevitBoarderIDFromExcel(worksheet.Cells[row, rColumn].Style.Border.Left);
                 }
             }
-            catch { }
             if (right != null)
             {
                 scdB.BorderRightLineStyle = right;
             }
             ElementId left = getRevitBoarderIDFromExcel(excB.Left);
-            try
+            int lColumn = column - 1;
+            if (left == null)
             {
-                if (left == null)
+                while (
+                    lColumn >= 2 
+                    && (worksheet.Column(lColumn).Hidden 
+                    || worksheet.Cells[row, lColumn, row, column].Merge))
                 {
-                    left = getRevitBoarderIDFromExcel(worksheet.Cells[row, column - 1].Style.Border.Right);
+                    lColumn--;
+                }
+                if (lColumn >= 2)
+                {
+                    left = getRevitBoarderIDFromExcel(worksheet.Cells[row, lColumn].Style.Border.Right);
                 }
             }
-            catch { }
             if (left != null)
             {
                 scdB.BorderLeftLineStyle = left;
