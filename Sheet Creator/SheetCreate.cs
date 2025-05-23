@@ -40,7 +40,6 @@ namespace Intech
             UIApplication uiapp = commandData.Application;
             Document doc = uiapp.ActiveUIDocument.Document;
             Transaction trans = new Transaction(doc, "Create Sheet");
-            UIDocument uidoc = commandData.Application.ActiveUIDocument;
 
             //start forn
             SheetCreateForm form = new SheetCreateForm(commandData, Selected);
