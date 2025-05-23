@@ -85,7 +85,7 @@ namespace Intech
                     hidden.Add(i);
                     continue;
                 }
-                totalWidth += worksheet.Column(i).Width * 7.5;
+                totalWidth += worksheet.Column(i).Width * 7.5 + 5;
             }
             nCol -= hidden.Count;
 
@@ -246,11 +246,27 @@ namespace Intech
             Document doc = linkUI.doc;
             ViewSchedule schedule = ViewSchedule.CreateKeySchedule(doc, new ElementId(BuiltInCategory.OST_GenericModel));
             //schedule.Name = name;
+            schedule.LookupParameter("View Template").Set("");
             ScheduleDefinition def = schedule.Definition;
 
             List<string> field = new List<string>();
             def.ShowTitle = true;
             def.ShowHeaders = false;
+
+
+            List<Element> text = new FilteredElementCollector(doc).OfClass(typeof(TextNoteType)).WhereElementIsElementType().ToElements() as List<Element>;
+            ElementId textId = null;
+            foreach (Element e in text)
+            {
+                if (e.Name.Equals("Schedule Text 1"))
+                {
+                    textId = e.Id;
+                }
+            }
+            if (textId != null)
+            {
+                schedule.TitleTextTypeId = textId;
+            }
             return schedule;
         }
 
@@ -281,13 +297,17 @@ namespace Intech
             if (right == null)
             {
                 while (
-                    (rColumn - 6 <= worksheet.Columns.EndColumn
-                    && worksheet.Column(rColumn).Hidden 
-                    || worksheet.Cells[row, column, row, rColumn].Merge))
+                    rColumn <= worksheet.Columns.EndColumn
+                    && (worksheet.Column(rColumn).Hidden
+                    ||  mergeCheck(worksheet, row, column, row, rColumn)))
                 {
-                    rColumn++;
+                    rColumn ++;
                 }
-                if (rColumn - 1 <= worksheet.Columns.EndColumn)
+                if (rColumn != column + 1)
+                {
+                    right = getRevitBoarderIDFromExcel(worksheet.Cells[row, rColumn - 1].Style.Border.Right);
+                }
+                if (right == null)
                 {
                     right = getRevitBoarderIDFromExcel(worksheet.Cells[row, rColumn].Style.Border.Left);
                 }
@@ -303,7 +323,7 @@ namespace Intech
                 while (
                     lColumn >= 2 
                     && (worksheet.Column(lColumn).Hidden 
-                    || worksheet.Cells[row, lColumn, row, column].Merge))
+                    || mergeCheck(worksheet, row, lColumn, row, column)))
                 {
                     lColumn--;
                 }
@@ -402,12 +422,44 @@ namespace Intech
             double offBy = 0;
             switch (fontName)
             {
-                case "Calibri": offBy = (1/32) * 96; break; //sheet side is larger by 3/64"
+                case "Calibri": offBy = 1.25; break; //sheet side is larger by 3/64"
                 
                 default: offBy = 0; break; //not off by anything //fonts like ariel
             }
+
             double adjusted = value - offBy;
             return adjusted;
+        }
+
+        private static bool mergeCheck(
+            ExcelWorksheet worksheet, 
+            int startRow, 
+            int startColumn, 
+            int endRow, 
+            int endColumn)
+        {
+            if (!worksheet.Cells[startRow, startColumn, endRow, endColumn].Merge)
+            {
+                return false;
+            }
+            if (startRow == endRow && startColumn == endColumn)
+            {
+                return true;
+            }
+            foreach (string r in worksheet.MergedCells)
+            {
+                ExcelRange range = worksheet.Cells[r];
+
+                if (range.Start.Row <= startRow 
+                    && endRow <= range.End.Row 
+                    && range.Start.Column <= startColumn
+                    && endColumn <= range.End.Column)
+                {
+                    return true;
+                }
+            }
+            
+            return false;
         }
     }
 }
