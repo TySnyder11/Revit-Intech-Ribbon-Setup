@@ -160,7 +160,7 @@ namespace Intech
                     }
 
                     //Style cell
-                    ExcelStyle Style = worksheet.Cells[j + 1, colIndex + 1].Style;
+                    ExcelStyle Style = worksheet.Cells[j + range.Start.Row, colIndex + range.Start.Column].Style;
                     TableCellStyle newStyle = new TableCellStyle();
                     TableCellStyleOverrideOptions options = new TableCellStyleOverrideOptions();
                     options.SetAllOverrides(true);
@@ -168,8 +168,9 @@ namespace Intech
                     newStyle.SetCellStyleOverrideOptions(options);
 
                     //font
-                    newStyle.TextSize = roundFont(32, (int)Style.Font.Size);
-                    newStyle.FontName = Style.Font.Name;
+                    string fontName = Style.Font.Name;
+                    newStyle.FontName = fontName;
+                    newStyle.TextSize = revitFontWrongScaleFix(fontName, Style.Font.Size);
                     newStyle.IsFontBold = Style.Font.Bold;
                     newStyle.TextColor = ExcelColorToRevit(Style.Font.Color);
 
@@ -187,23 +188,21 @@ namespace Intech
                     newStyle.FontVerticalAlignment = (VerticalAlignmentStyle)((int)Style.VerticalAlignment * 4); 
 
                     //border
-                    copyBorder(newStyle, worksheet,j + 1, colIndex + 1);
+                    copyBorder(newStyle, worksheet,j + range.Start.Row, colIndex + range.Start.Column);
 
                     //check for notes cell and fix
                     if (newStyle.FontHorizontalAlignment == HorizontalAlignmentStyle.Left && !string.IsNullOrEmpty(tableData.GetCellText(j, i)))
                     {
-                        Font font = new Font(Style.Font.Name, (int)(Style.Font.Size ) + 1);
+                        Font font = new Font(Style.Font.Name, (int)(Style.Font.Size));
 
                         using (Bitmap bitmap = new Bitmap(1, 1))
                         using (Graphics graphics = Graphics.FromImage(bitmap))
                         {
-                            //SizeF textSize = graphics.MeasureString(text, font);
-                            int textSize = System.Windows.Forms.TextRenderer.MeasureText(text, font).Width + 1;
+                            int textSize = System.Windows.Forms.TextRenderer.MeasureText(text, font).Width + 10;
                             int cellwidth = tableData.GetColumnWidthInPixels(i);
-                            Debug.WriteLine(textSize);
                             int p = i;
                             int copyColumnIndex = colIndex + 1;
-                            while (textSize > cellwidth)
+                            while (textSize > cellwidth && !worksheet.Cells[j + range.Start.Row, colIndex + range.Start.Column].Merge)
                             {
                                 if (worksheet.Column(copyColumnIndex + range.Start.Column).Hidden)
                                 {
@@ -212,17 +211,14 @@ namespace Intech
                                 }
 
                                 p++;
+                                copyColumnIndex++;
                                 if (p >= nCol)
                                 {
                                     break;
                                 }
-                                Debug.WriteLine(cellwidth);
-                                cellwidth += (int)(worksheet.Column(copyColumnIndex + range.Start.Column).Width * 7.5) + 5;
+                                cellwidth += (int)(worksheet.Column(copyColumnIndex + range.Start.Column).Width * 7.5);
                                 
                             }
-                            
-                            Debug.WriteLine(cellwidth);
-
                             if (i != p)
                             {
                                 TableMergedCell tableMergedCell = new TableMergedCell(j, i, j, p);
@@ -235,7 +231,7 @@ namespace Intech
                     if (i == 0)
                     {
                         //Set row height
-                        int height = (int)(worksheet.Row(j + range.Start.Row).Height * 4 / 3);
+                        int height = (int)(worksheet.Row(j + range.Start.Row).Height * 4 / 3) + 3;
                         tableData.SetRowHeightInPixels(j, height);
                     }
                 }
@@ -393,18 +389,17 @@ namespace Intech
             return color;
         }
 
-        private static double roundIN(int ofanInch, double value)
+        private static double revitFontWrongScaleFix(string fontName, double value)
         {
-            double round = Math.Round(value * ofanInch) / ofanInch;
-            return round;
-        }
-
-        private static int roundFont(int ofonInch, int value)
-        {
-            double pixperinch = 96;
-            int pix = (int)Math.Round(roundIN(ofonInch, value * pixperinch) / pixperinch);
-            double ratio = value / pix;
-            return pix;
+            double offBy = 0;
+            switch (fontName)
+            {
+                case "Calibri": offBy = (1/32) * 96; break; //sheet side is larger by 3/64"
+                
+                default: offBy = 0; break; //not off by anything //fonts like ariel
+            }
+            double adjusted = value - offBy;
+            return adjusted;
         }
     }
 }
