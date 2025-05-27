@@ -46,6 +46,7 @@
             this.richTextBox2 = new System.Windows.Forms.RichTextBox();
             this.InfoBox1 = new System.Windows.Forms.RichTextBox();
             this.Infobox2 = new System.Windows.Forms.RichTextBox();
+            this.Settings = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.InfoGrid)).BeginInit();
             this.SuspendLayout();
             // 
@@ -205,12 +206,13 @@
             this.richTextBox2.BackColor = System.Drawing.SystemColors.Menu;
             this.richTextBox2.BorderStyle = System.Windows.Forms.BorderStyle.None;
             this.richTextBox2.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.richTextBox2.Location = new System.Drawing.Point(383, 317);
+            this.richTextBox2.Location = new System.Drawing.Point(399, 289);
             this.richTextBox2.Name = "richTextBox2";
             this.richTextBox2.ReadOnly = true;
-            this.richTextBox2.Size = new System.Drawing.Size(52, 57);
+            this.richTextBox2.Size = new System.Drawing.Size(71, 85);
             this.richTextBox2.TabIndex = 11;
-            this.richTextBox2.Text = "Shedule:\n\nView:";
+            this.richTextBox2.Text = "Shedule:\n\nArea:\n\nView:";
+            this.richTextBox2.TextChanged += new System.EventHandler(this.richTextBox2_TextChanged);
             // 
             // InfoBox1
             // 
@@ -236,12 +238,22 @@
             this.Infobox2.TabIndex = 13;
             this.Infobox2.Text = "";
             // 
+            // Settings
+            // 
+            this.Settings.Location = new System.Drawing.Point(756, 381);
+            this.Settings.Name = "Settings";
+            this.Settings.Size = new System.Drawing.Size(75, 23);
+            this.Settings.TabIndex = 14;
+            this.Settings.Text = "Settings";
+            this.Settings.UseVisualStyleBackColor = true;
+            // 
             // ExcelLinkUI
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.CancelButton = this.Close;
             this.ClientSize = new System.Drawing.Size(843, 445);
+            this.Controls.Add(this.Settings);
             this.Controls.Add(this.Infobox2);
             this.Controls.Add(this.InfoBox1);
             this.Controls.Add(this.richTextBox2);
@@ -257,6 +269,7 @@
             this.Controls.Add(this.InfoGrid);
             this.MaximumSize = new System.Drawing.Size(859, 484);
             this.MinimumSize = new System.Drawing.Size(859, 484);
+            this.Name = "ExcelLinkUI";
             this.Text = "Linked Excel Manager";
             ((System.ComponentModel.ISupportInitialize)(this.InfoGrid)).EndInit();
             this.ResumeLayout(false);
@@ -283,5 +296,6 @@
         private System.Windows.Forms.DataGridViewTextBoxColumn Status;
         private System.Windows.Forms.DataGridViewTextBoxColumn LastUpdate;
         private System.Windows.Forms.DataGridViewTextBoxColumn File;
+        private System.Windows.Forms.Button Settings;
     }
 }
