@@ -34,15 +34,13 @@ namespace Excel_Link
         {
             AddLink addLinkForm = new AddLink(t);
             addLinkForm.ShowDialog(this);
-
+            InfoGrid.Rows.Clear();
             loadSaveFile();
         }
-
-        List<(string, string, string)> extraInfo = new List<(string, string, string)>();
         private void loadSaveFile()
         {
             data = Intech.linkUI.readSave();
-            for (int i = 1; i < data.Length; i++)
+            for (int i = 0; i < data.Length; i++)
             {
                 string[] instance = data[i];
                 if (Intech.linkUI.doc.Title == instance[0])
@@ -51,8 +49,9 @@ namespace Excel_Link
                     string fileName = Path.GetFileNameWithoutExtension(excelPath);
                     string sheet = instance[2];
                     string area = instance[3];
-                    string lastUpdate = instance[4];
-                    string user = instance[5];
+                    string viewSheet = instance[4];
+                    string lastUpdate = instance[5];
+                    string user = instance[6];
                     DateTime lastImport = DateTime.ParseExact(lastUpdate, "yyyyMMdd_HHmmss", CultureInfo.InvariantCulture);
                     string time = lastImport.ToString("g");
                     if (File.Exists(excelPath))
@@ -85,6 +84,71 @@ namespace Excel_Link
         private void InfoGrid_CellClick(object sender, DataGridViewCellEventArgs e)
         {
             int row = e.RowIndex;
+            string[] selected = data[row];
+            string excelPath = selected[1];
+            string sheet = selected[2];
+            string area = selected[3];
+            string viewSheet = selected[4];
+            string lastUpdate = selected[5];
+            string user = selected[6];
+
+            FolderTextBox.Text = Path.GetDirectoryName(excelPath);
+            FileTextBox.Text = Path.GetFileNameWithoutExtension(excelPath);
+            ScheduleTextBox.Text = sheet;
+            AreaTextBox.Text = area;
+            workSheetTextBox.Text = sheet;
+
+            //get schedule
+            t.Start();
+            t.Commit();
+            Document doc = Intech.linkUI.doc;
+            ViewSheet elm = new FilteredElementCollector(doc).OfClass(typeof(ViewSheet))
+                .WhereElementIsNotElementType()
+                .ToElements()
+                .Cast<ViewSheet>()
+                .FirstOrDefault(vs => (vs.SheetNumber + " - " + vs.Name) == viewSheet);
+            if (elm != null)
+            {
+                ViewTextBox.Text = elm.SheetNumber + " - " + elm.Name;
+            }
+            else
+            {
+                ViewTextBox.Text = "Schedule not sunk. You or " + user + " needs to sink to populate.";
+            }
+
+
+                //get status
+
+                DateTime lastImport = DateTime.ParseExact(lastUpdate, "yyyyMMdd_HHmmss", CultureInfo.InvariantCulture);
+            string status = "";
+            if (File.Exists(excelPath))
+            {
+                DateTime lastModified = File.GetLastWriteTime(excelPath);
+                if (lastModified < lastImport)
+                {
+                    status = "Up to Date";
+                }
+                else
+                {
+                    status = "Out of Date";
+                }
+            }
+            else
+            {
+                status = "File not found." + "Might be in local drive of " + user + ".";
+            }
+
+            StatusTextBox.Text = status;
+        }
+
+        private void Up_Click(object sender, EventArgs e)
+        {
+            if (!string.IsNullOrEmpty(StatusTextBox.Text))
+            {
+                t.Start("Update Schedule");
+                Intech.Excel.Update(FolderTextBox.Text + FileTextBox.Text, 
+                    ScheduleTextBox.Text,workSheetTextBox.Text,AreaTextBox.Text);
+            }
         }
     }
 }

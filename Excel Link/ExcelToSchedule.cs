@@ -6,6 +6,7 @@ using OfficeOpenXml;
 using OfficeOpenXml.Style;
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Diagnostics;
 using System.Drawing;
 using System.Globalization;
@@ -45,11 +46,11 @@ namespace Intech
             }
             Document doc = linkUI.doc;
             //get all sheets from doc
-            Element sheet = null;
-            foreach (Element e in new FilteredElementCollector(doc).OfClass(typeof(ViewSheet))
+            ViewSheet sheet = null;
+            foreach (ViewSheet e in new FilteredElementCollector(doc).OfClass(typeof(ViewSheet))
                 .WhereElementIsNotElementType().ToElements())
             {
-                if (e.Name.Equals(viewName)) 
+                if ((e.SheetNumber + " - " + e.Name).Equals(viewName)) 
                 {
                     sheet = e;
                 }
@@ -62,10 +63,33 @@ namespace Intech
             return schedule.Name;
         }
 
-        public static string Update(string xlsx, string scheduleName, string worksheetName, string rangeName)
+        public static void Update(string xlsx, string scheduleName, string worksheetName, string rangeName)
         {
-
-            return null;
+            ExcelPackage excel = new ExcelPackage(new FileInfo(xlsx));
+            ExcelWorksheets worksheets = excel.Workbook.Worksheets;
+            ExcelWorksheet worksheet = null;
+            foreach (ExcelWorksheet ws in worksheets)
+            {
+                if (ws.Name.Equals(worksheetName))
+                {
+                    worksheet = ws;
+                    break;
+                }
+            }
+            Document doc = linkUI.doc;
+            ViewSchedule schedule = null;
+            foreach (ViewSchedule e in new FilteredElementCollector(doc).OfClass(typeof(ViewSchedule))
+                .WhereElementIsNotElementType().ToElements())
+            {
+                if (e.Name.Equals(scheduleName)) 
+                {
+                    //get schedule
+                    schedule = e;
+                }
+            }
+            schedule.GetTableData().GetSectionData(SectionType.Header).Dispose();
+            
+            xlsxToSchedule(worksheet, schedule, rangeName);
         }
         public static bool xlsxToSchedule(ExcelWorksheet worksheet, ViewSchedule schedule, string rangeName) {
 
@@ -103,12 +127,21 @@ namespace Intech
             //set size
             schedule.GetTableData().GetSectionData(SectionType.Body).SetColumnWidthInPixels(0, (int)(totalWidth));
 
+            while (tableData.NumberOfColumns > nCol)
+            {
+                tableData.RemoveColumn(1);
+            }
+            while (tableData.NumberOfRows > nRow)
+            {
+                tableData.RemoveRow(1);
+            }
+
             //Make cells and populate data
-            for (int i = 1; i < nCol; i++)
+            for (int i = 1; tableData.NumberOfColumns < nCol; i++)
             {
                 tableData.InsertColumn(i);
             }
-            for (int i = 1; i < nRow; i++)
+            for (int i = 1; tableData.NumberOfRows < nRow; i++)
             {
                 tableData.InsertRow(i);
             }
@@ -151,8 +184,10 @@ namespace Intech
                 tableMergedCell.Top = excelRange.Start.Row - range.Start.Row;
                 tableMergedCell.Right = endCol - range.Start.Column - hBefore - hInside;
                 tableMergedCell.Bottom = excelRange.End.Row - range.Start.Row;
+                TableMergedCell check = tableData.GetMergedCell(tableMergedCell.Top, tableMergedCell.Left);
                 if (0 <= tableMergedCell.Left && tableMergedCell.Left <= nCol
-                    && 0 <= tableMergedCell.Top && tableMergedCell.Top <= nRow)
+                    && 0 <= tableMergedCell.Top && tableMergedCell.Top <= nRow 
+                    && !check.Equals(tableMergedCell))
                 {
                     tableData.MergeCells(tableMergedCell);
                 }

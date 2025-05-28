@@ -36,7 +36,7 @@ namespace Intech
             ViewSheet sheet = doc.ActiveView as ViewSheet;
             if (sheet != null)
             {
-                return sheet.Name;
+                return sheet.SheetNumber + " - " + sheet.Name;
             }
             return null;
         }
@@ -51,7 +51,8 @@ namespace Intech
                 List<string[]> data = new List<string[]>();
                 foreach (string line in lines)
                 {
-                    if (!string.IsNullOrWhiteSpace(line))
+                    string[] lineData = line.Split('\t');
+                    if (!string.IsNullOrWhiteSpace(line) && lineData[0].Equals(doc.Title))
                     {
                         data.Add(line.Split('\t'));
                     }
@@ -62,7 +63,7 @@ namespace Intech
             {
                 createSaveFile();
             }
-            return null;
+            return new string[0][];
         }
 
         public static void appendSave(string[] data)
@@ -104,7 +105,7 @@ namespace Intech
             }
         }
 
-        public static void newLink(string path, string workSheet, string area)
+        public static void newLink(string path, string workSheet, string area, string viewSheet)
         {
             if (string.IsNullOrEmpty(path) || string.IsNullOrEmpty(workSheet) || string.IsNullOrEmpty(area))
             {
@@ -117,7 +118,7 @@ namespace Intech
             string user = Environment.UserName; // Get the current user's name
 
             // Append the new link to the save file
-            appendSave(new string[] { doc.Title, path, workSheet, area, timeStamp, user });
+            appendSave(new string[] { doc.Title, path, workSheet, area, viewSheet, timeStamp, user });
         }
 
         public static void createSaveFile()
@@ -128,7 +129,7 @@ namespace Intech
             {
                 using (StreamWriter sw = new StreamWriter(saveFile, false))
                 {
-                    sw.WriteLine("Project\tPath\tWorksheet\tArea\tTimestamp\tUser");
+                    sw.WriteLine("Project\tPath\tWorksheet\tArea\tViewSheet\tTimestamp\tUser");
                 }
             }
         }

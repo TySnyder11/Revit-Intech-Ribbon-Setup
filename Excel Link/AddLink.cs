@@ -91,6 +91,14 @@ namespace Excel_Link
             {
                 sheetSelect.Text = string.Empty;
                 sheetSelect.Enabled = true;
+                sheetSelect.Items.Clear();
+                Document doc = Intech.linkUI.doc;
+                IList<Element> sheets = new FilteredElementCollector(doc)
+                    .OfClass(typeof(ViewSheet)).WhereElementIsNotElementType().ToElements();
+                foreach (ViewSheet sheet in sheets)
+                {
+                    sheetSelect.Items.Add( sheet.SheetNumber + " - " + sheet.Name );
+                }
             }
             else
             {
@@ -124,7 +132,7 @@ namespace Excel_Link
             trans.Start();
             string scheduleName = Intech.Excel.newLink(pathTextBox.Text, nameTextBox.Text, 
                                     workSheetSelect.Text, areaSelect.Text, sheetSelect.Text);
-            Intech.linkUI.newLink(pathTextBox.Text, scheduleName, areaSelect.Text);
+            Intech.linkUI.newLink(pathTextBox.Text, scheduleName, areaSelect.Text, sheetSelect.Text);
             workSheetSelect.Text = String.Empty;
             areaSelect.Text = String.Empty;
             nameTextBox.Text = String.Empty;

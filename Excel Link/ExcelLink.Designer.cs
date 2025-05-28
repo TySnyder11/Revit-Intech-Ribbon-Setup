@@ -51,6 +51,7 @@
             this.ViewTextBox = new System.Windows.Forms.TextBox();
             this.AreaTextBox = new System.Windows.Forms.TextBox();
             this.ScheduleTextBox = new System.Windows.Forms.TextBox();
+            this.workSheetTextBox = new System.Windows.Forms.TextBox();
             ((System.ComponentModel.ISupportInitialize)(this.InfoGrid)).BeginInit();
             this.SuspendLayout();
             // 
@@ -110,7 +111,7 @@
             // create
             // 
             this.create.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.create.Location = new System.Drawing.Point(15, 391);
+            this.create.Location = new System.Drawing.Point(15, 401);
             this.create.Name = "create";
             this.create.Size = new System.Drawing.Size(75, 23);
             this.create.TabIndex = 1;
@@ -132,7 +133,7 @@
             // OpEx
             // 
             this.OpEx.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.OpEx.Location = new System.Drawing.Point(96, 391);
+            this.OpEx.Location = new System.Drawing.Point(96, 401);
             this.OpEx.Name = "OpEx";
             this.OpEx.Size = new System.Drawing.Size(75, 23);
             this.OpEx.TabIndex = 3;
@@ -142,7 +143,7 @@
             // OpSh
             // 
             this.OpSh.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.OpSh.Location = new System.Drawing.Point(177, 391);
+            this.OpSh.Location = new System.Drawing.Point(177, 401);
             this.OpSh.Name = "OpSh";
             this.OpSh.Size = new System.Drawing.Size(75, 23);
             this.OpSh.TabIndex = 4;
@@ -152,7 +153,7 @@
             // RemLnk
             // 
             this.RemLnk.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.RemLnk.Location = new System.Drawing.Point(603, 391);
+            this.RemLnk.Location = new System.Drawing.Point(603, 401);
             this.RemLnk.Name = "RemLnk";
             this.RemLnk.Size = new System.Drawing.Size(85, 23);
             this.RemLnk.TabIndex = 7;
@@ -162,7 +163,7 @@
             // NewLnk
             // 
             this.NewLnk.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.NewLnk.Location = new System.Drawing.Point(519, 391);
+            this.NewLnk.Location = new System.Drawing.Point(519, 401);
             this.NewLnk.Name = "NewLnk";
             this.NewLnk.Size = new System.Drawing.Size(78, 23);
             this.NewLnk.TabIndex = 6;
@@ -172,12 +173,13 @@
             // Up
             // 
             this.Up.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.Up.Location = new System.Drawing.Point(438, 391);
+            this.Up.Location = new System.Drawing.Point(438, 401);
             this.Up.Name = "Up";
             this.Up.Size = new System.Drawing.Size(75, 23);
             this.Up.TabIndex = 5;
             this.Up.Text = "Update";
             this.Up.UseVisualStyleBackColor = true;
+            this.Up.Click += new System.EventHandler(this.Up_Click);
             // 
             // nt1
             // 
@@ -199,12 +201,12 @@
             this.richTextBox1.BackColor = System.Drawing.SystemColors.Menu;
             this.richTextBox1.BorderStyle = System.Windows.Forms.BorderStyle.None;
             this.richTextBox1.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.richTextBox1.Location = new System.Drawing.Point(38, 289);
+            this.richTextBox1.Location = new System.Drawing.Point(26, 289);
             this.richTextBox1.Name = "richTextBox1";
             this.richTextBox1.ReadOnly = true;
-            this.richTextBox1.Size = new System.Drawing.Size(52, 96);
+            this.richTextBox1.Size = new System.Drawing.Size(86, 115);
             this.richTextBox1.TabIndex = 10;
-            this.richTextBox1.Text = "Folder:\n\nFile:\n\nStatus:";
+            this.richTextBox1.Text = "Folder:\n\nFile:\n\nStatus:\n\nWorksheet:";
             // 
             // richTextBox2
             // 
@@ -231,7 +233,7 @@
             // 
             this.FolderTextBox.BackColor = System.Drawing.SystemColors.Menu;
             this.FolderTextBox.BorderStyle = System.Windows.Forms.BorderStyle.None;
-            this.FolderTextBox.Location = new System.Drawing.Point(96, 288);
+            this.FolderTextBox.Location = new System.Drawing.Point(96, 291);
             this.FolderTextBox.Name = "FolderTextBox";
             this.FolderTextBox.Size = new System.Drawing.Size(355, 13);
             this.FolderTextBox.TabIndex = 15;
@@ -240,7 +242,7 @@
             // 
             this.FileTextBox.BackColor = System.Drawing.SystemColors.Menu;
             this.FileTextBox.BorderStyle = System.Windows.Forms.BorderStyle.None;
-            this.FileTextBox.Location = new System.Drawing.Point(96, 318);
+            this.FileTextBox.Location = new System.Drawing.Point(96, 320);
             this.FileTextBox.Name = "FileTextBox";
             this.FileTextBox.Size = new System.Drawing.Size(355, 13);
             this.FileTextBox.TabIndex = 16;
@@ -249,7 +251,7 @@
             // 
             this.StatusTextBox.BackColor = System.Drawing.SystemColors.Menu;
             this.StatusTextBox.BorderStyle = System.Windows.Forms.BorderStyle.None;
-            this.StatusTextBox.Location = new System.Drawing.Point(96, 348);
+            this.StatusTextBox.Location = new System.Drawing.Point(96, 351);
             this.StatusTextBox.Name = "StatusTextBox";
             this.StatusTextBox.Size = new System.Drawing.Size(355, 13);
             this.StatusTextBox.TabIndex = 17;
@@ -258,7 +260,7 @@
             // 
             this.ViewTextBox.BackColor = System.Drawing.SystemColors.Menu;
             this.ViewTextBox.BorderStyle = System.Windows.Forms.BorderStyle.None;
-            this.ViewTextBox.Location = new System.Drawing.Point(519, 348);
+            this.ViewTextBox.Location = new System.Drawing.Point(519, 350);
             this.ViewTextBox.Name = "ViewTextBox";
             this.ViewTextBox.Size = new System.Drawing.Size(217, 13);
             this.ViewTextBox.TabIndex = 20;
@@ -267,7 +269,7 @@
             // 
             this.AreaTextBox.BackColor = System.Drawing.SystemColors.Menu;
             this.AreaTextBox.BorderStyle = System.Windows.Forms.BorderStyle.None;
-            this.AreaTextBox.Location = new System.Drawing.Point(519, 318);
+            this.AreaTextBox.Location = new System.Drawing.Point(519, 320);
             this.AreaTextBox.Name = "AreaTextBox";
             this.AreaTextBox.Size = new System.Drawing.Size(217, 13);
             this.AreaTextBox.TabIndex = 19;
@@ -276,10 +278,19 @@
             // 
             this.ScheduleTextBox.BackColor = System.Drawing.SystemColors.Menu;
             this.ScheduleTextBox.BorderStyle = System.Windows.Forms.BorderStyle.None;
-            this.ScheduleTextBox.Location = new System.Drawing.Point(519, 288);
+            this.ScheduleTextBox.Location = new System.Drawing.Point(519, 290);
             this.ScheduleTextBox.Name = "ScheduleTextBox";
             this.ScheduleTextBox.Size = new System.Drawing.Size(217, 13);
             this.ScheduleTextBox.TabIndex = 18;
+            // 
+            // workSheetTextBox
+            // 
+            this.workSheetTextBox.BackColor = System.Drawing.SystemColors.Menu;
+            this.workSheetTextBox.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.workSheetTextBox.Location = new System.Drawing.Point(96, 382);
+            this.workSheetTextBox.Name = "workSheetTextBox";
+            this.workSheetTextBox.Size = new System.Drawing.Size(355, 13);
+            this.workSheetTextBox.TabIndex = 21;
             // 
             // ExcelLinkUI
             // 
@@ -287,6 +298,7 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.CancelButton = this.Close;
             this.ClientSize = new System.Drawing.Size(843, 445);
+            this.Controls.Add(this.workSheetTextBox);
             this.Controls.Add(this.ViewTextBox);
             this.Controls.Add(this.AreaTextBox);
             this.Controls.Add(this.ScheduleTextBox);
@@ -339,5 +351,6 @@
         private System.Windows.Forms.TextBox ViewTextBox;
         private System.Windows.Forms.TextBox AreaTextBox;
         private System.Windows.Forms.TextBox ScheduleTextBox;
+        private System.Windows.Forms.TextBox workSheetTextBox;
     }
 }
