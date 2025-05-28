@@ -13,64 +13,75 @@ using System.IO;
 using System.Linq;
 using System.Windows.Forms;
 using System.Windows.Media.Media3D;
+using System.Xml.Linq;
 
 namespace Intech
 {
     [Autodesk.Revit.Attributes.Transaction(Autodesk.Revit.Attributes.TransactionMode.Manual)]//EVERY COMMAND REQUIRES THIS!
     public class Excel
     {
-        public static string getExcelFile()
-        {
-            OpenFileDialog excelFileDialog = new OpenFileDialog();
-            excelFileDialog.Filter = "Excel Files|*.xls;*.xlsx;*.xlsm|All files (*.*)|*.*";
-            excelFileDialog.Title = "Select Excel File";
-            string excelFile = string.Empty;
-            if (excelFileDialog.ShowDialog() == DialogResult.OK)
-            {
-                excelFile = excelFileDialog.FileName;
-            }
-            else
-            {
-                TaskDialog.Show("Error", "No file selected.");
-                return null;
-            }
-            return excelFile;
-        }
-
-        public static void saveLinkInfo(string file) {
-            Document doc = linkUI.doc;
-            doc.GetCloudModelPath();
-
-        }
 
         public static void updateLinkInfo(string file)
         {
 
         }
 
-        public static bool xlsxToSchedule(string xlsx, string name, Transaction t) {
-            ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
+        public static string newLink(string xlsx, string name, string worksheetName, string rangeName, string viewName)
+        {
             //create schedule
             ViewSchedule schedule = createBlankSchedule(name);
+
+            //get xlsx data 
+            ExcelPackage excel = new ExcelPackage(new FileInfo(xlsx));
+            ExcelWorksheets worksheets = excel.Workbook.Worksheets;
+            ExcelWorksheet worksheet = null;
+            foreach (ExcelWorksheet ws in worksheets)
+            {
+                if (ws.Name.Equals(worksheetName))
+                {
+                    worksheet = ws;
+                    break;
+                }
+            }
+            Document doc = linkUI.doc;
+            //get all sheets from doc
+            Element sheet = null;
+            foreach (Element e in new FilteredElementCollector(doc).OfClass(typeof(ViewSheet))
+                .WhereElementIsNotElementType().ToElements())
+            {
+                if (e.Name.Equals(viewName)) 
+                {
+                    sheet = e;
+                }
+            }
+
+            xlsxToSchedule(worksheet, schedule, rangeName);
+            XYZ origin = new XYZ(0, 0, 0);
+            ScheduleSheetInstance instance = ScheduleSheetInstance.Create(linkUI.doc, sheet.Id, schedule.Id, origin);
+
+            return schedule.Name;
+        }
+
+        public static string Update(string xlsx, string scheduleName, string worksheetName, string rangeName)
+        {
+
+            return null;
+        }
+        public static bool xlsxToSchedule(ExcelWorksheet worksheet, ViewSchedule schedule, string rangeName) {
 
             //get table info
             TableSectionData tableData = schedule.GetTableData().GetSectionData(SectionType.Header);
 
-            //get xlsx data 
-            ExcelPackage excel = new ExcelPackage(new FileInfo(xlsx));
-            ExcelWorksheet worksheet = excel.Workbook.Worksheets[0];
-
-            
             //get range to link
             ExcelNamedRange range = null;
             foreach (ExcelNamedRange r in worksheet.Names) {
-                if ((r.Name).Contains("Print_Area")) {
+                if ((r.Name).Contains(rangeName)) {
                     range = r; 
                     break;
                 }
             }
             if (range == null) {
-                TaskDialog.Show("Error", "No named range found in the worksheet.");
+                TaskDialog.Show("Error", "No range named " + rangeName + " found in the worksheet.");
                 return false;
             }
             int nCol = range.Columns;
@@ -123,7 +134,7 @@ namespace Intech
                         hBefore++;
                         continue;
                     }
-                    if (startCol < i && i < endCol)
+                    if (startCol < i && i <= endCol)
                     {
                         hInside++;
                         continue;
@@ -187,9 +198,10 @@ namespace Intech
                     HorizontalAlignmentStyle x = HorizontalAlignmentStyle.Left; //base case center
                     switch ((int)style.HorizontalAlignment) 
                     {
-                        case 1: break; // left
+                        case 1: x = HorizontalAlignmentStyle.Left; break; // left
                         case 2: x = HorizontalAlignmentStyle.Center; break; // center
                         case 4: x = HorizontalAlignmentStyle.Right; break; // right
+                        default: x = HorizontalAlignmentStyle.Left; break;
                     }
                     newStyle.FontHorizontalAlignment = x;
 
@@ -210,7 +222,7 @@ namespace Intech
                             int textSize = System.Windows.Forms.TextRenderer.MeasureText(text, font).Width + 10;
                             int cellwidth = tableData.GetColumnWidthInPixels(i);
                             int p = i;
-                            int copyColumnIndex = colIndex + 1;
+                            int copyColumnIndex = colIndex;
                             while (textSize > cellwidth && !worksheet.Cells[j + range.Start.Row, colIndex + range.Start.Column].Merge)
                             {
                                 if (worksheet.Column(copyColumnIndex + range.Start.Column).Hidden)
@@ -254,7 +266,9 @@ namespace Intech
         private static ViewSchedule createBlankSchedule(string name) {
             Document doc = linkUI.doc;
             ViewSchedule schedule = ViewSchedule.CreateKeySchedule(doc, new ElementId(BuiltInCategory.OST_GenericModel));
-            //schedule.Name = name;
+            //rename existing schedules to avoid name conflicts
+            name = renameHelper(name, new FilteredElementCollector(doc).OfClass(typeof(ViewSchedule)).WhereElementIsNotElementType().ToElements());
+            schedule.Name = name;
             schedule.LookupParameter("View Template").Set("");
             ScheduleDefinition def = schedule.Definition;
 
@@ -277,6 +291,19 @@ namespace Intech
                 schedule.TitleTextTypeId = textId;
             }
             return schedule;
+        }
+
+        private static string renameHelper(string name, IList<Element> schedules)
+        {
+            foreach (Element view in schedules)
+            {
+                if (view.Name.Equals(name))
+                {
+                    name = view.Name + " - Copy";
+                    name = renameHelper(name, schedules);
+                }
+            }
+            return name;
         }
 
         private static void copyBorder(TableCellStyle scdB, ExcelWorksheet worksheet, int row, int column) {
@@ -336,7 +363,7 @@ namespace Intech
                 {
                     lColumn--;
                 }
-                if (lColumn >= 2)
+                if (lColumn >= 1)
                 {
                     left = getRevitBoarderIDFromExcel(worksheet.Cells[row, lColumn].Style.Border.Right);
                 }

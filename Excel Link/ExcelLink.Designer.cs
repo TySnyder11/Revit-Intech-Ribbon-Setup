@@ -1,4 +1,4 @@
-﻿namespace TitleBlockSetup.Excel_Import
+﻿namespace Excel_Link
 {
     partial class ExcelLinkUI
     {
@@ -29,10 +29,10 @@
         private void InitializeComponent()
         {
             this.InfoGrid = new System.Windows.Forms.DataGridView();
-            this.Name = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.NameColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.Status = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.LastUpdate = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.File = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.PathColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.ExcelFileDialog = new System.Windows.Forms.OpenFileDialog();
             this.create = new System.Windows.Forms.Button();
             this.Close = new System.Windows.Forms.Button();
@@ -44,9 +44,13 @@
             this.nt1 = new System.Windows.Forms.TextBox();
             this.richTextBox1 = new System.Windows.Forms.RichTextBox();
             this.richTextBox2 = new System.Windows.Forms.RichTextBox();
-            this.InfoBox1 = new System.Windows.Forms.RichTextBox();
-            this.Infobox2 = new System.Windows.Forms.RichTextBox();
             this.Settings = new System.Windows.Forms.Button();
+            this.FolderTextBox = new System.Windows.Forms.TextBox();
+            this.FileTextBox = new System.Windows.Forms.TextBox();
+            this.StatusTextBox = new System.Windows.Forms.TextBox();
+            this.ViewTextBox = new System.Windows.Forms.TextBox();
+            this.AreaTextBox = new System.Windows.Forms.TextBox();
+            this.ScheduleTextBox = new System.Windows.Forms.TextBox();
             ((System.ComponentModel.ISupportInitialize)(this.InfoGrid)).BeginInit();
             this.SuspendLayout();
             // 
@@ -60,20 +64,21 @@
             this.InfoGrid.BackgroundColor = System.Drawing.SystemColors.ControlLight;
             this.InfoGrid.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             this.InfoGrid.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
-            this.Name,
+            this.NameColumn,
             this.Status,
             this.LastUpdate,
-            this.File});
+            this.PathColumn});
             this.InfoGrid.Location = new System.Drawing.Point(12, 12);
             this.InfoGrid.Name = "InfoGrid";
             this.InfoGrid.Size = new System.Drawing.Size(819, 249);
             this.InfoGrid.TabIndex = 0;
+            this.InfoGrid.CellClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.InfoGrid_CellClick);
             // 
-            // Name
+            // NameColumn
             // 
-            this.Name.HeaderText = "Name";
-            this.Name.Name = "Name";
-            this.Name.Width = 150;
+            this.NameColumn.HeaderText = "Schedule Name";
+            this.NameColumn.Name = "NameColumn";
+            this.NameColumn.Width = 150;
             // 
             // Status
             // 
@@ -89,12 +94,12 @@
             this.LastUpdate.ReadOnly = true;
             this.LastUpdate.Width = 200;
             // 
-            // File
+            // PathColumn
             // 
-            this.File.HeaderText = "File Name";
-            this.File.Name = "File";
-            this.File.ReadOnly = true;
-            this.File.Width = 350;
+            this.PathColumn.HeaderText = "Excel Path";
+            this.PathColumn.Name = "PathColumn";
+            this.PathColumn.ReadOnly = true;
+            this.PathColumn.Width = 350;
             // 
             // ExcelFileDialog
             // 
@@ -157,9 +162,9 @@
             // NewLnk
             // 
             this.NewLnk.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.NewLnk.Location = new System.Drawing.Point(522, 391);
+            this.NewLnk.Location = new System.Drawing.Point(519, 391);
             this.NewLnk.Name = "NewLnk";
-            this.NewLnk.Size = new System.Drawing.Size(75, 23);
+            this.NewLnk.Size = new System.Drawing.Size(78, 23);
             this.NewLnk.TabIndex = 6;
             this.NewLnk.Text = "Change Link";
             this.NewLnk.UseVisualStyleBackColor = true;
@@ -167,7 +172,7 @@
             // Up
             // 
             this.Up.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.Up.Location = new System.Drawing.Point(441, 391);
+            this.Up.Location = new System.Drawing.Point(438, 391);
             this.Up.Name = "Up";
             this.Up.Size = new System.Drawing.Size(75, 23);
             this.Up.TabIndex = 5;
@@ -206,37 +211,12 @@
             this.richTextBox2.BackColor = System.Drawing.SystemColors.Menu;
             this.richTextBox2.BorderStyle = System.Windows.Forms.BorderStyle.None;
             this.richTextBox2.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.richTextBox2.Location = new System.Drawing.Point(399, 289);
+            this.richTextBox2.Location = new System.Drawing.Point(457, 289);
             this.richTextBox2.Name = "richTextBox2";
             this.richTextBox2.ReadOnly = true;
             this.richTextBox2.Size = new System.Drawing.Size(71, 85);
             this.richTextBox2.TabIndex = 11;
             this.richTextBox2.Text = "Shedule:\n\nArea:\n\nView:";
-            this.richTextBox2.TextChanged += new System.EventHandler(this.richTextBox2_TextChanged);
-            // 
-            // InfoBox1
-            // 
-            this.InfoBox1.BackColor = System.Drawing.SystemColors.Menu;
-            this.InfoBox1.BorderStyle = System.Windows.Forms.BorderStyle.None;
-            this.InfoBox1.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.InfoBox1.Location = new System.Drawing.Point(85, 289);
-            this.InfoBox1.Name = "InfoBox1";
-            this.InfoBox1.ReadOnly = true;
-            this.InfoBox1.Size = new System.Drawing.Size(52, 96);
-            this.InfoBox1.TabIndex = 12;
-            this.InfoBox1.Text = "";
-            // 
-            // Infobox2
-            // 
-            this.Infobox2.BackColor = System.Drawing.SystemColors.Menu;
-            this.Infobox2.BorderStyle = System.Windows.Forms.BorderStyle.None;
-            this.Infobox2.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.Infobox2.Location = new System.Drawing.Point(441, 317);
-            this.Infobox2.Name = "Infobox2";
-            this.Infobox2.ReadOnly = true;
-            this.Infobox2.Size = new System.Drawing.Size(52, 57);
-            this.Infobox2.TabIndex = 13;
-            this.Infobox2.Text = "";
             // 
             // Settings
             // 
@@ -247,15 +227,73 @@
             this.Settings.Text = "Settings";
             this.Settings.UseVisualStyleBackColor = true;
             // 
+            // FolderTextBox
+            // 
+            this.FolderTextBox.BackColor = System.Drawing.SystemColors.Menu;
+            this.FolderTextBox.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.FolderTextBox.Location = new System.Drawing.Point(96, 288);
+            this.FolderTextBox.Name = "FolderTextBox";
+            this.FolderTextBox.Size = new System.Drawing.Size(355, 13);
+            this.FolderTextBox.TabIndex = 15;
+            // 
+            // FileTextBox
+            // 
+            this.FileTextBox.BackColor = System.Drawing.SystemColors.Menu;
+            this.FileTextBox.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.FileTextBox.Location = new System.Drawing.Point(96, 318);
+            this.FileTextBox.Name = "FileTextBox";
+            this.FileTextBox.Size = new System.Drawing.Size(355, 13);
+            this.FileTextBox.TabIndex = 16;
+            // 
+            // StatusTextBox
+            // 
+            this.StatusTextBox.BackColor = System.Drawing.SystemColors.Menu;
+            this.StatusTextBox.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.StatusTextBox.Location = new System.Drawing.Point(96, 348);
+            this.StatusTextBox.Name = "StatusTextBox";
+            this.StatusTextBox.Size = new System.Drawing.Size(355, 13);
+            this.StatusTextBox.TabIndex = 17;
+            // 
+            // ViewTextBox
+            // 
+            this.ViewTextBox.BackColor = System.Drawing.SystemColors.Menu;
+            this.ViewTextBox.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.ViewTextBox.Location = new System.Drawing.Point(519, 348);
+            this.ViewTextBox.Name = "ViewTextBox";
+            this.ViewTextBox.Size = new System.Drawing.Size(217, 13);
+            this.ViewTextBox.TabIndex = 20;
+            // 
+            // AreaTextBox
+            // 
+            this.AreaTextBox.BackColor = System.Drawing.SystemColors.Menu;
+            this.AreaTextBox.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.AreaTextBox.Location = new System.Drawing.Point(519, 318);
+            this.AreaTextBox.Name = "AreaTextBox";
+            this.AreaTextBox.Size = new System.Drawing.Size(217, 13);
+            this.AreaTextBox.TabIndex = 19;
+            // 
+            // ScheduleTextBox
+            // 
+            this.ScheduleTextBox.BackColor = System.Drawing.SystemColors.Menu;
+            this.ScheduleTextBox.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.ScheduleTextBox.Location = new System.Drawing.Point(519, 288);
+            this.ScheduleTextBox.Name = "ScheduleTextBox";
+            this.ScheduleTextBox.Size = new System.Drawing.Size(217, 13);
+            this.ScheduleTextBox.TabIndex = 18;
+            // 
             // ExcelLinkUI
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.CancelButton = this.Close;
             this.ClientSize = new System.Drawing.Size(843, 445);
+            this.Controls.Add(this.ViewTextBox);
+            this.Controls.Add(this.AreaTextBox);
+            this.Controls.Add(this.ScheduleTextBox);
+            this.Controls.Add(this.StatusTextBox);
+            this.Controls.Add(this.FileTextBox);
+            this.Controls.Add(this.FolderTextBox);
             this.Controls.Add(this.Settings);
-            this.Controls.Add(this.Infobox2);
-            this.Controls.Add(this.InfoBox1);
             this.Controls.Add(this.richTextBox2);
             this.Controls.Add(this.richTextBox1);
             this.Controls.Add(this.nt1);
@@ -290,12 +328,16 @@
         private System.Windows.Forms.TextBox nt1;
         private System.Windows.Forms.RichTextBox richTextBox1;
         private System.Windows.Forms.RichTextBox richTextBox2;
-        private System.Windows.Forms.RichTextBox InfoBox1;
-        private System.Windows.Forms.RichTextBox Infobox2;
-        private System.Windows.Forms.DataGridViewTextBoxColumn Name;
+        private System.Windows.Forms.Button Settings;
+        private System.Windows.Forms.DataGridViewTextBoxColumn NameColumn;
         private System.Windows.Forms.DataGridViewTextBoxColumn Status;
         private System.Windows.Forms.DataGridViewTextBoxColumn LastUpdate;
-        private System.Windows.Forms.DataGridViewTextBoxColumn File;
-        private System.Windows.Forms.Button Settings;
+        private System.Windows.Forms.DataGridViewTextBoxColumn PathColumn;
+        private System.Windows.Forms.TextBox FolderTextBox;
+        private System.Windows.Forms.TextBox FileTextBox;
+        private System.Windows.Forms.TextBox StatusTextBox;
+        private System.Windows.Forms.TextBox ViewTextBox;
+        private System.Windows.Forms.TextBox AreaTextBox;
+        private System.Windows.Forms.TextBox ScheduleTextBox;
     }
 }

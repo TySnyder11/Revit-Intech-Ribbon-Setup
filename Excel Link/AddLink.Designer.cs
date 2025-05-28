@@ -1,4 +1,4 @@
-﻿namespace TitleBlockSetup.Excel_Link
+﻿namespace Excel_Link
 {
     partial class AddLink
     {
@@ -34,14 +34,14 @@
             this.fileDialogButton = new System.Windows.Forms.Button();
             this.areaSelect = new System.Windows.Forms.ComboBox();
             this.textBox1 = new System.Windows.Forms.TextBox();
-            this.sheetSelect = new System.Windows.Forms.ComboBox();
+            this.workSheetSelect = new System.Windows.Forms.ComboBox();
             this.textBox2 = new System.Windows.Forms.TextBox();
             this.textBox3 = new System.Windows.Forms.TextBox();
-            this.Path = new System.Windows.Forms.TextBox();
+            this.pathTextBox = new System.Windows.Forms.TextBox();
             this.View = new System.Windows.Forms.TextBox();
-            this.comboBox1 = new System.Windows.Forms.ComboBox();
-            this.checkBox1 = new System.Windows.Forms.CheckBox();
-            this.textBox4 = new System.Windows.Forms.TextBox();
+            this.sheetSelect = new System.Windows.Forms.ComboBox();
+            this.currentSheetCheck = new System.Windows.Forms.CheckBox();
+            this.nameTextBox = new System.Windows.Forms.TextBox();
             this.textBox5 = new System.Windows.Forms.TextBox();
             this.SuspendLayout();
             // 
@@ -58,16 +58,19 @@
             this.Save.TabIndex = 0;
             this.Save.Text = "Save...";
             this.Save.UseVisualStyleBackColor = true;
+            this.Save.Click += new System.EventHandler(this.Save_Click);
             // 
             // Cancel
             // 
             this.Cancel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.Cancel.Location = new System.Drawing.Point(234, 193);
+            this.Cancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
+            this.Cancel.Location = new System.Drawing.Point(281, 193);
             this.Cancel.Name = "Cancel";
             this.Cancel.Size = new System.Drawing.Size(75, 23);
             this.Cancel.TabIndex = 1;
             this.Cancel.Text = "Cancel";
             this.Cancel.UseVisualStyleBackColor = true;
+            this.Cancel.Click += new System.EventHandler(this.Cancel_Click);
             // 
             // fileDialogButton
             // 
@@ -75,10 +78,11 @@
             | System.Windows.Forms.AnchorStyles.Right)));
             this.fileDialogButton.Location = new System.Drawing.Point(64, 32);
             this.fileDialogButton.Name = "fileDialogButton";
-            this.fileDialogButton.Size = new System.Drawing.Size(223, 23);
+            this.fileDialogButton.Size = new System.Drawing.Size(270, 23);
             this.fileDialogButton.TabIndex = 2;
             this.fileDialogButton.Text = "File Explorer...";
             this.fileDialogButton.UseVisualStyleBackColor = true;
+            this.fileDialogButton.Click += new System.EventHandler(this.fileDialogButton_Click);
             // 
             // areaSelect
             // 
@@ -86,9 +90,8 @@
             this.areaSelect.FormattingEnabled = true;
             this.areaSelect.Location = new System.Drawing.Point(73, 95);
             this.areaSelect.Name = "areaSelect";
-            this.areaSelect.Size = new System.Drawing.Size(228, 21);
+            this.areaSelect.Size = new System.Drawing.Size(275, 21);
             this.areaSelect.TabIndex = 3;
-            this.areaSelect.SelectedIndexChanged += new System.EventHandler(this.areaSelect_SelectedIndexChanged);
             // 
             // textBox1
             // 
@@ -100,17 +103,16 @@
             this.textBox1.Size = new System.Drawing.Size(35, 13);
             this.textBox1.TabIndex = 4;
             this.textBox1.Text = "Area";
-            this.textBox1.TextChanged += new System.EventHandler(this.textBox1_TextChanged);
             // 
-            // sheetSelect
+            // workSheetSelect
             // 
-            this.sheetSelect.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
-            this.sheetSelect.FormattingEnabled = true;
-            this.sheetSelect.Location = new System.Drawing.Point(73, 68);
-            this.sheetSelect.Name = "sheetSelect";
-            this.sheetSelect.Size = new System.Drawing.Size(228, 21);
-            this.sheetSelect.TabIndex = 5;
-            this.sheetSelect.SelectedIndexChanged += new System.EventHandler(this.sheetSelect_SelectedIndexChanged);
+            this.workSheetSelect.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
+            this.workSheetSelect.FormattingEnabled = true;
+            this.workSheetSelect.Location = new System.Drawing.Point(73, 68);
+            this.workSheetSelect.Name = "workSheetSelect";
+            this.workSheetSelect.Size = new System.Drawing.Size(275, 21);
+            this.workSheetSelect.TabIndex = 5;
+            this.workSheetSelect.SelectedIndexChanged += new System.EventHandler(this.workSheetSelect_SelectedIndexChanged);
             // 
             // textBox2
             // 
@@ -122,7 +124,6 @@
             this.textBox2.Size = new System.Drawing.Size(62, 13);
             this.textBox2.TabIndex = 6;
             this.textBox2.Text = "WorkSheet";
-            this.textBox2.TextChanged += new System.EventHandler(this.textBox2_TextChanged);
             // 
             // textBox3
             // 
@@ -134,14 +135,15 @@
             this.textBox3.TabIndex = 7;
             this.textBox3.Text = "Path";
             // 
-            // Path
+            // pathTextBox
             // 
-            this.Path.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            this.pathTextBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.Path.Location = new System.Drawing.Point(38, 6);
-            this.Path.Name = "Path";
-            this.Path.Size = new System.Drawing.Size(275, 20);
-            this.Path.TabIndex = 8;
+            this.pathTextBox.Location = new System.Drawing.Point(38, 6);
+            this.pathTextBox.Name = "pathTextBox";
+            this.pathTextBox.Size = new System.Drawing.Size(322, 20);
+            this.pathTextBox.TabIndex = 8;
+            this.pathTextBox.TextChanged += new System.EventHandler(this.pathTextBox_TextChanged);
             // 
             // View
             // 
@@ -153,39 +155,36 @@
             this.View.Size = new System.Drawing.Size(35, 13);
             this.View.TabIndex = 10;
             this.View.Text = "Sheet";
-            this.View.TextChanged += new System.EventHandler(this.View_TextChanged);
             // 
-            // comboBox1
+            // sheetSelect
             // 
-            this.comboBox1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
-            this.comboBox1.FormattingEnabled = true;
-            this.comboBox1.Location = new System.Drawing.Point(59, 168);
-            this.comboBox1.Name = "comboBox1";
-            this.comboBox1.Size = new System.Drawing.Size(245, 21);
-            this.comboBox1.TabIndex = 9;
-            this.comboBox1.SelectedIndexChanged += new System.EventHandler(this.comboBox1_SelectedIndexChanged);
+            this.sheetSelect.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
+            this.sheetSelect.FormattingEnabled = true;
+            this.sheetSelect.Location = new System.Drawing.Point(59, 168);
+            this.sheetSelect.Name = "sheetSelect";
+            this.sheetSelect.Size = new System.Drawing.Size(292, 21);
+            this.sheetSelect.TabIndex = 9;
             // 
-            // checkBox1
+            // currentSheetCheck
             // 
-            this.checkBox1.Anchor = System.Windows.Forms.AnchorStyles.Left;
-            this.checkBox1.AutoSize = true;
-            this.checkBox1.Location = new System.Drawing.Point(32, 148);
-            this.checkBox1.Name = "checkBox1";
-            this.checkBox1.Size = new System.Drawing.Size(91, 17);
-            this.checkBox1.TabIndex = 11;
-            this.checkBox1.Text = "Current Sheet";
-            this.checkBox1.UseVisualStyleBackColor = true;
-            this.checkBox1.CheckedChanged += new System.EventHandler(this.checkBox1_CheckedChanged);
+            this.currentSheetCheck.Anchor = System.Windows.Forms.AnchorStyles.Left;
+            this.currentSheetCheck.AutoSize = true;
+            this.currentSheetCheck.Location = new System.Drawing.Point(32, 148);
+            this.currentSheetCheck.Name = "currentSheetCheck";
+            this.currentSheetCheck.Size = new System.Drawing.Size(91, 17);
+            this.currentSheetCheck.TabIndex = 11;
+            this.currentSheetCheck.Text = "Current Sheet";
+            this.currentSheetCheck.UseVisualStyleBackColor = true;
+            this.currentSheetCheck.CheckedChanged += new System.EventHandler(this.currentSheetCheck_CheckedChanged);
             // 
-            // textBox4
+            // nameTextBox
             // 
-            this.textBox4.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            this.nameTextBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.textBox4.Location = new System.Drawing.Point(73, 122);
-            this.textBox4.Name = "textBox4";
-            this.textBox4.Size = new System.Drawing.Size(228, 20);
-            this.textBox4.TabIndex = 13;
-            this.textBox4.TextChanged += new System.EventHandler(this.textBox4_TextChanged_1);
+            this.nameTextBox.Location = new System.Drawing.Point(73, 122);
+            this.nameTextBox.Name = "nameTextBox";
+            this.nameTextBox.Size = new System.Drawing.Size(275, 20);
+            this.nameTextBox.TabIndex = 13;
             // 
             // textBox5
             // 
@@ -196,22 +195,22 @@
             this.textBox5.Size = new System.Drawing.Size(35, 13);
             this.textBox5.TabIndex = 12;
             this.textBox5.Text = "Name";
-            this.textBox5.TextChanged += new System.EventHandler(this.textBox5_TextChanged_1);
             // 
             // AddLink
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(321, 221);
-            this.Controls.Add(this.textBox4);
+            this.CancelButton = this.Cancel;
+            this.ClientSize = new System.Drawing.Size(368, 221);
+            this.Controls.Add(this.nameTextBox);
             this.Controls.Add(this.textBox5);
-            this.Controls.Add(this.checkBox1);
+            this.Controls.Add(this.currentSheetCheck);
             this.Controls.Add(this.View);
-            this.Controls.Add(this.comboBox1);
-            this.Controls.Add(this.Path);
+            this.Controls.Add(this.sheetSelect);
+            this.Controls.Add(this.pathTextBox);
             this.Controls.Add(this.textBox3);
             this.Controls.Add(this.textBox2);
-            this.Controls.Add(this.sheetSelect);
+            this.Controls.Add(this.workSheetSelect);
             this.Controls.Add(this.textBox1);
             this.Controls.Add(this.areaSelect);
             this.Controls.Add(this.fileDialogButton);
@@ -221,7 +220,6 @@
             this.MinimumSize = new System.Drawing.Size(200, 260);
             this.Name = "AddLink";
             this.Text = "AddLink";
-            this.Load += new System.EventHandler(this.AddLink_Load);
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -235,14 +233,14 @@
         private System.Windows.Forms.Button fileDialogButton;
         private System.Windows.Forms.ComboBox areaSelect;
         private System.Windows.Forms.TextBox textBox1;
-        private System.Windows.Forms.ComboBox sheetSelect;
+        private System.Windows.Forms.ComboBox workSheetSelect;
         private System.Windows.Forms.TextBox textBox2;
         private System.Windows.Forms.TextBox textBox3;
-        private System.Windows.Forms.TextBox Path;
+        private System.Windows.Forms.TextBox pathTextBox;
         private System.Windows.Forms.TextBox View;
-        private System.Windows.Forms.ComboBox comboBox1;
-        private System.Windows.Forms.CheckBox checkBox1;
-        private System.Windows.Forms.TextBox textBox4;
+        private System.Windows.Forms.ComboBox sheetSelect;
+        private System.Windows.Forms.CheckBox currentSheetCheck;
+        private System.Windows.Forms.TextBox nameTextBox;
         private System.Windows.Forms.TextBox textBox5;
     }
 }
