@@ -8,6 +8,7 @@ namespace Excel_Link
         public linkSettings()
         {
             InitializeComponent();
+            this.CenterToParent();
             pathTextBox.Text = Intech.linkUI.getSaveFile();
         }
 

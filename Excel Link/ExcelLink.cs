@@ -16,7 +16,7 @@ namespace Excel_Link
         {
             InitializeComponent();
             this.t = t;
-
+            this.CenterToParent();
             loadSaveFile();
         }
 

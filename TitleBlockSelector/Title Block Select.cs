@@ -22,6 +22,10 @@ namespace Intech
             //Get element ID of selected
             ICollection<ElementId> selectedIds = uidoc.Selection.GetElementIds();
 
+            if (selectedIds.Count == 0 )
+            {
+                return Result.Cancelled;
+            }
             //filter out all elements that is not a sheet
             var sheet = new FilteredElementCollector(doc, selectedIds).OfCategory(BuiltInCategory.OST_Sheets).WhereElementIsNotElementType().ToElementIds();
 

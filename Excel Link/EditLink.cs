@@ -18,6 +18,7 @@ namespace Excel_Link
         public EditLink(string path, string workSheet, string area, string Name, string sheet)
         {
             InitializeComponent();
+            this.CenterToParent();
 
             pathTextBox.Text = path;
             workSheetSelect.Text = workSheet;

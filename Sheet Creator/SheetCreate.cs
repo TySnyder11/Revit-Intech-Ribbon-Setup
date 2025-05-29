@@ -32,9 +32,22 @@ namespace Intech
             return Result.Succeeded;
         }
     }
+
     
     public class SheetActualCreate
     {
+        public static string renumbHelper(List<ViewSheet> viewSheets, string number)
+        {
+            foreach (ViewSheet viewSheet in viewSheets)
+            {
+                if (viewSheet.SheetNumber.Equals(number))
+                {
+                    number += "(copy)";
+                    renumbHelper(viewSheets, number);
+                }
+            }
+            return number;
+        }
         public static Result Run(ExternalCommandData commandData, List<ViewPlan> Selected)
         {
             UIApplication uiapp = commandData.Application;
@@ -114,7 +127,7 @@ namespace Intech
                 //Set selected parameters
                 foreach (Parameter p in title_block[0].Parameters)
                 {
-                    if (form.ParameterCheckList.CheckedItems.Contains(p.Definition.Name))
+                    if (form.ParameterCheckList.CheckedItems.Contains(p.Definition.Name) && !p.IsReadOnly)
                         p.Set(1);
                     else if (!p.IsReadOnly)
                         p.Set(0);
@@ -237,7 +250,14 @@ namespace Intech
 
                 //Set sheet number
                 string numb = form.TradeAbriviation.Text + DisciplineValue[form.Discipline.Text].Item1.ToString().Replace("\r", "") + form.MiddleSheetNumber.Text + levelNumber + "." + areaNumber;
-                newsheet.SheetNumber = numb;
+
+                List<ViewSheet> sheets = new FilteredElementCollector(doc).OfClass(typeof(ViewSheet))
+                    .WhereElementIsNotElementType()
+                    .ToElements()
+                    .Cast<ViewSheet>()
+                    .ToList();
+
+                newsheet.SheetNumber = renumbHelper(sheets, numb);
 
                 //get center of sheet
                 XYZ xYZ = new XYZ();
@@ -274,7 +294,7 @@ namespace Intech
                 try
                 {
                     //change viewport to correct scale
-                    viewport.ChangeTypeId(new ElementId(int.Parse(scales[sheetscale.Remove(0, 1).Remove(sheetscale.Length - 2, 1)].Item1)));
+                    viewport.ChangeTypeId(new ElementId(Int64.Parse(scales[sheetscale.Remove(0, 1).Remove(sheetscale.Length - 2, 1)].Item1)));
                 }
                 catch
                 {

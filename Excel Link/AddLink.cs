@@ -20,6 +20,7 @@ namespace Excel_Link
         public AddLink(Autodesk.Revit.DB.Transaction t)
         {
             InitializeComponent();
+            this.CenterToParent();
             trans = t;
 
             currentSheetCheck.Checked = true;
