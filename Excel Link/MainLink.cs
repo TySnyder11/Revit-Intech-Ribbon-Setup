@@ -3,13 +3,9 @@ using Autodesk.Revit.UI;
 using OfficeOpenXml;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Reflection;
 using System.Windows.Forms;
-using System.Windows.Media.Imaging;
-using AW = Autodesk.Windows;
 
 namespace Intech
 {
@@ -23,7 +19,8 @@ namespace Intech
         public Result Execute(ExternalCommandData commandData, ref string message, ElementSet elements)
         {
             UIApplication uiApp = commandData.Application;
-            doc = uiApp.ActiveUIDocument.Document;
+            uidoc = uiApp.ActiveUIDocument;
+            doc = uidoc.Document;
             Transaction t = new Transaction(doc, "Excel Link");
             ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
             Excel_Link.ExcelLinkUI excelLinkUI = new Excel_Link.ExcelLinkUI(t);
@@ -177,7 +174,7 @@ namespace Intech
             string user = Environment.UserName; // Get the current user's name
 
             // Append the new link to the save file
-            appendSave(new string[] { doc.Title, path, workSheet, area, viewSheet, timeStamp, user, schedule});
+            appendSave(new string[] { doc.Title, path, workSheet, area, viewSheet, timeStamp, user, schedule });
         }
 
         public static void createSaveFile()
@@ -191,6 +188,12 @@ namespace Intech
                     sw.WriteLine("Project\tPath\tWorksheet\tArea\tViewSheet\tTimestamp\tUser\tSchedule");
                 }
             }
+        }
+
+        public static string getSaveFile()
+        {
+            string[] localSettings = File.ReadAllLines(settingsFile);
+            return localSettings[1].Trim();
         }
 
         public static int findLineIndexFromDataRow(string[] dataRow)
@@ -210,6 +213,13 @@ namespace Intech
                 }
             }
             return -1;
+        }
+
+        public static void changeSaveFile(string newPath)
+        {
+            string[] localSettings = File.ReadAllLines(settingsFile);
+            localSettings[1] = newPath;
+            File.WriteAllLines(settingsFile, localSettings);
         }
     }
 }

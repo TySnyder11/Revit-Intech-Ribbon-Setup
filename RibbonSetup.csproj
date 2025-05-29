@@ -113,6 +113,12 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Excel Link\EditLink.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Excel Link\EditLink.Designer.cs">
+      <DependentUpon>EditLink.cs</DependentUpon>
+    </Compile>
     <Compile Include="Excel Link\AddLink.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -125,6 +131,12 @@
     </Compile>
     <Compile Include="Excel Link\ExcelLink.Designer.cs">
       <DependentUpon>ExcelLink.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Excel Link\linkSettings.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Excel Link\linkSettings.Designer.cs">
+      <DependentUpon>linkSettings.cs</DependentUpon>
     </Compile>
     <Compile Include="Excel Link\MainLink.cs" />
     <Compile Include="Properties\Settings.Designer.cs">
@@ -187,11 +199,17 @@
     <EmbeddedResource Include="DependentView\DependentViewForm.resx">
       <DependentUpon>DependentViewForm.cs</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="Excel Link\EditLink.resx">
+      <DependentUpon>EditLink.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Excel Link\AddLink.resx">
       <DependentUpon>AddLink.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Excel Link\ExcelLink.resx">
       <DependentUpon>ExcelLink.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Excel Link\linkSettings.resx">
+      <DependentUpon>linkSettings.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>

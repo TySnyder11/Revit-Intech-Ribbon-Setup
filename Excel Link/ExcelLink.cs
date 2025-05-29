@@ -1,20 +1,10 @@
 ﻿using Autodesk.Revit.DB;
-using OfficeOpenXml;
-using OfficeOpenXml.Style;
-using OfficeOpenXml.Table;
 using System;
-using System.Collections.Generic;
-using System.ComponentModel;
 using System.Data;
-using System.Drawing;
 using System.Globalization;
 using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
-using static Autodesk.Revit.DB.SpecTypeId;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement.TaskbarClock;
 
 namespace Excel_Link
 {
@@ -71,6 +61,15 @@ namespace Excel_Link
                     }
                 }
             }
+
+            FolderTextBox.Text = string.Empty;
+            FileTextBox.Text = string.Empty;
+            StatusTextBox.Text = string.Empty;
+            workSheetTextBox.Text = string.Empty;
+            AreaTextBox.Text = string.Empty;
+            ScheduleTextBox.Text = string.Empty;
+            ViewTextBox.Text = string.Empty;
+
         }
 
         private void appendInfoGrid(string name, string status, string lastUpdate, string fileName)
@@ -81,6 +80,7 @@ namespace Excel_Link
         private void InfoGrid_CellClick(object sender, DataGridViewCellEventArgs e)
         {
             int row = e.RowIndex;
+            if (row == -1) return;
             selected = data[row];
             string excelPath = selected[1];
             string workSheet = selected[2];
@@ -113,9 +113,9 @@ namespace Excel_Link
             }
 
 
-                //get status
+            //get status
 
-                DateTime lastImport = DateTime.ParseExact(lastUpdate, "yyyyMMdd_HHmmss", CultureInfo.InvariantCulture);
+            DateTime lastImport = DateTime.ParseExact(lastUpdate, "yyyyMMdd_HHmmss", CultureInfo.InvariantCulture);
             string status = "";
             if (File.Exists(excelPath))
             {
@@ -147,7 +147,7 @@ namespace Excel_Link
                 t.Commit();
                 int line = Intech.linkUI.findLineIndexFromDataRow(selected);
                 Intech.linkUI.removeLineFromSave(line);
-                Intech.linkUI.newLink(FolderTextBox.Text + '\\' + FileTextBox.Text, 
+                Intech.linkUI.newLink(FolderTextBox.Text + '\\' + FileTextBox.Text,
                     workSheetTextBox.Text, AreaTextBox.Text, ViewTextBox.Text, ScheduleTextBox.Text);
                 InfoGrid.Rows.Clear();
                 loadSaveFile();
@@ -159,7 +159,7 @@ namespace Excel_Link
             if (!string.IsNullOrEmpty(StatusTextBox.Text))
             {
                 ViewSchedule schedule = Intech.linkUI.getScheduleFromName(ScheduleTextBox.Text);
-                if ( schedule != null)
+                if (schedule != null)
                 {
                     t.Start("Remove Sheet");
                     Intech.linkUI.doc.Delete(schedule.Id);
@@ -176,7 +176,7 @@ namespace Excel_Link
         private void OpEx_Click(object sender, EventArgs e)
         {
             if (!string.IsNullOrEmpty(StatusTextBox.Text))
-            { 
+            {
                 string path = FolderTextBox.Text + '\\' + FileTextBox.Text;
                 if (File.Exists(path))
                 {
@@ -195,14 +195,45 @@ namespace Excel_Link
 
         private void NewLnk_Click(object sender, EventArgs e)
         {
+            EditLink editLinkForm = new EditLink(FolderTextBox.Text + '\\' + FileTextBox.Text,
+                workSheetTextBox.Text, AreaTextBox.Text, ScheduleTextBox.Text, ViewTextBox.Text);
+            if (editLinkForm.ShowDialog(this) == DialogResult.OK)
+            {
+                string path = editLinkForm.pathTextBox.Text;
+                string workSheet = editLinkForm.workSheetSelect.Text;
+                string area = editLinkForm.areaSelect.Text;
+                string name = editLinkForm.nameTextBox.Text;
+                string sheet = editLinkForm.sheetSelect.Text;
 
+                t.Start("Edit Link Schedule");
+                string scheduleName = Intech.Excel.Update(path, ScheduleTextBox.Text, name, workSheet, area);
+                t.Commit();
+
+                if (scheduleName != null)
+                {
+                    int line = Intech.linkUI.findLineIndexFromDataRow(selected);
+                    Intech.linkUI.removeLineFromSave(line);
+                    Intech.linkUI.newLink(path, workSheet, area, sheet, scheduleName);
+                    InfoGrid.Rows.Clear();
+                    loadSaveFile();
+                }
+            }
         }
 
         private void OpSh_Click(object sender, EventArgs e)
         {
-            t.Start("Set Active View Sheet");
             Intech.linkUI.setActiveViewSheet(ViewTextBox.Text);
-            t.Commit();
+        }
+
+        private void Settings_Click(object sender, EventArgs e)
+        {
+            linkSettings settingsForm = new linkSettings();
+            if (settingsForm.ShowDialog(this) == DialogResult.OK)
+            {
+                Intech.linkUI.changeSaveFile(settingsForm.pathTextBox.Text);
+                InfoGrid.Rows.Clear();
+                loadSaveFile();
+            }
         }
     }
 }

@@ -1,20 +1,12 @@
 ﻿using Autodesk.Revit.DB;
-using Autodesk.Revit.DB.Architecture;
 using Autodesk.Revit.UI;
-using Autodesk.Revit.UI.Events;
 using OfficeOpenXml;
 using OfficeOpenXml.Style;
 using System;
 using System.Collections.Generic;
-using System.Data;
-using System.Diagnostics;
 using System.Drawing;
 using System.Globalization;
 using System.IO;
-using System.Linq;
-using System.Windows.Forms;
-using System.Windows.Media.Media3D;
-using System.Xml.Linq;
 
 namespace Intech
 {
@@ -50,7 +42,7 @@ namespace Intech
             foreach (ViewSheet e in new FilteredElementCollector(doc).OfClass(typeof(ViewSheet))
                 .WhereElementIsNotElementType().ToElements())
             {
-                if ((e.SheetNumber + " - " + e.Name).Equals(viewName)) 
+                if ((e.SheetNumber + " - " + e.Name).Equals(viewName))
                 {
                     sheet = e;
                 }
@@ -81,30 +73,76 @@ namespace Intech
             foreach (ViewSchedule e in new FilteredElementCollector(doc).OfClass(typeof(ViewSchedule))
                 .WhereElementIsNotElementType().ToElements())
             {
-                if (e.Name.Equals(scheduleName)) 
+                if (e.Name.Equals(scheduleName))
+                {
+                    //get schedule
+                    schedule = e;
+                }
+            }
+
+            xlsxToSchedule(worksheet, schedule, rangeName);
+        }
+        public static string Update(string xlsx, string scheduleName, string newName, string worksheetName, string rangeName)
+        {
+            ExcelPackage excel = new ExcelPackage(new FileInfo(xlsx));
+            ExcelWorksheets worksheets = excel.Workbook.Worksheets;
+            ExcelWorksheet worksheet = null;
+            foreach (ExcelWorksheet ws in worksheets)
+            {
+                if (ws.Name.Equals(worksheetName))
+                {
+                    worksheet = ws;
+                    break;
+                }
+            }
+            Document doc = linkUI.doc;
+            ViewSchedule schedule = null;
+            foreach (ViewSchedule e in new FilteredElementCollector(doc).OfClass(typeof(ViewSchedule))
+                .WhereElementIsNotElementType().ToElements())
+            {
+                if (e.Name.Equals(scheduleName))
                 {
                     //get schedule
                     schedule = e;
                 }
             }
             schedule.GetTableData().GetSectionData(SectionType.Header).Dispose();
-            
+
+            //rename schedule
+            if (schedule == null)
+            {
+                TaskDialog.Show("Error", "Schedule with name " + scheduleName + " not found. Make sure person who added has sunk and there has not been a name change to the schedule");
+                return null;
+            }
+
+            if (newName != schedule.Name)
+            {
+                schedule.Name = renameHelper(newName, new FilteredElementCollector(doc).OfClass(typeof(ViewSchedule)).WhereElementIsNotElementType().ToElements());
+            }
+
             xlsxToSchedule(worksheet, schedule, rangeName);
+
+            return schedule.Name;
         }
-        public static bool xlsxToSchedule(ExcelWorksheet worksheet, ViewSchedule schedule, string rangeName) {
+
+        public static bool xlsxToSchedule(ExcelWorksheet worksheet, ViewSchedule schedule, string rangeName)
+        {
 
             //get table info
             TableSectionData tableData = schedule.GetTableData().GetSectionData(SectionType.Header);
 
             //get range to link
             ExcelNamedRange range = null;
-            foreach (ExcelNamedRange r in worksheet.Names) {
-                if ((r.Name).Contains(rangeName)) {
-                    range = r; 
+            foreach (ExcelNamedRange r in worksheet.Names)
+            {
+                if ((r.Name).Contains(rangeName))
+                {
+                    range = r;
                     break;
                 }
             }
-            if (range == null) {
+            if (range == null)
+            {
                 TaskDialog.Show("Error", "No range named " + rangeName + " found in the worksheet.");
                 return false;
             }
@@ -115,7 +153,7 @@ namespace Intech
             Double totalWidth = 0;
             for (int i = range.Start.Column; i < nCol + range.Start.Column; i++)
             {
-                if (worksheet.Column(i).Hidden) 
+                if (worksheet.Column(i).Hidden)
                 {
                     hidden.Add(i);
                     continue;
@@ -186,7 +224,7 @@ namespace Intech
                 tableMergedCell.Bottom = excelRange.End.Row - range.Start.Row;
                 TableMergedCell check = tableData.GetMergedCell(tableMergedCell.Top, tableMergedCell.Left);
                 if (0 <= tableMergedCell.Left && tableMergedCell.Left <= nCol
-                    && 0 <= tableMergedCell.Top && tableMergedCell.Top <= nRow 
+                    && 0 <= tableMergedCell.Top && tableMergedCell.Top <= nRow
                     && !check.Equals(tableMergedCell))
                 {
                     tableData.MergeCells(tableMergedCell);
@@ -195,14 +233,16 @@ namespace Intech
 
             //add text
             int colIndex = 0;
-            for (int i = 0; i < nCol; i++) {
-                if (worksheet.Column(colIndex + range.Start.Column).Hidden) 
+            for (int i = 0; i < nCol; i++)
+            {
+                if (worksheet.Column(colIndex + range.Start.Column).Hidden)
                 {
                     i--;
                     colIndex++;
                     continue;
                 }
-                for (int j = 0; j < nRow; j++) {
+                for (int j = 0; j < nRow; j++)
+                {
                     string text = range.GetCellValue<String>(j, colIndex);
                     if (!string.IsNullOrEmpty(text))
                     {
@@ -231,7 +271,7 @@ namespace Intech
 
                     //Text alignment
                     HorizontalAlignmentStyle x = HorizontalAlignmentStyle.Left; //base case center
-                    switch ((int)style.HorizontalAlignment) 
+                    switch ((int)style.HorizontalAlignment)
                     {
                         case 1: x = HorizontalAlignmentStyle.Left; break; // left
                         case 2: x = HorizontalAlignmentStyle.Center; break; // center
@@ -241,10 +281,10 @@ namespace Intech
                     newStyle.FontHorizontalAlignment = x;
 
                     //works due to there similar numbering for vert alignment
-                    newStyle.FontVerticalAlignment = (VerticalAlignmentStyle)((int)style.VerticalAlignment * 4); 
+                    newStyle.FontVerticalAlignment = (VerticalAlignmentStyle)((int)style.VerticalAlignment * 4);
 
                     //border
-                    copyBorder(newStyle, worksheet,j + range.Start.Row, colIndex + range.Start.Column);
+                    copyBorder(newStyle, worksheet, j + range.Start.Row, colIndex + range.Start.Column);
 
                     //check for notes cell and fix
                     if (newStyle.FontHorizontalAlignment == HorizontalAlignmentStyle.Left && !string.IsNullOrEmpty(tableData.GetCellText(j, i)))
@@ -273,7 +313,7 @@ namespace Intech
                                     break;
                                 }
                                 cellwidth += (int)(worksheet.Column(copyColumnIndex + range.Start.Column).Width * 7.5);
-                                
+
                             }
                             TableMergedCell check = tableData.GetMergedCell(j, i);
                             TableMergedCell tableMergedCell = new TableMergedCell(j, i, j, p);
@@ -283,7 +323,7 @@ namespace Intech
                             }
                         }
                     }
- 
+
                     tableData.SetCellStyle(j, i, newStyle);
                     if (i == 0)
                     {
@@ -296,10 +336,11 @@ namespace Intech
                 tableData.SetColumnWidthInPixels(i, width);
                 colIndex++;
             }
-                    return true;
+            return true;
         }
 
-        private static ViewSchedule createBlankSchedule(string name) {
+        private static ViewSchedule createBlankSchedule(string name)
+        {
             Document doc = linkUI.doc;
             ViewSchedule schedule = ViewSchedule.CreateKeySchedule(doc, new ElementId(BuiltInCategory.OST_GenericModel));
             //rename existing schedules to avoid name conflicts
@@ -342,7 +383,8 @@ namespace Intech
             return name;
         }
 
-        private static void copyBorder(TableCellStyle scdB, ExcelWorksheet worksheet, int row, int column) {
+        private static void copyBorder(TableCellStyle scdB, ExcelWorksheet worksheet, int row, int column)
+        {
             Border excB = worksheet.Cells[row, column].Style.Border;
             ElementId top = getRevitBoarderIDFromExcel(excB.Top);
             int tRow = row;
@@ -371,9 +413,9 @@ namespace Intech
                 while (
                     rColumn <= worksheet.Columns.EndColumn
                     && (worksheet.Column(rColumn).Hidden
-                    ||  mergeCheck(worksheet, row, column, row, rColumn)))
+                    || mergeCheck(worksheet, row, column, row, rColumn)))
                 {
-                    rColumn ++;
+                    rColumn++;
                 }
                 if (rColumn != column + 1)
                 {
@@ -393,8 +435,8 @@ namespace Intech
             if (left == null)
             {
                 while (
-                    lColumn >= 2 
-                    && (worksheet.Column(lColumn).Hidden 
+                    lColumn >= 2
+                    && (worksheet.Column(lColumn).Hidden
                     || mergeCheck(worksheet, row, lColumn, row, column)))
                 {
                     lColumn--;
@@ -410,8 +452,9 @@ namespace Intech
             }
         }
 
-        private static ElementId getRevitBoarderIDFromExcel(ExcelBorderItem border) {
-            if (border == null || border.Color.Rgb == null) 
+        private static ElementId getRevitBoarderIDFromExcel(ExcelBorderItem border)
+        {
+            if (border == null || border.Color.Rgb == null)
             {
                 return null;
             }
@@ -435,14 +478,14 @@ namespace Intech
                 case 4: weight = 4; break;  //thin
                 case 11: weight = 6; break; //medium 
                 case 10: weight = 7; break; //thick
-                
+
                 default: weight = 4; break; //default (in case line type not recognized)
             }
 
             ElementId lineID = null;
             foreach (Category cal in graphicStyleCategories)
             {
-                if (cal.Name == "RGB " + r + " ," + g + " ," + b + ", Weight " + weight) 
+                if (cal.Name == "RGB " + r + " ," + g + " ," + b + ", Weight " + weight)
                 {
                     lineID = cal.Id;
                 }
@@ -458,7 +501,8 @@ namespace Intech
             return lineID;
         }
 
-        private static ElementId createLineType(int weight, Autodesk.Revit.DB.Color color) {
+        private static ElementId createLineType(int weight, Autodesk.Revit.DB.Color color)
+        {
             int r = color.Red;
             int g = color.Green;
             int b = color.Blue;
@@ -495,7 +539,7 @@ namespace Intech
             switch (fontName)
             {
                 case "Calibri": offBy = 1.25; break; //sheet side is larger by 3/64"
-                
+
                 default: offBy = 0; break; //not off by anything //fonts like ariel
             }
 
@@ -504,10 +548,10 @@ namespace Intech
         }
 
         private static bool mergeCheck(
-            ExcelWorksheet worksheet, 
-            int startRow, 
-            int startColumn, 
-            int endRow, 
+            ExcelWorksheet worksheet,
+            int startRow,
+            int startColumn,
+            int endRow,
             int endColumn)
         {
             if (!worksheet.Cells[startRow, startColumn, endRow, endColumn].Merge)
@@ -522,15 +566,15 @@ namespace Intech
             {
                 ExcelRange range = worksheet.Cells[r];
 
-                if (range.Start.Row <= startRow 
-                    && endRow <= range.End.Row 
+                if (range.Start.Row <= startRow
+                    && endRow <= range.End.Row
                     && range.Start.Column <= startColumn
                     && endColumn <= range.End.Column)
                 {
                     return true;
                 }
             }
-            
+
             return false;
         }
     }

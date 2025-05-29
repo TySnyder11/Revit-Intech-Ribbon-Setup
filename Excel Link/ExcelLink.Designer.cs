@@ -33,7 +33,6 @@
             this.Status = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.LastUpdate = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.PathColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.ExcelFileDialog = new System.Windows.Forms.OpenFileDialog();
             this.create = new System.Windows.Forms.Button();
             this.Close = new System.Windows.Forms.Button();
             this.OpEx = new System.Windows.Forms.Button();
@@ -102,12 +101,6 @@
             this.PathColumn.ReadOnly = true;
             this.PathColumn.Width = 350;
             // 
-            // ExcelFileDialog
-            // 
-            this.ExcelFileDialog.FileName = "Excel Link";
-            this.ExcelFileDialog.Filter = "Excel Files|*.xls;*.xlsx;*.xlsm|All files (*.*)|*.*";
-            this.ExcelFileDialog.Title = "Excel Link";
-            // 
             // create
             // 
             this.create.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
@@ -159,7 +152,7 @@
             this.RemLnk.Name = "RemLnk";
             this.RemLnk.Size = new System.Drawing.Size(85, 23);
             this.RemLnk.TabIndex = 7;
-            this.RemLnk.Text = "Remove Link";
+            this.RemLnk.Text = "Remove";
             this.RemLnk.UseVisualStyleBackColor = true;
             this.RemLnk.Click += new System.EventHandler(this.RemLnk_Click);
             // 
@@ -170,7 +163,7 @@
             this.NewLnk.Name = "NewLnk";
             this.NewLnk.Size = new System.Drawing.Size(78, 23);
             this.NewLnk.TabIndex = 6;
-            this.NewLnk.Text = "Change Link";
+            this.NewLnk.Text = "Reload From";
             this.NewLnk.UseVisualStyleBackColor = true;
             this.NewLnk.Click += new System.EventHandler(this.NewLnk_Click);
             // 
@@ -181,7 +174,7 @@
             this.Up.Name = "Up";
             this.Up.Size = new System.Drawing.Size(75, 23);
             this.Up.TabIndex = 5;
-            this.Up.Text = "Update";
+            this.Up.Text = "Reload";
             this.Up.UseVisualStyleBackColor = true;
             this.Up.Click += new System.EventHandler(this.Up_Click);
             // 
@@ -232,6 +225,7 @@
             this.Settings.TabIndex = 14;
             this.Settings.Text = "Settings";
             this.Settings.UseVisualStyleBackColor = true;
+            this.Settings.Click += new System.EventHandler(this.Settings_Click);
             // 
             // FolderTextBox
             // 
@@ -334,7 +328,6 @@
         #endregion
         private System.Windows.Forms.DataGridView InfoGrid;
         private System.Windows.Forms.Button create;
-        private System.Windows.Forms.OpenFileDialog ExcelFileDialog;
         private System.Windows.Forms.Button OpEx;
         private System.Windows.Forms.Button Close;
         private System.Windows.Forms.Button OpSh;
