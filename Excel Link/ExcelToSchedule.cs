@@ -1,76 +1,149 @@
 ﻿using Autodesk.Revit.DB;
-using Autodesk.Revit.DB.Architecture;
 using Autodesk.Revit.UI;
-using Autodesk.Revit.UI.Events;
 using OfficeOpenXml;
 using OfficeOpenXml.Style;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Drawing;
 using System.Globalization;
 using System.IO;
-using System.Linq;
-using System.Windows.Forms;
-using System.Windows.Media.Media3D;
 
 namespace Intech
 {
     [Autodesk.Revit.Attributes.Transaction(Autodesk.Revit.Attributes.TransactionMode.Manual)]//EVERY COMMAND REQUIRES THIS!
     public class Excel
     {
-        public static string getExcelFile()
-        {
-            OpenFileDialog excelFileDialog = new OpenFileDialog();
-            excelFileDialog.Filter = "Excel Files|*.xls;*.xlsx;*.xlsm|All files (*.*)|*.*";
-            excelFileDialog.Title = "Select Excel File";
-            string excelFile = string.Empty;
-            if (excelFileDialog.ShowDialog() == DialogResult.OK)
-            {
-                excelFile = excelFileDialog.FileName;
-            }
-            else
-            {
-                TaskDialog.Show("Error", "No file selected.");
-                return null;
-            }
-            return excelFile;
-        }
-
-        public static void saveLinkInfo(string file) {
-            Document doc = linkUI.doc;
-            doc.GetCloudModelPath();
-
-        }
 
         public static void updateLinkInfo(string file)
         {
 
         }
 
-        public static bool xlsxToSchedule(string xlsx, string name, Transaction t) {
-            ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
+        public static string newLink(string xlsx, string name, string worksheetName, string rangeName, string viewName)
+        {
             //create schedule
             ViewSchedule schedule = createBlankSchedule(name);
+
+            //get xlsx data 
+            ExcelPackage excel = new ExcelPackage(new FileInfo(xlsx));
+            ExcelWorksheets worksheets = excel.Workbook.Worksheets;
+            ExcelWorksheet worksheet = null;
+            foreach (ExcelWorksheet ws in worksheets)
+            {
+                if (ws.Name.Equals(worksheetName))
+                {
+                    worksheet = ws;
+                    break;
+                }
+            }
+            Document doc = linkUI.doc;
+            //get all sheets from doc
+            ViewSheet sheet = null;
+            foreach (ViewSheet e in new FilteredElementCollector(doc).OfClass(typeof(ViewSheet))
+                .WhereElementIsNotElementType().ToElements())
+            {
+                if ((e.SheetNumber + " - " + e.Name).Equals(viewName))
+                {
+                    sheet = e;
+                }
+            }
+
+            xlsxToSchedule(worksheet, schedule, rangeName);
+            XYZ origin = new XYZ(0, 0, 0);
+            ScheduleSheetInstance instance = ScheduleSheetInstance.Create(linkUI.doc, sheet.Id, schedule.Id, origin);
+
+            return schedule.Name;
+        }
+
+        public static void Update(string xlsx, string scheduleName, string worksheetName, string rangeName)
+        {
+            ExcelPackage excel = new ExcelPackage(new FileInfo(xlsx));
+            ExcelWorksheets worksheets = excel.Workbook.Worksheets;
+            ExcelWorksheet worksheet = null;
+            foreach (ExcelWorksheet ws in worksheets)
+            {
+                if (ws.Name.Equals(worksheetName))
+                {
+                    worksheet = ws;
+                    break;
+                }
+            }
+            Document doc = linkUI.doc;
+            ViewSchedule schedule = null;
+            foreach (ViewSchedule e in new FilteredElementCollector(doc).OfClass(typeof(ViewSchedule))
+                .WhereElementIsNotElementType().ToElements())
+            {
+                if (e.Name.Equals(scheduleName))
+                {
+                    //get schedule
+                    schedule = e;
+                }
+            }
+
+            xlsxToSchedule(worksheet, schedule, rangeName);
+        }
+        public static string Update(string xlsx, string scheduleName, string newName, string worksheetName, string rangeName)
+        {
+            ExcelPackage excel = new ExcelPackage(new FileInfo(xlsx));
+            ExcelWorksheets worksheets = excel.Workbook.Worksheets;
+            ExcelWorksheet worksheet = null;
+            foreach (ExcelWorksheet ws in worksheets)
+            {
+                if (ws.Name.Equals(worksheetName))
+                {
+                    worksheet = ws;
+                    break;
+                }
+            }
+            Document doc = linkUI.doc;
+            ViewSchedule schedule = null;
+            foreach (ViewSchedule e in new FilteredElementCollector(doc).OfClass(typeof(ViewSchedule))
+                .WhereElementIsNotElementType().ToElements())
+            {
+                if (e.Name.Equals(scheduleName))
+                {
+                    //get schedule
+                    schedule = e;
+                }
+            }
+            schedule.GetTableData().GetSectionData(SectionType.Header).Dispose();
+
+            //rename schedule
+            if (schedule == null)
+            {
+                TaskDialog.Show("Error", "Schedule with name " + scheduleName + " not found. Make sure person who added has sunk and there has not been a name change to the schedule");
+                return null;
+            }
+
+            if (newName != schedule.Name)
+            {
+                schedule.Name = renameHelper(newName, new FilteredElementCollector(doc).OfClass(typeof(ViewSchedule)).WhereElementIsNotElementType().ToElements());
+            }
+
+            xlsxToSchedule(worksheet, schedule, rangeName);
+
+            return schedule.Name;
+        }
+
+        public static bool xlsxToSchedule(ExcelWorksheet worksheet, ViewSchedule schedule, string rangeName)
+        {
 
             //get table info
             TableSectionData tableData = schedule.GetTableData().GetSectionData(SectionType.Header);
 
-            //get xlsx data 
-            ExcelPackage excel = new ExcelPackage(new FileInfo(xlsx));
-            ExcelWorksheet worksheet = excel.Workbook.Worksheets[0];
-
-            
             //get range to link
             ExcelNamedRange range = null;
-            foreach (ExcelNamedRange r in worksheet.Names) {
-                if ((r.Name).Contains("Print_Area")) {
-                    range = r; 
+            foreach (ExcelNamedRange r in worksheet.Names)
+            {
+                if ((r.Name).Contains(rangeName))
+                {
+                    range = r;
                     break;
                 }
             }
-            if (range == null) {
-                TaskDialog.Show("Error", "No named range found in the worksheet.");
+            if (range == null)
+            {
+                TaskDialog.Show("Error", "No range named " + rangeName + " found in the worksheet.");
                 return false;
             }
             int nCol = range.Columns;
@@ -80,24 +153,33 @@ namespace Intech
             Double totalWidth = 0;
             for (int i = range.Start.Column; i < nCol + range.Start.Column; i++)
             {
-                if (worksheet.Column(i + range.Start.Column).Hidden) 
+                if (worksheet.Column(i).Hidden)
                 {
                     hidden.Add(i);
                     continue;
                 }
-                totalWidth += worksheet.Column(i).Width * 7.5 + 5;
+                totalWidth += worksheet.Column(i).Width * 7.5 + 1;
             }
             nCol -= hidden.Count;
 
             //set size
             schedule.GetTableData().GetSectionData(SectionType.Body).SetColumnWidthInPixels(0, (int)(totalWidth));
 
+            while (tableData.NumberOfColumns > nCol)
+            {
+                tableData.RemoveColumn(1);
+            }
+            while (tableData.NumberOfRows > nRow)
+            {
+                tableData.RemoveRow(1);
+            }
+
             //Make cells and populate data
-            for (int i = 1; i < nCol; i++)
+            for (int i = 1; tableData.NumberOfColumns < nCol; i++)
             {
                 tableData.InsertColumn(i);
             }
-            for (int i = 1; i < nRow; i++)
+            for (int i = 1; tableData.NumberOfRows < nRow; i++)
             {
                 tableData.InsertRow(i);
             }
@@ -123,7 +205,7 @@ namespace Intech
                         hBefore++;
                         continue;
                     }
-                    if (startCol < i && i < endCol)
+                    if (startCol < i && i <= endCol)
                     {
                         hInside++;
                         continue;
@@ -136,23 +218,31 @@ namespace Intech
 
                 //Merge
                 TableMergedCell tableMergedCell = new TableMergedCell();
-                tableMergedCell.Left = startCol + range.Start.Column - hBefore - 2;
-                tableMergedCell.Top = excelRange.Start.Row + range.Start.Row - 2;
-                tableMergedCell.Right = endCol + range.Start.Column - hBefore - hInside - 2;
-                tableMergedCell.Bottom = excelRange.End.Row + range.Start.Row - 2;
-                tableData.MergeCells(tableMergedCell);
+                tableMergedCell.Left = startCol - range.Start.Column - hBefore;
+                tableMergedCell.Top = excelRange.Start.Row - range.Start.Row;
+                tableMergedCell.Right = endCol - range.Start.Column - hBefore - hInside;
+                tableMergedCell.Bottom = excelRange.End.Row - range.Start.Row;
+                TableMergedCell check = tableData.GetMergedCell(tableMergedCell.Top, tableMergedCell.Left);
+                if (0 <= tableMergedCell.Left && tableMergedCell.Left <= nCol
+                    && 0 <= tableMergedCell.Top && tableMergedCell.Top <= nRow
+                    && !check.Equals(tableMergedCell))
+                {
+                    tableData.MergeCells(tableMergedCell);
+                }
             }
 
             //add text
             int colIndex = 0;
-            for (int i = 0; i < nCol; i++) {
-                if (worksheet.Column(colIndex + range.Start.Column).Hidden) 
+            for (int i = 0; i < nCol; i++)
+            {
+                if (worksheet.Column(colIndex + range.Start.Column).Hidden)
                 {
                     i--;
                     colIndex++;
                     continue;
                 }
-                for (int j = 0; j < nRow; j++) {
+                for (int j = 0; j < nRow; j++)
+                {
                     string text = range.GetCellValue<String>(j, colIndex);
                     if (!string.IsNullOrEmpty(text))
                     {
@@ -160,7 +250,7 @@ namespace Intech
                     }
 
                     //Style cell
-                    ExcelStyle Style = worksheet.Cells[j + range.Start.Row, colIndex + range.Start.Column].Style;
+                    ExcelStyle style = worksheet.Cells[j + range.Start.Row, colIndex + range.Start.Column].Style;
                     TableCellStyle newStyle = new TableCellStyle();
                     TableCellStyleOverrideOptions options = new TableCellStyleOverrideOptions();
                     options.SetAllOverrides(true);
@@ -168,32 +258,38 @@ namespace Intech
                     newStyle.SetCellStyleOverrideOptions(options);
 
                     //font
-                    string fontName = Style.Font.Name;
+                    string fontName = style.Font.Name;
                     newStyle.FontName = fontName;
-                    newStyle.TextSize = revitFontWrongScaleFix(fontName, Style.Font.Size);
-                    newStyle.IsFontBold = Style.Font.Bold;
-                    newStyle.TextColor = ExcelColorToRevit(Style.Font.Color);
+                    newStyle.TextSize = revitFontWrongScaleFix(fontName, style.Font.Size);
+                    newStyle.IsFontBold = style.Font.Bold;
+                    newStyle.IsFontItalic = style.Font.Italic;
+                    newStyle.IsFontUnderline = style.Font.UnderLine;
+                    newStyle.TextColor = ExcelColorToRevit(style.Font.Color, "#FF000000");
+
+                    //background
+                    newStyle.BackgroundColor = ExcelColorToRevit(style.Fill.BackgroundColor, "#FFFFFFFF");
 
                     //Text alignment
                     HorizontalAlignmentStyle x = HorizontalAlignmentStyle.Left; //base case center
-                    switch ((int)Style.HorizontalAlignment) 
+                    switch ((int)style.HorizontalAlignment)
                     {
-                        case 1: break; // left
+                        case 1: x = HorizontalAlignmentStyle.Left; break; // left
                         case 2: x = HorizontalAlignmentStyle.Center; break; // center
                         case 4: x = HorizontalAlignmentStyle.Right; break; // right
+                        default: x = HorizontalAlignmentStyle.Left; break;
                     }
                     newStyle.FontHorizontalAlignment = x;
 
                     //works due to there similar numbering for vert alignment
-                    newStyle.FontVerticalAlignment = (VerticalAlignmentStyle)((int)Style.VerticalAlignment * 4); 
+                    newStyle.FontVerticalAlignment = (VerticalAlignmentStyle)((int)style.VerticalAlignment * 4);
 
                     //border
-                    copyBorder(newStyle, worksheet,j + range.Start.Row, colIndex + range.Start.Column);
+                    copyBorder(newStyle, worksheet, j + range.Start.Row, colIndex + range.Start.Column);
 
                     //check for notes cell and fix
                     if (newStyle.FontHorizontalAlignment == HorizontalAlignmentStyle.Left && !string.IsNullOrEmpty(tableData.GetCellText(j, i)))
                     {
-                        Font font = new Font(Style.Font.Name, (int)(Style.Font.Size));
+                        Font font = new Font(style.Font.Name, (int)(style.Font.Size));
 
                         using (Bitmap bitmap = new Bitmap(1, 1))
                         using (Graphics graphics = Graphics.FromImage(bitmap))
@@ -201,7 +297,7 @@ namespace Intech
                             int textSize = System.Windows.Forms.TextRenderer.MeasureText(text, font).Width + 10;
                             int cellwidth = tableData.GetColumnWidthInPixels(i);
                             int p = i;
-                            int copyColumnIndex = colIndex + 1;
+                            int copyColumnIndex = colIndex;
                             while (textSize > cellwidth && !worksheet.Cells[j + range.Start.Row, colIndex + range.Start.Column].Merge)
                             {
                                 if (worksheet.Column(copyColumnIndex + range.Start.Column).Hidden)
@@ -217,35 +313,39 @@ namespace Intech
                                     break;
                                 }
                                 cellwidth += (int)(worksheet.Column(copyColumnIndex + range.Start.Column).Width * 7.5);
-                                
+
                             }
-                            if (i != p)
+                            TableMergedCell check = tableData.GetMergedCell(j, i);
+                            TableMergedCell tableMergedCell = new TableMergedCell(j, i, j, p);
+                            if (i != p && check.Bottom == j + 1 && check.Right == i + 1)
                             {
-                                TableMergedCell tableMergedCell = new TableMergedCell(j, i, j, p);
                                 tableData.MergeCells(tableMergedCell);
                             }
                         }
                     }
- 
+
                     tableData.SetCellStyle(j, i, newStyle);
                     if (i == 0)
                     {
                         //Set row height
-                        int height = (int)(worksheet.Row(j + range.Start.Row).Height * 4 / 3) + 3;
+                        int height = (int)(worksheet.Row(j + range.Start.Row).Height * 4 / 3) + 1;
                         tableData.SetRowHeightInPixels(j, height);
                     }
                 }
-                int width = (int)(worksheet.Column(colIndex + range.Start.Column).Width * 7.5);
+                int width = (int)(worksheet.Column(colIndex + range.Start.Column).Width * 7.5 + 1);
                 tableData.SetColumnWidthInPixels(i, width);
                 colIndex++;
             }
-                    return true;
+            return true;
         }
 
-        private static ViewSchedule createBlankSchedule(string name) {
+        private static ViewSchedule createBlankSchedule(string name)
+        {
             Document doc = linkUI.doc;
             ViewSchedule schedule = ViewSchedule.CreateKeySchedule(doc, new ElementId(BuiltInCategory.OST_GenericModel));
-            //schedule.Name = name;
+            //rename existing schedules to avoid name conflicts
+            name = renameHelper(name, new FilteredElementCollector(doc).OfClass(typeof(ViewSchedule)).WhereElementIsNotElementType().ToElements());
+            schedule.Name = name;
             schedule.LookupParameter("View Template").Set("");
             ScheduleDefinition def = schedule.Definition;
 
@@ -270,7 +370,21 @@ namespace Intech
             return schedule;
         }
 
-        private static void copyBorder(TableCellStyle scdB, ExcelWorksheet worksheet, int row, int column) {
+        private static string renameHelper(string name, IList<Element> schedules)
+        {
+            foreach (Element view in schedules)
+            {
+                if (view.Name.Equals(name))
+                {
+                    name = view.Name + " - Copy";
+                    name = renameHelper(name, schedules);
+                }
+            }
+            return name;
+        }
+
+        private static void copyBorder(TableCellStyle scdB, ExcelWorksheet worksheet, int row, int column)
+        {
             Border excB = worksheet.Cells[row, column].Style.Border;
             ElementId top = getRevitBoarderIDFromExcel(excB.Top);
             int tRow = row;
@@ -299,9 +413,9 @@ namespace Intech
                 while (
                     rColumn <= worksheet.Columns.EndColumn
                     && (worksheet.Column(rColumn).Hidden
-                    ||  mergeCheck(worksheet, row, column, row, rColumn)))
+                    || mergeCheck(worksheet, row, column, row, rColumn)))
                 {
-                    rColumn ++;
+                    rColumn++;
                 }
                 if (rColumn != column + 1)
                 {
@@ -321,13 +435,13 @@ namespace Intech
             if (left == null)
             {
                 while (
-                    lColumn >= 2 
-                    && (worksheet.Column(lColumn).Hidden 
+                    lColumn >= 2
+                    && (worksheet.Column(lColumn).Hidden
                     || mergeCheck(worksheet, row, lColumn, row, column)))
                 {
                     lColumn--;
                 }
-                if (lColumn >= 2)
+                if (lColumn >= 1)
                 {
                     left = getRevitBoarderIDFromExcel(worksheet.Cells[row, lColumn].Style.Border.Right);
                 }
@@ -338,8 +452,9 @@ namespace Intech
             }
         }
 
-        private static ElementId getRevitBoarderIDFromExcel(ExcelBorderItem border) {
-            if (border == null || border.Color.Rgb == null) 
+        private static ElementId getRevitBoarderIDFromExcel(ExcelBorderItem border)
+        {
+            if (border == null || border.Color.Rgb == null)
             {
                 return null;
             }
@@ -350,7 +465,7 @@ namespace Intech
             CategoryNameMap graphicStyleCategories = lineCat.SubCategories;
 
             //get color
-            Autodesk.Revit.DB.Color color = ExcelColorToRevit(border.Color);
+            Autodesk.Revit.DB.Color color = ExcelColorToRevit(border.Color, "#FF000000");
             int r = color.Red;
             int g = color.Green;
             int b = color.Blue;
@@ -363,14 +478,14 @@ namespace Intech
                 case 4: weight = 4; break;  //thin
                 case 11: weight = 6; break; //medium 
                 case 10: weight = 7; break; //thick
-                
+
                 default: weight = 4; break; //default (in case line type not recognized)
             }
 
             ElementId lineID = null;
             foreach (Category cal in graphicStyleCategories)
             {
-                if (cal.Name == "RGB " + r + " ," + g + " ," + b + ", Weight " + weight) 
+                if (cal.Name == "RGB " + r + " ," + g + " ," + b + ", Weight " + weight)
                 {
                     lineID = cal.Id;
                 }
@@ -386,7 +501,8 @@ namespace Intech
             return lineID;
         }
 
-        private static ElementId createLineType(int weight, Autodesk.Revit.DB.Color color) {
+        private static ElementId createLineType(int weight, Autodesk.Revit.DB.Color color)
+        {
             int r = color.Red;
             int g = color.Green;
             int b = color.Blue;
@@ -401,12 +517,12 @@ namespace Intech
             return lineStyleCat.Id;
         }
 
-        private static Autodesk.Revit.DB.Color ExcelColorToRevit(ExcelColor ExcColor)
+        private static Autodesk.Revit.DB.Color ExcelColorToRevit(ExcelColor ExcColor, string defaultColorHex)
         {
-            string RGBhex = ExcColor.Rgb;
-            if (String.IsNullOrEmpty(RGBhex))
+            string RGBhex = ExcColor.LookupColor();
+            if (ExcColor.Indexed == 0)
             {
-                RGBhex = "#000000";
+                RGBhex = defaultColorHex;
             }
             int argb = Int32.Parse(RGBhex.Replace("#", ""), NumberStyles.HexNumber);
             System.Drawing.Color excColor = System.Drawing.Color.FromArgb(argb);
@@ -423,7 +539,7 @@ namespace Intech
             switch (fontName)
             {
                 case "Calibri": offBy = 1.25; break; //sheet side is larger by 3/64"
-                
+
                 default: offBy = 0; break; //not off by anything //fonts like ariel
             }
 
@@ -432,10 +548,10 @@ namespace Intech
         }
 
         private static bool mergeCheck(
-            ExcelWorksheet worksheet, 
-            int startRow, 
-            int startColumn, 
-            int endRow, 
+            ExcelWorksheet worksheet,
+            int startRow,
+            int startColumn,
+            int endRow,
             int endColumn)
         {
             if (!worksheet.Cells[startRow, startColumn, endRow, endColumn].Merge)
@@ -450,15 +566,15 @@ namespace Intech
             {
                 ExcelRange range = worksheet.Cells[r];
 
-                if (range.Start.Row <= startRow 
-                    && endRow <= range.End.Row 
+                if (range.Start.Row <= startRow
+                    && endRow <= range.End.Row
                     && range.Start.Column <= startColumn
                     && endColumn <= range.End.Column)
                 {
                     return true;
                 }
             }
-            
+
             return false;
         }
     }
