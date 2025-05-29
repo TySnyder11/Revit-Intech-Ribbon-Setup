@@ -47,11 +47,8 @@ namespace Excel_Link
                 {
                     string excelPath = instance[1];
                     string fileName = Path.GetFileNameWithoutExtension(excelPath);
-                    string sheet = instance[2];
-                    string area = instance[3];
-                    string viewSheet = instance[4];
+                    string sheet = instance[7];
                     string lastUpdate = instance[5];
-                    string user = instance[6];
                     DateTime lastImport = DateTime.ParseExact(lastUpdate, "yyyyMMdd_HHmmss", CultureInfo.InvariantCulture);
                     string time = lastImport.ToString("g");
                     if (File.Exists(excelPath))
@@ -80,27 +77,26 @@ namespace Excel_Link
         {
             InfoGrid.Rows.Add(name, status, lastUpdate, fileName);
         }
-
+        string[] selected = null;
         private void InfoGrid_CellClick(object sender, DataGridViewCellEventArgs e)
         {
             int row = e.RowIndex;
-            string[] selected = data[row];
+            selected = data[row];
             string excelPath = selected[1];
-            string sheet = selected[2];
+            string workSheet = selected[2];
             string area = selected[3];
             string viewSheet = selected[4];
             string lastUpdate = selected[5];
             string user = selected[6];
+            string sheet = selected[7];
 
             FolderTextBox.Text = Path.GetDirectoryName(excelPath);
-            FileTextBox.Text = Path.GetFileNameWithoutExtension(excelPath);
+            FileTextBox.Text = Path.GetFileName(excelPath);
             ScheduleTextBox.Text = sheet;
             AreaTextBox.Text = area;
-            workSheetTextBox.Text = sheet;
+            workSheetTextBox.Text = workSheet;
 
             //get schedule
-            t.Start();
-            t.Commit();
             Document doc = Intech.linkUI.doc;
             ViewSheet elm = new FilteredElementCollector(doc).OfClass(typeof(ViewSheet))
                 .WhereElementIsNotElementType()
@@ -135,7 +131,7 @@ namespace Excel_Link
             }
             else
             {
-                status = "File not found." + "Might be in local drive of " + user + ".";
+                status = "File not found." + "Might be in local files of " + user + ".";
             }
 
             StatusTextBox.Text = status;
@@ -143,12 +139,70 @@ namespace Excel_Link
 
         private void Up_Click(object sender, EventArgs e)
         {
-            if (!string.IsNullOrEmpty(StatusTextBox.Text))
+            if (!string.IsNullOrEmpty(StatusTextBox.Text) && !StatusTextBox.Text.Contains("File not found."))
             {
                 t.Start("Update Schedule");
-                Intech.Excel.Update(FolderTextBox.Text + FileTextBox.Text, 
-                    ScheduleTextBox.Text,workSheetTextBox.Text,AreaTextBox.Text);
+                Intech.Excel.Update(FolderTextBox.Text + '\\' + FileTextBox.Text,
+                    ScheduleTextBox.Text, workSheetTextBox.Text, AreaTextBox.Text);
+                t.Commit();
+                int line = Intech.linkUI.findLineIndexFromDataRow(selected);
+                Intech.linkUI.removeLineFromSave(line);
+                Intech.linkUI.newLink(FolderTextBox.Text + '\\' + FileTextBox.Text, 
+                    workSheetTextBox.Text, AreaTextBox.Text, ViewTextBox.Text, ScheduleTextBox.Text);
+                InfoGrid.Rows.Clear();
+                loadSaveFile();
             }
+        }
+
+        private void RemLnk_Click(object sender, EventArgs e)
+        {
+            if (!string.IsNullOrEmpty(StatusTextBox.Text))
+            {
+                ViewSchedule schedule = Intech.linkUI.getScheduleFromName(ScheduleTextBox.Text);
+                if ( schedule != null)
+                {
+                    t.Start("Remove Sheet");
+                    Intech.linkUI.doc.Delete(schedule.Id);
+                    t.Commit();
+                }
+                int line = Intech.linkUI.findLineIndexFromDataRow(selected);
+                Intech.linkUI.removeLineFromSave(line);
+
+                InfoGrid.Rows.Clear();
+                loadSaveFile();
+            }
+        }
+
+        private void OpEx_Click(object sender, EventArgs e)
+        {
+            if (!string.IsNullOrEmpty(StatusTextBox.Text))
+            { 
+                string path = FolderTextBox.Text + '\\' + FileTextBox.Text;
+                if (File.Exists(path))
+                {
+                    System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
+                    {
+                        FileName = path,
+                        UseShellExecute = true
+                    });
+                }
+                else
+                {
+                    MessageBox.Show("File not found: " + path, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+            }
+        }
+
+        private void NewLnk_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void OpSh_Click(object sender, EventArgs e)
+        {
+            t.Start("Set Active View Sheet");
+            Intech.linkUI.setActiveViewSheet(ViewTextBox.Text);
+            t.Commit();
         }
     }
 }

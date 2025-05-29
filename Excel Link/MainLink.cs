@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using System.Windows.Forms;
 using System.Windows.Media.Imaging;
@@ -16,6 +17,7 @@ namespace Intech
     public class linkUI : IExternalCommand
     {
         public static Document doc = null;
+        public static UIDocument uidoc = null;
         public static string settingsFile = typeof(RibbonTab).Assembly.Location.Replace("RibbonSetup.dll", "LinkSettings.txt");
 
         public Result Execute(ExternalCommandData commandData, ref string message, ElementSet elements)
@@ -24,7 +26,6 @@ namespace Intech
             doc = uiApp.ActiveUIDocument.Document;
             Transaction t = new Transaction(doc, "Excel Link");
             ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
-
             Excel_Link.ExcelLinkUI excelLinkUI = new Excel_Link.ExcelLinkUI(t);
             excelLinkUI.ShowDialog();
 
@@ -39,6 +40,64 @@ namespace Intech
                 return sheet.SheetNumber + " - " + sheet.Name;
             }
             return null;
+        }
+
+        public static ViewSheet getSheetFromName(string sheetName)
+        {
+            ViewSheet sheet = null;
+            foreach (ViewSheet e in new FilteredElementCollector(doc).OfClass(typeof(ViewSheet))
+                .WhereElementIsNotElementType().ToElements())
+            {
+                if ((e.SheetNumber + " - " + e.Name).Equals(sheetName))
+                {
+                    //get schedule
+                    sheet = e;
+                }
+            }
+            return sheet;
+        }
+
+        public static Element revitElementCollect(string name, Type type)
+        {
+            Element elem = null;
+            foreach (Element e in new FilteredElementCollector(doc).OfClass(type)
+                .WhereElementIsNotElementType().ToElements())
+            {
+                if (e.Name.Equals(name))
+                {
+                    //get schedule
+                    elem = e;
+                }
+            }
+            return elem;
+        }
+
+        public static ViewSchedule getScheduleFromName(string scheduleName)
+        {
+            ViewSchedule schedule = null;
+            foreach (ViewSchedule e in new FilteredElementCollector(doc).OfClass(typeof(ViewSchedule))
+                .WhereElementIsNotElementType().ToElements())
+            {
+                if (e.Name.Equals(scheduleName))
+                {
+                    //get schedule
+                    schedule = e;
+                }
+            }
+            return schedule;
+        }
+
+        public static void setActiveViewSheet(string sheetName)
+        {
+            ViewSheet sheet = getSheetFromName(sheetName);
+            if (sheet != null)
+            {
+                uidoc.ActiveView = sheet;
+            }
+            else
+            {
+                MessageBox.Show("Sheet not found: " + sheetName, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
         }
 
         public static string[][] readSave()
@@ -105,7 +164,7 @@ namespace Intech
             }
         }
 
-        public static void newLink(string path, string workSheet, string area, string viewSheet)
+        public static void newLink(string path, string workSheet, string area, string viewSheet, string schedule)
         {
             if (string.IsNullOrEmpty(path) || string.IsNullOrEmpty(workSheet) || string.IsNullOrEmpty(area))
             {
@@ -118,7 +177,7 @@ namespace Intech
             string user = Environment.UserName; // Get the current user's name
 
             // Append the new link to the save file
-            appendSave(new string[] { doc.Title, path, workSheet, area, viewSheet, timeStamp, user });
+            appendSave(new string[] { doc.Title, path, workSheet, area, viewSheet, timeStamp, user, schedule});
         }
 
         public static void createSaveFile()
@@ -129,9 +188,28 @@ namespace Intech
             {
                 using (StreamWriter sw = new StreamWriter(saveFile, false))
                 {
-                    sw.WriteLine("Project\tPath\tWorksheet\tArea\tViewSheet\tTimestamp\tUser");
+                    sw.WriteLine("Project\tPath\tWorksheet\tArea\tViewSheet\tTimestamp\tUser\tSchedule");
                 }
             }
+        }
+
+        public static int findLineIndexFromDataRow(string[] dataRow)
+        {
+            string[] localSettings = File.ReadAllText(settingsFile).Split('\n');
+            string saveFile = localSettings[1].Trim();
+            if (File.Exists(saveFile))
+            {
+                string[] lines = File.ReadAllLines(saveFile);
+                for (int i = 0; i < lines.Length; i++)
+                {
+                    string[] lineData = lines[i].Split('\t');
+                    if (dataRow.SequenceEqual(lineData))
+                    {
+                        return i; // Return the index of the matching line
+                    }
+                }
+            }
+            return -1;
         }
     }
 }

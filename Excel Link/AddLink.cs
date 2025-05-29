@@ -120,7 +120,7 @@ namespace Excel_Link
 
         private void Save_Click(object sender, EventArgs e)
         {
-            if (string.IsNullOrEmpty(pathTextBox.Text) ||
+            if (string.IsNullOrEmpty(pathTextBox.Text) || string.IsNullOrEmpty(sheetSelect.Text) ||
                 string.IsNullOrEmpty(workSheetSelect.Text) || string.IsNullOrEmpty(areaSelect.Text))
             {
                 MessageBox.Show("Please fill in all fields.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
@@ -132,7 +132,7 @@ namespace Excel_Link
             trans.Start();
             string scheduleName = Intech.Excel.newLink(pathTextBox.Text, nameTextBox.Text, 
                                     workSheetSelect.Text, areaSelect.Text, sheetSelect.Text);
-            Intech.linkUI.newLink(pathTextBox.Text, scheduleName, areaSelect.Text, sheetSelect.Text);
+            Intech.linkUI.newLink(pathTextBox.Text, workSheetSelect.Text, areaSelect.Text, sheetSelect.Text, scheduleName);
             workSheetSelect.Text = String.Empty;
             areaSelect.Text = String.Empty;
             nameTextBox.Text = String.Empty;

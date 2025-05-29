@@ -275,9 +275,10 @@ namespace Intech
                                 cellwidth += (int)(worksheet.Column(copyColumnIndex + range.Start.Column).Width * 7.5);
                                 
                             }
-                            if (i != p)
+                            TableMergedCell check = tableData.GetMergedCell(j, i);
+                            TableMergedCell tableMergedCell = new TableMergedCell(j, i, j, p);
+                            if (i != p && check.Bottom == j + 1 && check.Right == i + 1)
                             {
-                                TableMergedCell tableMergedCell = new TableMergedCell(j, i, j, p);
                                 tableData.MergeCells(tableMergedCell);
                             }
                         }

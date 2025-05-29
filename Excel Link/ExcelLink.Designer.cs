@@ -111,7 +111,7 @@
             // create
             // 
             this.create.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.create.Location = new System.Drawing.Point(15, 401);
+            this.create.Location = new System.Drawing.Point(15, 407);
             this.create.Name = "create";
             this.create.Size = new System.Drawing.Size(75, 23);
             this.create.TabIndex = 1;
@@ -133,47 +133,51 @@
             // OpEx
             // 
             this.OpEx.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.OpEx.Location = new System.Drawing.Point(96, 401);
+            this.OpEx.Location = new System.Drawing.Point(96, 407);
             this.OpEx.Name = "OpEx";
             this.OpEx.Size = new System.Drawing.Size(75, 23);
             this.OpEx.TabIndex = 3;
             this.OpEx.Text = "Open Excel";
             this.OpEx.UseVisualStyleBackColor = true;
+            this.OpEx.Click += new System.EventHandler(this.OpEx_Click);
             // 
             // OpSh
             // 
             this.OpSh.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.OpSh.Location = new System.Drawing.Point(177, 401);
+            this.OpSh.Location = new System.Drawing.Point(177, 407);
             this.OpSh.Name = "OpSh";
             this.OpSh.Size = new System.Drawing.Size(75, 23);
             this.OpSh.TabIndex = 4;
             this.OpSh.Text = "Open Sheet";
             this.OpSh.UseVisualStyleBackColor = true;
+            this.OpSh.Click += new System.EventHandler(this.OpSh_Click);
             // 
             // RemLnk
             // 
             this.RemLnk.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.RemLnk.Location = new System.Drawing.Point(603, 401);
+            this.RemLnk.Location = new System.Drawing.Point(603, 407);
             this.RemLnk.Name = "RemLnk";
             this.RemLnk.Size = new System.Drawing.Size(85, 23);
             this.RemLnk.TabIndex = 7;
             this.RemLnk.Text = "Remove Link";
             this.RemLnk.UseVisualStyleBackColor = true;
+            this.RemLnk.Click += new System.EventHandler(this.RemLnk_Click);
             // 
             // NewLnk
             // 
             this.NewLnk.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.NewLnk.Location = new System.Drawing.Point(519, 401);
+            this.NewLnk.Location = new System.Drawing.Point(519, 407);
             this.NewLnk.Name = "NewLnk";
             this.NewLnk.Size = new System.Drawing.Size(78, 23);
             this.NewLnk.TabIndex = 6;
             this.NewLnk.Text = "Change Link";
             this.NewLnk.UseVisualStyleBackColor = true;
+            this.NewLnk.Click += new System.EventHandler(this.NewLnk_Click);
             // 
             // Up
             // 
             this.Up.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.Up.Location = new System.Drawing.Point(438, 401);
+            this.Up.Location = new System.Drawing.Point(438, 407);
             this.Up.Name = "Up";
             this.Up.Size = new System.Drawing.Size(75, 23);
             this.Up.TabIndex = 5;
