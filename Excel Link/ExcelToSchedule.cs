@@ -160,26 +160,42 @@ namespace Intech
                 }
                 totalWidth += worksheet.Column(i).Width * 7.5 + 1;
             }
+
             nCol -= hidden.Count;
 
             //set size
             schedule.GetTableData().GetSectionData(SectionType.Body).SetColumnWidthInPixels(0, (int)(totalWidth));
 
-            while (tableData.NumberOfColumns > nCol)
+            //reset table data merged cells
+            for (int row = 0; row < tableData.NumberOfRows; row++)
             {
-                tableData.RemoveColumn(1);
+                for (int col = 0; col < tableData.NumberOfColumns; col++)
+                {
+                    TableMergedCell mergeData = tableData.GetMergedCell(row, col);
+                    mergeData.Top = row;
+                    mergeData.Left = col;
+                    mergeData.Right = col;
+                    mergeData.Bottom = row;
+                    tableData.SetMergedCell(row, col, mergeData);
+                }
             }
-            while (tableData.NumberOfRows > nRow)
+
+            while (tableData.NumberOfColumns > 0)
             {
-                tableData.RemoveRow(1);
+                tableData.RemoveColumn(0);
+            }
+
+            while (tableData.NumberOfRows > 0)
+            {
+                tableData.RemoveRow(0);
             }
 
             //Make cells and populate data
-            for (int i = 1; tableData.NumberOfColumns < nCol; i++)
+            for (int i = 0; tableData.NumberOfColumns < nCol; i++)
             {
                 tableData.InsertColumn(i);
             }
-            for (int i = 1; tableData.NumberOfRows < nRow; i++)
+            for (int i = 0; tableData.NumberOfRows < nRow; i++)
             {
                 tableData.InsertRow(i);
             }
@@ -222,12 +238,15 @@ namespace Intech
                 tableMergedCell.Top = excelRange.Start.Row - range.Start.Row;
                 tableMergedCell.Right = endCol - range.Start.Column - hBefore - hInside;
                 tableMergedCell.Bottom = excelRange.End.Row - range.Start.Row;
-                TableMergedCell check = tableData.GetMergedCell(tableMergedCell.Top, tableMergedCell.Left);
-                if (0 <= tableMergedCell.Left && tableMergedCell.Left <= nCol
-                    && 0 <= tableMergedCell.Top && tableMergedCell.Top <= nRow
-                    && !check.Equals(tableMergedCell))
+                if (0 <= tableMergedCell.Left && tableMergedCell.Left <= nCol - 1
+                    && 0 <= tableMergedCell.Top && tableMergedCell.Top <= nRow - 1
+                    )
                 {
-                    tableData.MergeCells(tableMergedCell);
+                    TableMergedCell check = tableData.GetMergedCell(tableMergedCell.Top, tableMergedCell.Left);
+                    if (!check.Equals(tableMergedCell))
+                    {
+                        tableData.MergeCells(tableMergedCell);
+                    }
                 }
             }
 
@@ -283,52 +302,43 @@ namespace Intech
                     //works due to there similar numbering for vert alignment
                     newStyle.FontVerticalAlignment = (VerticalAlignmentStyle)((int)style.VerticalAlignment * 4);
 
-                    //border
-                    copyBorder(newStyle, worksheet, j + range.Start.Row, colIndex + range.Start.Column);
-
                     //check for notes cell and fix
                     if (newStyle.FontHorizontalAlignment == HorizontalAlignmentStyle.Left && !string.IsNullOrEmpty(tableData.GetCellText(j, i)))
                     {
-                        Font font = new Font(style.Font.Name, (int)(style.Font.Size));
-
-                        using (Bitmap bitmap = new Bitmap(1, 1))
-                        using (Graphics graphics = Graphics.FromImage(bitmap))
+                        int p = i;
+                        int copyColumnIndex = colIndex;
+                        while (p < nCol - 1 && string.IsNullOrEmpty(range.GetCellValue<String>(j, copyColumnIndex + 1)))
                         {
-                            int textSize = System.Windows.Forms.TextRenderer.MeasureText(text, font).Width + 10;
-                            int cellwidth = tableData.GetColumnWidthInPixels(i);
-                            int p = i;
-                            int copyColumnIndex = colIndex;
-                            while (textSize > cellwidth && !worksheet.Cells[j + range.Start.Row, colIndex + range.Start.Column].Merge)
+                            if (worksheet.Column(copyColumnIndex + range.Start.Column).Hidden)
                             {
-                                if (worksheet.Column(copyColumnIndex + range.Start.Column).Hidden)
-                                {
-                                    copyColumnIndex++;
-                                    continue;
-                                }
-
-                                p++;
                                 copyColumnIndex++;
-                                if (p >= nCol)
-                                {
-                                    break;
-                                }
-                                cellwidth += (int)(worksheet.Column(copyColumnIndex + range.Start.Column).Width * 7.5);
+                                continue;
+                            }
+                            p++;
+                            copyColumnIndex++;
 
-                            }
-                            TableMergedCell check = tableData.GetMergedCell(j, i);
-                            TableMergedCell tableMergedCell = new TableMergedCell(j, i, j, p);
-                            if (i != p && check.Bottom == j + 1 && check.Right == i + 1)
-                            {
-                                tableData.MergeCells(tableMergedCell);
-                            }
+                        }
+                        TableMergedCell tableMergedCell = new TableMergedCell(j, i, j, p);
+                        if (i != p)
+                        {
+                            tableData.MergeCells(tableMergedCell);
                         }
                     }
+
+
+                    //border
+                    copyBorder(j, i, 
+                        newStyle, worksheet, j + range.Start.Row, colIndex + range.Start.Column, tableData);
 
                     tableData.SetCellStyle(j, i, newStyle);
                     if (i == 0)
                     {
                         //Set row height
-                        int height = (int)(worksheet.Row(j + range.Start.Row).Height * 4 / 3) + 1;
+                        int height = (int)(worksheet.Row(j + range.Start.Row).Height * 4 / 3) + 3;
+                        if (worksheet.Row(j + range.Start.Row).Hidden)
+                        {
+                            height = 0;
+                        }
                         tableData.SetRowHeightInPixels(j, height);
                     }
                 }
@@ -383,7 +393,7 @@ namespace Intech
             return name;
         }
 
-        private static void copyBorder(TableCellStyle scdB, ExcelWorksheet worksheet, int row, int column)
+        private static void copyBorder(int tabRow, int tabCol, TableCellStyle scdB, ExcelWorksheet worksheet, int row, int column, TableSectionData tableData)
         {
             Border excB = worksheet.Cells[row, column].Style.Border;
             ElementId top = getRevitBoarderIDFromExcel(excB.Top);
@@ -407,23 +417,26 @@ namespace Intech
                 scdB.BorderBottomLineStyle = bottom;
             }
             ElementId right = getRevitBoarderIDFromExcel(excB.Right);
-            int rColumn = column + 1;
             if (right == null)
             {
-                while (
-                    rColumn <= worksheet.Columns.EndColumn
-                    && (worksheet.Column(rColumn).Hidden
-                    || mergeCheck(worksheet, row, column, row, rColumn)))
+                TableMergedCell merge = tableData.GetMergedCell(tabRow, tabCol);
+                int difMerge = merge.Right - tabCol;
+
+                for (int i = 0; i < difMerge; i++)
                 {
-                    rColumn++;
+                    if (worksheet.Column(column + i).Hidden)
+                    {
+                        difMerge++;
+                    }
                 }
-                if (rColumn != column + 1)
+
+                if (right == null)
                 {
-                    right = getRevitBoarderIDFromExcel(worksheet.Cells[row, rColumn - 1].Style.Border.Right);
+                    right = getRevitBoarderIDFromExcel(worksheet.Cells[row, column + difMerge].Style.Border.Right);
                 }
                 if (right == null)
                 {
-                    right = getRevitBoarderIDFromExcel(worksheet.Cells[row, rColumn].Style.Border.Left);
+                    right = getRevitBoarderIDFromExcel(worksheet.Cells[row, column + difMerge + 1].Style.Border.Left);
                 }
             }
             if (right != null)
@@ -431,19 +444,22 @@ namespace Intech
                 scdB.BorderRightLineStyle = right;
             }
             ElementId left = getRevitBoarderIDFromExcel(excB.Left);
-            int lColumn = column - 1;
             if (left == null)
             {
-                while (
-                    lColumn >= 2
-                    && (worksheet.Column(lColumn).Hidden
-                    || mergeCheck(worksheet, row, lColumn, row, column)))
+                TableMergedCell merge = tableData.GetMergedCell(tabRow, tabCol);
+                int difMerge = tabCol - merge.Left;
+
+                for (int i = 0; i <= difMerge; i++)
                 {
-                    lColumn--;
+                    if (worksheet.Column(column - i).Hidden)
+                    {
+                        difMerge++;
+                    }
                 }
-                if (lColumn >= 1)
+                
+                if (column - difMerge >= 2)
                 {
-                    left = getRevitBoarderIDFromExcel(worksheet.Cells[row, lColumn].Style.Border.Right);
+                    left = getRevitBoarderIDFromExcel(worksheet.Cells[row, column - difMerge - 1].Style.Border.Right);
                 }
             }
             if (left != null)
@@ -465,7 +481,7 @@ namespace Intech
             CategoryNameMap graphicStyleCategories = lineCat.SubCategories;
 
             //get color
-            Autodesk.Revit.DB.Color color = ExcelColorToRevit(border.Color, "#FF000000");
+            Autodesk.Revit.DB.Color color = ExcelColorToRevit(border.Color, "#FF000000", "#FFFFFFFF");
             int r = color.Red;
             int g = color.Green;
             int b = color.Blue;
@@ -521,6 +537,22 @@ namespace Intech
         {
             string RGBhex = ExcColor.LookupColor();
             if (ExcColor.Indexed == 0)
+            {
+                RGBhex = defaultColorHex;
+            }
+            int argb = Int32.Parse(RGBhex.Replace("#", ""), NumberStyles.HexNumber);
+            System.Drawing.Color excColor = System.Drawing.Color.FromArgb(argb);
+            Byte r = Convert.ToByte(excColor.R);
+            Byte g = Convert.ToByte(excColor.G);
+            Byte b = Convert.ToByte(excColor.B);
+            Autodesk.Revit.DB.Color color = new Autodesk.Revit.DB.Color(r, g, b);
+            return color;
+        }
+
+        private static Autodesk.Revit.DB.Color ExcelColorToRevit(ExcelColor ExcColor, string defaultColorHex, string notColor)
+        {
+            string RGBhex = ExcColor.LookupColor();
+            if (ExcColor.Indexed == 0 || RGBhex == notColor)
             {
                 RGBhex = defaultColorHex;
             }

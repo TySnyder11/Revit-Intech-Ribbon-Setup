@@ -33,6 +33,12 @@ namespace Excel_Link
             if (openFileDialog1.ShowDialog() == DialogResult.OK)
             {
                 pathTextBox.Text = openFileDialog1.FileName;
+                if (Path.GetExtension(pathTextBox.Text).EndsWith("xls")) 
+                {
+                    MessageBox.Show("Please covnert xls to xlsx. You can do this by opening file in excel and clicking SaveAs then select file type as xlsx.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    pathTextBox.Text = string.Empty;
+                    return;
+                }
             }
         }
 
