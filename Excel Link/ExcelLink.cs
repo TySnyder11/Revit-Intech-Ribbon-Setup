@@ -69,7 +69,6 @@ namespace Excel_Link
             AreaTextBox.Text = string.Empty;
             ScheduleTextBox.Text = string.Empty;
             ViewTextBox.Text = string.Empty;
-
         }
 
         private void appendInfoGrid(string name, string status, string lastUpdate, string fileName)

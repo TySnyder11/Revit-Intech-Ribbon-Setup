@@ -35,7 +35,7 @@ namespace Excel_Link
                 pathTextBox.Text = openFileDialog1.FileName;
                 if (Path.GetExtension(pathTextBox.Text).EndsWith("xls")) 
                 {
-                    MessageBox.Show("Please covnert xls to xlsx. You can do this by opening file in excel and clicking SaveAs then select file type as xlsx.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    MessageBox.Show("Please convert xls to xlsx. You can do this by opening file in excel and clicking SaveAs then select file type as xlsx.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     pathTextBox.Text = string.Empty;
                     return;
                 }
@@ -57,6 +57,7 @@ namespace Excel_Link
                     workSheetSelect.Items.Add(ws.Name);
                 }
                 workSheetSelect.Enabled = true;
+                workSheetSelect.Text = workSheetSelect.Items[0].ToString();
             }
         }
 
@@ -85,6 +86,10 @@ namespace Excel_Link
             foreach (ExcelNamedRange namedRange in worksheet.Names)
             {
                 areaSelect.Items.Add(namedRange.Name);
+                if(namedRange.Name.Equals("_xlnm.Print_Area"))
+                {
+                    areaSelect.Text = "_xlnm.Print_Area";
+                }
             }
             if (areaSelect.Items.Count > 0)
             {

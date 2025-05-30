@@ -4,7 +4,6 @@ using OfficeOpenXml;
 using OfficeOpenXml.Style;
 using System;
 using System.Collections.Generic;
-using System.Drawing;
 using System.Globalization;
 using System.IO;
 
@@ -201,7 +200,7 @@ namespace Intech
             }
 
             //Merge cells
-            foreach (String r in worksheet.MergedCells)
+            foreach (string r in worksheet.MergedCells)
             {
                 //Need to take account of hidden cells during indexing
                 ExcelRange excelRange = worksheet.Cells[r];
@@ -262,9 +261,25 @@ namespace Intech
                 }
                 for (int j = 0; j < nRow; j++)
                 {
-                    string text = range.GetCellValue<String>(j, colIndex);
+                    string text = range.GetCellValue<string>(j, colIndex);
                     if (!string.IsNullOrEmpty(text))
                     {
+                        //Check for numbers and round them to same as excel
+                        if (double.TryParse(text, out double number))
+                        {
+                            string round = worksheet.Cells[j + range.Start.Row, colIndex + range.Start.Column].Style.Numberformat.Format;
+                            if (round != "General")
+                            {
+                                int dec = 2;
+                                if (round != null && round.Contains("."))
+                                {
+                                    string decStr = round.Split('.')[1];
+                                    dec = decStr.Length;
+                                }
+                                text = Math.Round(number, dec).ToString();
+                            }
+                        }
+                        //set text to cell
                         tableData.SetCellText(j, i, text);
                     }
 
@@ -307,7 +322,7 @@ namespace Intech
                     {
                         int p = i;
                         int copyColumnIndex = colIndex;
-                        while (p < nCol - 1 && string.IsNullOrEmpty(range.GetCellValue<String>(j, copyColumnIndex + 1)))
+                        while (p < nCol - 1 && string.IsNullOrEmpty(range.GetCellValue<string>(j, copyColumnIndex + 1)))
                         {
                             if (worksheet.Column(copyColumnIndex + range.Start.Column).Hidden)
                             {
