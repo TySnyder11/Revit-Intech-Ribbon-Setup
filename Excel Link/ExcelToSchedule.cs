@@ -361,6 +361,15 @@ namespace Intech
                 tableData.SetColumnWidthInPixels(i, width);
                 colIndex++;
             }
+
+            for (int i = 0; i < tableData.NumberOfRows; i++)
+            {
+                if (tableData.GetRowHeight(i) == 0)
+                {
+                    tableData.RemoveRow(i);
+                    i--;
+                }
+            }
             return true;
         }
 
