@@ -268,7 +268,7 @@ namespace Intech
                             Debug.WriteLine(numOfHeaders);
 
                             //Add a table onto the data
-                            string tablerange = "A" + numOfHeaders + ":" + IndexToColumn(nColumns-1) + (nRows+1); //get data range
+                            string tablerange = "A" + numOfHeaders + ":" + IndexToColumn(nColumns-1) + (nRows + numOfHeaders); //get data range
 
                             var dataRange = copiedWorksheet.Cells[tablerange];
 
