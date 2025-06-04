@@ -110,6 +110,9 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Connector Tools\Connect.cs" />
+    <Compile Include="Connector Tools\RotateConnector.cs" />
+    <Compile Include="Connector Tools\RotateWith.cs" />
     <Compile Include="Excel Link\EditLink.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -242,6 +245,9 @@
   </ItemGroup>
   <ItemGroup>
     <WCFMetadata Include="Connected Services\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Parameter Sync\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

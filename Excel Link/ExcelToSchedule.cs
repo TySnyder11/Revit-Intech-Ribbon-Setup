@@ -424,7 +424,12 @@ namespace Intech
             int tRow = row;
             if (tRow >= 2 && top == null)
             {
-                top = getRevitBoarderIDFromExcel(worksheet.Cells[tRow - 1, column].Style.Border.Bottom);
+                int hiddenRows = 0;
+                while (worksheet.Row(tRow - 1 - hiddenRows).Hidden)
+                {
+                    hiddenRows++;
+                }
+                top = getRevitBoarderIDFromExcel(worksheet.Cells[tRow - 1 - hiddenRows, column].Style.Border.Bottom);
             }
             if (top != null)
             {
@@ -434,7 +439,12 @@ namespace Intech
             int bRow = row;
             if (bRow <= worksheet.Rows.EndRow && bottom == null)
             {
-                bottom = getRevitBoarderIDFromExcel(worksheet.Cells[bRow + 1, column].Style.Border.Top);
+                int hiddenRows = 0;
+                while (worksheet.Row(bRow + 1 + hiddenRows).Hidden)
+                {
+                    hiddenRows++;
+                }
+                bottom = getRevitBoarderIDFromExcel(worksheet.Cells[bRow + 1 + hiddenRows, column].Style.Border.Top);
             }
             if (bottom != null)
             {

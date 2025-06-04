@@ -68,6 +68,7 @@ namespace Intech
             //Create different panels
             RibbonPanel SheetPanel = application.CreateRibbonPanel(tabName, "Sheets");
             RibbonPanel TaggingPanel = application.CreateRibbonPanel(tabName, "Tagging");
+            RibbonPanel ConnectTools = application.CreateRibbonPanel(tabName, "Quick Tools");
             RibbonPanel ExportPanel = application.CreateRibbonPanel(tabName, "Exports");
             RibbonPanel ImportPanel = application.CreateRibbonPanel(tabName, "Import");
 
@@ -93,6 +94,27 @@ namespace Intech
                 ssData.Image = new BitmapImage(new Uri(IconPath));
                 ssData.LargeImage = new BitmapImage(new Uri(IconPath));
                 PushButton ss = SheetPanel.AddItem(ssData) as PushButton;
+            }
+
+            //Connect Tools Ribbon
+            {
+                PushButtonData b1Data = new PushButtonData("Connect", "Connect", AddInPath, "Intech.ConnectElementsCommand");
+                b1Data.ToolTip = "Connects fitting to pipe or duct to other duct element.";
+                b1Data.Image = new BitmapImage(new Uri(IconPath));
+                b1Data.LargeImage = new BitmapImage(new Uri(IconPath));
+                PushButton pb01 = ConnectTools.AddItem(b1Data) as PushButton;
+
+                PushButtonData b2Data = new PushButtonData("Rotate", "Rotate", AddInPath, "Intech.RotateConnector");
+                b2Data.ToolTip = "Selects a fitting then promps angle.";
+                b2Data.Image = new BitmapImage(new Uri(IconPath));
+                b2Data.LargeImage = new BitmapImage(new Uri(IconPath));
+                PushButton pb02 = ConnectTools.AddItem(b2Data) as PushButton;
+
+                PushButtonData b3Data = new PushButtonData("Rotate Around", "Rotate Around", AddInPath, "Intech.RotateConnectedElements");
+                b3Data.ToolTip = "Selects a fitting and duct/pipe then promps angle.";
+                b3Data.Image = new BitmapImage(new Uri(IconPath));
+                b3Data.LargeImage = new BitmapImage(new Uri(IconPath));
+                PushButton pb03 = ConnectTools.AddItem(b3Data) as PushButton;
             }
 
             //Export Ribbon
