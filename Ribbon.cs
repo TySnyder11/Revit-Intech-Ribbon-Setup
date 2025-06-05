@@ -96,7 +96,7 @@ namespace Intech
                 PushButton ss = SheetPanel.AddItem(ssData) as PushButton;
             }
 
-            //Connect Tools Ribbon
+            //Quick Tools Ribbon
             {
                 PushButtonData b1Data = new PushButtonData("Connect", "Connect", AddInPath, "Intech.ConnectElementsCommand");
                 b1Data.ToolTip = "Connects fitting to pipe or duct to other duct element.";
@@ -115,6 +115,12 @@ namespace Intech
                 b3Data.Image = new BitmapImage(new Uri(IconPath));
                 b3Data.LargeImage = new BitmapImage(new Uri(IconPath));
                 PushButton pb03 = ConnectTools.AddItem(b3Data) as PushButton;
+
+                PushButtonData b4Data = new PushButtonData("ParameterSync", "Parameter Sync", AddInPath, "Intech.ParameterSyncMenu");
+                b4Data.ToolTip = "Opens menu to do fancy parameter stuff.";
+                b4Data.Image = new BitmapImage(new Uri(IconPath));
+                b4Data.LargeImage = new BitmapImage(new Uri(IconPath));
+                PushButton pb04 = ConnectTools.AddItem(b4Data) as PushButton;
             }
 
             //Export Ribbon

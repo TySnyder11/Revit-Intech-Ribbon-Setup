@@ -139,11 +139,25 @@
       <DependentUpon>linkSettings.cs</DependentUpon>
     </Compile>
     <Compile Include="Excel Link\MainLink.cs" />
+    <Compile Include="Parameter Sync\NewParameterSync.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Parameter Sync\NewParameterSync.Designer.cs">
+      <DependentUpon>NewParameterSync.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Parameter Sync\MainParameterSync.cs" />
+    <Compile Include="Parameter Sync\ParameterSync Form.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Parameter Sync\ParameterSync Form.Designer.cs">
+      <DependentUpon>ParameterSync Form.cs</DependentUpon>
+    </Compile>
     <Compile Include="Properties\Settings.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
       <DependentUpon>Settings.settings</DependentUpon>
     </Compile>
+    <Compile Include="RevitHelperFunctions.cs" />
     <Compile Include="TigerStopANDBomExport\BOMExport.cs" />
     <Compile Include="Sheet Creator\SettingsRead.cs" />
     <Compile Include="DependentView\Dependent View.cs" />
@@ -211,6 +225,12 @@
     <EmbeddedResource Include="Excel Link\linkSettings.resx">
       <DependentUpon>linkSettings.cs</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="Parameter Sync\NewParameterSync.resx">
+      <DependentUpon>NewParameterSync.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Parameter Sync\ParameterSync Form.resx">
+      <DependentUpon>ParameterSync Form.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
@@ -246,8 +266,6 @@
   <ItemGroup>
     <WCFMetadata Include="Connected Services\" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Parameter Sync\" />
-  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
