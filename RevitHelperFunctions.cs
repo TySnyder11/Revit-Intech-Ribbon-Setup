@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Intech
+namespace Intech.Revit
 {
     internal class RevitHelperFunctions
     {
@@ -73,6 +73,20 @@ namespace Intech
             return param;
         }
 
+        static public void GetUnit(Category category, string paramName, out string name, out ForgeTypeId unitID, out ForgeTypeId specTypeId)
+        {
+            unitID = null;
+            name = null;
+            Parameter param = GetParameter(category, paramName);
+            specTypeId = param.Definition.GetDataType();
+            if (param != null && param.StorageType == StorageType.Double)
+            {
+                unitID = param.GetUnitTypeId();
+                name = LabelUtils.GetLabelForUnit(unitID);
+            }
+            return;
+        }
+
         static public void GetUnit(Category category, string paramName, out string name, out ForgeTypeId unitID)
         {
             unitID = null;
@@ -84,6 +98,49 @@ namespace Intech
                 name = LabelUtils.GetLabelForUnit(unitID);
             }
             return;
+        }
+
+
+        static public List<Element> GetElementsOfCategory(Category category)
+        {
+            ElementCategoryFilter filter = new ElementCategoryFilter(category.Id);
+            FilteredElementCollector collector = new FilteredElementCollector(doc)
+            .WhereElementIsNotElementType()
+            .WherePasses(filter);
+            return collector.ToList();
+        }
+
+
+        static public List<Element> GetElementTypesOfCategory(Category category)
+        {
+            ElementCategoryFilter filter = new ElementCategoryFilter(category.Id);
+            FilteredElementCollector collector = new FilteredElementCollector(doc)
+            .WhereElementIsElementType()
+            .WherePasses(filter);
+            return collector.ToList();
+        }
+
+
+        static public string GetParameterValueAsString(Element element, string paramName)
+        {
+            Parameter param = element.LookupParameter(paramName);
+            if (param == null) return null;
+
+            switch (param.StorageType)
+            {
+                case StorageType.String:
+                    return param.AsString();
+                case StorageType.Double:
+                    return param.AsValueString();
+                case StorageType.Integer:
+                    return param.AsInteger().ToString();
+                case StorageType.ElementId:
+                    ElementId id = param.AsElementId();
+                    Element e = doc.GetElement(id);
+                    return e?.Name ?? id.ToString();
+                default:
+                    return null;
+            }
         }
 
 

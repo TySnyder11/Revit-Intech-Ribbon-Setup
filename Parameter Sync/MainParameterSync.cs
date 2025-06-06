@@ -20,15 +20,15 @@ namespace Intech
         ref string message,
         ElementSet elements)
         {
+            SaveFileManager saveFileManager = new SaveFileManager("ParameterSync.txt", new TxtFormat());
             Document doc = commandData.Application.ActiveUIDocument.Document;
-            Intech.RevitHelperFunctions.init(doc);
-            
-            Intech.ParameterSyncForm parameterSyncForm = new Intech.ParameterSyncForm();
+            Revit.RevitHelperFunctions.init(doc);
+            ParameterSyncForm parameterSyncForm = new ParameterSyncForm();
             parameterSyncForm.ShowDialog();
-
-
 
             return Result.Succeeded;
         }
     }
+
+    
 }

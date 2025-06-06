@@ -1,11 +1,13 @@
 ﻿using Autodesk.Revit.DB;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Drawing;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
@@ -28,7 +30,7 @@ namespace Intech
         {
             InitializeComponent();
             CenterToParent();
-            catagories = Intech.RevitHelperFunctions.GetAllCategories();
+            catagories = Intech.Revit.RevitHelperFunctions.GetAllCategories();
             // Populate the category combo box with category names
             foreach (Category cat in catagories)
             {
@@ -64,7 +66,7 @@ namespace Intech
             if (catagories.Contains(categoryComboBox.Text))
             {
                 Category cat = catagories.get_Item(categoryComboBox.Text);
-                parameters = Intech.RevitHelperFunctions.GetParameters(cat);
+                parameters = Revit.RevitHelperFunctions.GetParameters(cat);
                 parameters.Sort();
                 if (!parameters.Contains(parameterComboBox.Text))
                 {
@@ -190,7 +192,8 @@ namespace Intech
             string text = smartParameterBox.Text.Substring(0, cursorPos);
             int lastOpen = text.LastIndexOf('[');
             int lastClose = text.LastIndexOf(']');
-
+            int lastOpenBrac = text.LastIndexOf('{');
+            int lastCloseBrac = text.LastIndexOf('}');
             if (lastOpen > lastClose)
             {
                 string partial = text.Substring(lastOpen + 1);
@@ -202,7 +205,7 @@ namespace Intech
                 {
                     suggestionIndex = 0;
                     string match = currentSuggestions[suggestionIndex];
-                    Intech.RevitHelperFunctions.GetUnit(catagories.get_Item(categoryComboBox.Text), match, out string unit, out ForgeTypeId unitID);
+                    Revit.RevitHelperFunctions.GetUnit(catagories.get_Item(categoryComboBox.Text), match, out string unit, out ForgeTypeId unitID);
                     match += "]";
                     if (unit != null)
                     {
@@ -217,33 +220,38 @@ namespace Intech
                     return;
                 }
             }
-            int lastOpenBrac = text.LastIndexOf('{');
-            int lastCloseBrac = text.LastIndexOf('}');
-
-            if (lastOpenBrac > lastCloseBrac && lastClose != -1 && lastOpen != -1)
+            else if (lastOpenBrac > lastCloseBrac && lastClose != -1 && lastOpen != -1)
             {
-                string partial = text.Substring(lastOpenBrac + 1);
-                currentSuggestions = parameters
-                    .Where(p => p.StartsWith(partial, StringComparison.OrdinalIgnoreCase))
-                    .ToList();
+                string parameter = text.Substring(lastOpen + 1, lastClose - lastOpen - 1 ).Trim();
+                Revit.RevitHelperFunctions.GetUnit(catagories.get_Item(categoryComboBox.Text), parameter, out string unit, out ForgeTypeId unitID, out ForgeTypeId specTypeId);
 
-                if (currentSuggestions.Count > 0)
+                if (UnitUtils.IsMeasurableSpec(specTypeId))
                 {
-                    suggestionIndex = 0;
-                    string match = currentSuggestions[suggestionIndex];
-                    Intech.RevitHelperFunctions.GetUnit(catagories.get_Item(categoryComboBox.Text), match, out string unit, out ForgeTypeId unitID);
-                    match += "]";
-                    if (unit != null)
-                    {
-                        match += "{ " + unit + "}";
-                    }
-                    string suggestion = match.Substring(partial.Length);
+                    List<ForgeTypeId> validUnits = UnitUtils.GetValidUnits(specTypeId) as List<ForgeTypeId>;
+                    validUnits.Remove(unitID);
+                    validUnits.Insert(0, unitID);
+                    List<string> unitNames = validUnits
+                        .Select(u => LabelUtils.GetLabelForUnit(u))
+                        .Where(u => !string.IsNullOrEmpty(u))
+                        .ToList();
+                    string partial = text.Substring(lastOpenBrac + 1);
+                    currentSuggestions = unitNames
+                        .Where(p => p.StartsWith(partial, StringComparison.OrdinalIgnoreCase))
+                        .ToList();
 
-                    System.Drawing.Point pos = smartParameterBox.GetPositionFromCharIndex(cursorPos);
-                    ghostLabel.Text = suggestion;
-                    ghostLabel.Location = new System.Drawing.Point(pos.X + 1, pos.Y);
-                    ghostLabel.Visible = true;
-                    return;
+                    if (currentSuggestions.Count > 0)
+                    {
+                        suggestionIndex = 0;
+                        string match = currentSuggestions[suggestionIndex];
+                        match += "}";
+                        string suggestion = match.Substring(partial.Length);
+
+                        System.Drawing.Point pos = smartParameterBox.GetPositionFromCharIndex(cursorPos);
+                        ghostLabel.Text = suggestion;
+                        ghostLabel.Location = new System.Drawing.Point(pos.X + 1, pos.Y);
+                        ghostLabel.Visible = true;
+                        return;
+                    }
                 }
             }
             ghostLabel.Visible = false;
@@ -272,9 +280,18 @@ namespace Intech
                     smartParameterBox.Text = smartParameterBox.Text.Insert(cursorPos, insertion);
                     smartParameterBox.SelectionStart = cursorPos + insertion.Length;
                 }
+                else if (lastSquiglBracket != -1)
+                {
+                    string insertion = ghostLabel.Text;
+                    smartParameterBox.Text = smartParameterBox.Text.Insert(cursorPos, insertion);
+                    smartParameterBox.SelectionStart = cursorPos + insertion.Length;
+                }
+
 
                 ghostLabel.Visible = false;
                 e.SuppressKeyPress = true;
+                ShowGhostSuggestion();
+
             }
             else if ((e.KeyCode == Keys.Down || e.KeyCode == Keys.Up) && ghostLabel.Visible && currentSuggestions.Count > 1)
             {
@@ -289,12 +306,13 @@ namespace Intech
 
                 string text = smartParameterBox.Text.Substring(0, cursorPos);
                 int lastBracket = text.LastIndexOf('[');
+                int lastSquiglBracket = text.LastIndexOf('{');
 
-                if (lastBracket != -1)
+                if (lastBracket != -1 && lastBracket > lastSquiglBracket)
                 {
                     string partial = text.Substring(lastBracket + 1);
                     string match = currentSuggestions[suggestionIndex];
-                    Intech.RevitHelperFunctions.GetUnit(catagories.get_Item(categoryComboBox.Text), match, out string unit, out ForgeTypeId unitID);
+                    Revit.RevitHelperFunctions.GetUnit(catagories.get_Item(categoryComboBox.Text), match, out string unit, out ForgeTypeId unitID);
                     match += "]";
                     if( unit != null)
                     {
@@ -305,10 +323,80 @@ namespace Intech
                     System.Drawing.Point pos = smartParameterBox.GetPositionFromCharIndex(cursorPos);
                     ghostLabel.Text = suggestion;
                     ghostLabel.Location = new System.Drawing.Point(pos.X + 1, pos.Y);
+                } 
+                else if(lastSquiglBracket != -1)
+                {
+                    string partial = text.Substring(lastSquiglBracket + 1);
+                    string match = currentSuggestions[suggestionIndex];
+                    match += "}";
+                    string suggestion = match.Substring(partial.Length);
+
+                    System.Drawing.Point pos = smartParameterBox.GetPositionFromCharIndex(cursorPos);
+                    ghostLabel.Text = suggestion;
+                    ghostLabel.Location = new System.Drawing.Point(pos.X + 1, pos.Y);
                 }
 
                 e.SuppressKeyPress = true;
             }
+        }
+
+        private void save_Click(object sender, EventArgs e)
+        {
+            saveOperation();
+        }
+
+        private void saveAndLoad_Click(object sender, EventArgs e)
+        {
+            saveOperation();
+        }
+
+        private bool saveOperation()
+        {
+            // Reset background colors first
+            nameTextBox.BackColor = SystemColors.Window;
+            categoryComboBox.BackColor = SystemColors.Window;
+            smartParameterBox.BackColor = SystemColors.Window;
+            parameterComboBox.BackColor = SystemColors.Window;
+
+            string Name = nameTextBox.Text.Trim();
+            string category = categoryComboBox.SelectedItem?.ToString();
+            bool hasError = false;
+
+            if (string.IsNullOrWhiteSpace(category))
+            {
+                categoryComboBox.BackColor = System.Drawing.Color.LightCoral;
+                MessageBox.Show("Please fill in category.");
+                hasError = true;
+            }
+
+            string parameter = smartParameterBox.Text.Trim();
+            if (string.IsNullOrWhiteSpace(parameter))
+            {
+                smartParameterBox.BackColor = System.Drawing.Color.LightCoral;
+                MessageBox.Show("Please fill in input parameter box.");
+                hasError = true;
+            }
+
+            string outputParameter = parameterComboBox.SelectedItem?.ToString();
+            if (string.IsNullOrWhiteSpace(outputParameter))
+            {
+                parameterComboBox.BackColor = System.Drawing.Color.LightCoral;
+                MessageBox.Show("Please fill in output parameter.");
+                hasError = true;
+            }
+
+            if (string.IsNullOrWhiteSpace(Name))
+            {
+                Name = category + " - " + outputParameter;
+            }
+
+            if (hasError)
+            {
+                return false;
+            }
+
+            return true;
+
         }
 
     }

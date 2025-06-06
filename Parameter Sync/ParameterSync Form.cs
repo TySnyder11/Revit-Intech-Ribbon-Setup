@@ -18,7 +18,7 @@ namespace Intech
         {
             InitializeComponent();
             CenterToParent();
-            catagories = Intech.RevitHelperFunctions.GetAllCategories();
+            catagories = Revit.RevitHelperFunctions.GetAllCategories();
             // Populate the combo box in the Element type row  on the dataGrid with category names
             DataGridViewComboBoxCell comboBoxCell = new DataGridViewComboBoxCell();
             foreach (Category category in catagories)
@@ -37,7 +37,7 @@ namespace Intech
             {
                 
                 string categoryName = dataGridView1.Rows[row].Cells[col].Value.ToString();
-                List<string> parameterNames = Intech.RevitHelperFunctions.GetParameters(catagories.get_Item(categoryName));
+                List<string> parameterNames = Revit.RevitHelperFunctions.GetParameters(catagories.get_Item(categoryName));
                 DataGridViewComboBoxCell comboBoxCell = new DataGridViewComboBoxCell();
                 foreach (string name in parameterNames)
                 {

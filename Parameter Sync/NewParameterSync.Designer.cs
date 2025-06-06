@@ -38,6 +38,7 @@
             this.save = new System.Windows.Forms.Button();
             this.Close = new System.Windows.Forms.Button();
             this.parameterComboBox = new System.Windows.Forms.ComboBox();
+            this.saveAndLoad = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // categoryComboBox
@@ -81,13 +82,13 @@
             this.textBox2.TabIndex = 3;
             this.textBox2.Text = "Category";
             // 
-            // richTextBox1
+            // smartParameterBox
             // 
             this.smartParameterBox.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.smartParameterBox.Location = new System.Drawing.Point(96, 39);
-            this.smartParameterBox.Name = "richTextBox1";
+            this.smartParameterBox.Name = "smartParameterBox";
             this.smartParameterBox.Size = new System.Drawing.Size(355, 54);
             this.smartParameterBox.TabIndex = 4;
             this.smartParameterBox.Text = "";
@@ -125,6 +126,7 @@
             this.save.TabIndex = 8;
             this.save.Text = "Save...";
             this.save.UseVisualStyleBackColor = true;
+            this.save.Click += new System.EventHandler(this.save_Click);
             // 
             // Close
             // 
@@ -147,12 +149,24 @@
             this.parameterComboBox.TabIndex = 10;
             this.parameterComboBox.TextUpdate += new System.EventHandler(this.parameter_SelectedTextUpdate);
             // 
+            // saveAndLoad
+            // 
+            this.saveAndLoad.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.saveAndLoad.Location = new System.Drawing.Point(85, 133);
+            this.saveAndLoad.Name = "saveAndLoad";
+            this.saveAndLoad.Size = new System.Drawing.Size(102, 23);
+            this.saveAndLoad.TabIndex = 11;
+            this.saveAndLoad.Text = "Save and Load...";
+            this.saveAndLoad.UseVisualStyleBackColor = true;
+            this.saveAndLoad.Click += new System.EventHandler(this.saveAndLoad_Click);
+            // 
             // NewParameterSync
             // 
             this.AcceptButton = this.save;
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(463, 166);
+            this.Controls.Add(this.saveAndLoad);
             this.Controls.Add(this.parameterComboBox);
             this.Controls.Add(this.Close);
             this.Controls.Add(this.save);
@@ -183,5 +197,6 @@
         private System.Windows.Forms.Button save;
         private System.Windows.Forms.Button Close;
         private System.Windows.Forms.ComboBox parameterComboBox;
+        private System.Windows.Forms.Button saveAndLoad;
     }
 }
