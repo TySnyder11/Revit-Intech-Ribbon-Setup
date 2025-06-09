@@ -100,6 +100,23 @@ namespace Intech.Revit
             return;
         }
 
+        static public ForgeTypeId GetUnit(string unitName)
+        {
+
+            var allUnits = UnitUtils.GetAllUnits();
+
+            foreach (var unitId in allUnits)
+            {
+                string displayName = UnitUtils.GetTypeCatalogStringForUnit(unitId);
+
+                if (string.Equals(displayName, unitName, StringComparison.OrdinalIgnoreCase))
+                {
+                    return unitId;
+                }
+            }
+            return null;
+        }
+
 
         static public List<Element> GetElementsOfCategory(Category category)
         {
