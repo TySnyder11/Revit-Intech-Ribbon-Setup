@@ -31,7 +31,7 @@ namespace Intech
             UIDocument uidoc = commandData.Application.ActiveUIDocument;
 
             //Get txt Path
-            string BasePath = typeof(RibbonTab).Assembly.Location.Replace("RibbonSetup.dll", "SheetSettings.txt");
+            string BasePath = Path.Combine(App.BasePath, "SheetSettings.txt");
 
             //Get Rows
             string fileContents = File.ReadAllText(BasePath);
@@ -164,7 +164,7 @@ namespace Intech
             if (Browser.ShowDialog(this) == DialogResult.OK)
             {
                 string importpath = Browser.FileName;
-                File.Copy(importpath, typeof(RibbonTab).Assembly.Location.Replace("RibbonSetup.dll", "SheetSettings.txt"), true);
+                File.Copy(importpath, Path.Combine(App.BasePath, "SheetSettings.txt"), true);
             }
             this.Close();
         }
@@ -191,7 +191,7 @@ namespace Intech
         private void Confirm_Click(object sender, EventArgs e)
         {
             var data = GetData();
-            string path = typeof(RibbonTab).Assembly.Location.Replace(@"RibbonSetup.dll", @"SheetSettings.txt");
+            string path = Path.Combine(App.BasePath, @"SheetSettings.txt");
             string[] lines = System.IO.File.ReadAllLines(path);
             var newLines = new string[] { data };
             System.IO.File.WriteAllLines(path, newLines);

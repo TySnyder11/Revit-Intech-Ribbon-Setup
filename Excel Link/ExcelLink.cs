@@ -33,33 +33,31 @@ namespace Excel_Link
             for (int i = 0; i < data.Length; i++)
             {
                 string[] instance = data[i];
-                if (Intech.linkUI.doc.Title == instance[0])
+                string excelPath = instance[0];
+                string fileName = Path.GetFileNameWithoutExtension(excelPath);
+                string sheet = instance[6];
+                string lastUpdate = instance[4];
+                DateTime lastImport = DateTime.ParseExact(lastUpdate, "yyyyMMdd_HHmmss", CultureInfo.InvariantCulture);
+                string time = lastImport.ToString("g");
+                if (File.Exists(excelPath))
                 {
-                    string excelPath = instance[1];
-                    string fileName = Path.GetFileNameWithoutExtension(excelPath);
-                    string sheet = instance[7];
-                    string lastUpdate = instance[5];
-                    DateTime lastImport = DateTime.ParseExact(lastUpdate, "yyyyMMdd_HHmmss", CultureInfo.InvariantCulture);
-                    string time = lastImport.ToString("g");
-                    if (File.Exists(excelPath))
+                    DateTime lastModified = File.GetLastWriteTime(excelPath);
+                    if (lastModified < lastImport)
                     {
-                        DateTime lastModified = File.GetLastWriteTime(excelPath);
-                        if (lastModified < lastImport)
-                        {
-                            //file is up to date
-                            appendInfoGrid(sheet, "Up to Date", time, fileName);
-                        }
-                        else
-                        {
-                            //file is out of date
-                            appendInfoGrid(sheet, "Out of Date", time, fileName);
-                        }
+                        //file is up to date
+                        appendInfoGrid(sheet, "Up to Date", time, fileName);
                     }
                     else
                     {
-                        appendInfoGrid(sheet, "File not found", time, fileName);
+                        //file is out of date
+                        appendInfoGrid(sheet, "Out of Date", time, fileName);
                     }
                 }
+                else
+                {
+                    appendInfoGrid(sheet, "File not found", time, fileName);
+                }
+                
             }
 
             FolderTextBox.Text = string.Empty;
@@ -81,13 +79,13 @@ namespace Excel_Link
             int row = e.RowIndex;
             if (row == -1) return;
             selected = data[row];
-            string excelPath = selected[1];
-            string workSheet = selected[2];
-            string area = selected[3];
-            string viewSheet = selected[4];
-            string lastUpdate = selected[5];
-            string user = selected[6];
-            string sheet = selected[7];
+            string excelPath = selected[0];
+            string workSheet = selected[1];
+            string area = selected[2];
+            string viewSheet = selected[3];
+            string lastUpdate = selected[4];
+            string user = selected[5];
+            string sheet = selected[6];
 
             FolderTextBox.Text = Path.GetDirectoryName(excelPath);
             FileTextBox.Text = Path.GetFileName(excelPath);
@@ -229,7 +227,6 @@ namespace Excel_Link
             linkSettings settingsForm = new linkSettings();
             if (settingsForm.ShowDialog(this) == DialogResult.OK)
             {
-                Intech.linkUI.changeSaveFile(settingsForm.pathTextBox.Text);
                 InfoGrid.Rows.Clear();
                 loadSaveFile();
             }

@@ -14,12 +14,16 @@ namespace Intech
         string SerializeHeader(string header);
     }
 
+
     public class TxtFormat : ISaveFileFormat
     {
-        public string SerializeRow(string[] row) => string.Join("\t", row);
-        public string[] DeserializeRow(string line) => line.Split('\t');
+        public string SerializeRow(string[] row) =>
+        string.Join("\t", row.Where(cell => cell != null));
+        public string[] DeserializeRow(string line) =>
+        line.TrimEnd('\t').Split('\t');
         public string SerializeHeader(string header) => header;
     }
+
 
     public class CsvFormat : ISaveFileFormat
     {

@@ -24,7 +24,7 @@ namespace Intech
             )
         SaveInformation(string HangerType)
         {
-            string path = typeof(RibbonTab).Assembly.Location.Replace("RibbonSetup.dll", "Tag Settings.txt");
+            string path = Path.Combine(App.BasePath, "Tag Settings.txt");
 
 
             //Get Txt information and take out header row
@@ -36,7 +36,7 @@ namespace Intech
             //create lists
             List<string> Category = new List<string>();
             List<string> Family = new List<string>();
-            List<string> Path = new List<string>();
+            List<string> Directory = new List<string>();
             List<string> TagFamily = new List<string>();
             List<bool> Leader = new List<bool>();
 
@@ -50,13 +50,13 @@ namespace Intech
                     //Create a list of settings for tags that are the same tag type (example size tag)
                     Category.Add(cells[2]);
                     Family.Add(cells[3]);
-                    Path.Add(cells[4]);
+                    Directory.Add(cells[4]);
                     TagFamily.Add(cells[5]);
                     if (cells[6].Contains("False")) Leader.Add(false);
                     else Leader.Add(true);
                 }
             }
-            return (Category, Family, Path, TagFamily, Leader);
+            return (Category, Family, Directory, TagFamily, Leader);
         }
         public static (ElementId, int) Pickelement(ExternalCommandData commandData, List<string> Categories)
         {

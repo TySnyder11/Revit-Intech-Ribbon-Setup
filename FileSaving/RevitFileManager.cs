@@ -11,6 +11,7 @@ namespace Intech.Revit
         private readonly string tempPath;
         private readonly string localPath;
         private readonly string sharedPath;
+        private readonly string localSharedPath;
         private readonly ISaveFileFormat format;
         private readonly string projectName;
 
@@ -19,17 +20,19 @@ namespace Intech.Revit
             this.projectName = doc.Title;
             this.format = format ?? throw new ArgumentNullException(nameof(format));
 
-            string baseDir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Intech");
+            string baseDir = Path.Combine(App.BasePath, "SaveFileManager");
             Directory.CreateDirectory(baseDir);
 
             tempPath = Path.Combine(baseDir, "temp.txt");
             localPath = Path.Combine(baseDir, "local.txt");
-            sharedPath = Path.Combine(@"\\SharedDrive\Intech", "shared.txt"); // One shared file
+            sharedPath = Path.Combine(@"V:\VCS Tools\Revit\Intech Ribbon\Ribbon Settings\SharedRibbonSync", "shared.txt");
+            localSharedPath = Path.Combine(baseDir, "LocalShared.txt");
         }
 
         public string TempPath => tempPath;
         public string LocalPath => localPath;
         public string SharedPath => sharedPath;
+        public string LocalSharedPath => localSharedPath;
 
         private SaveFileManager GetManager(string path) => new SaveFileManager(path, format);
 
@@ -39,12 +42,9 @@ namespace Intech.Revit
             var tempManager = GetManager(tempPath);
 
             var localSections = localManager.ReadAllSections();
-            var projectSection = localSections.FirstOrDefault(s => s.SectionName == projectName);
+            var projectSections = localSections.Where(s => s.ProjectName == projectName).ToList();
 
-            if (projectSection != null)
-            {
-                tempManager.WriteAllSections(new List<SaveFileSection> { projectSection });
-            }
+            tempManager.WriteAllSections(projectSections);
         }
 
         public void SaveToLocal()
@@ -52,93 +52,72 @@ namespace Intech.Revit
             var tempManager = GetManager(tempPath);
             var localManager = GetManager(localPath);
 
-            var tempSection = tempManager.ReadAllSections().FirstOrDefault(s => s.SectionName == projectName);
-            if (tempSection != null)
-            {
-                var localSections = localManager.ReadAllSections();
-                localSections.RemoveAll(s => s.SectionName == projectName);
-                localSections.Add(tempSection);
-                localManager.WriteAllSections(localSections);
-            }
+            var tempSections = tempManager.ReadAllSections().Where(s => s.ProjectName == projectName).ToList();
+            var localSections = localManager.ReadAllSections();
+
+            localSections.RemoveAll(s => s.ProjectName == projectName);
+            localSections.AddRange(tempSections);
+
+            localManager.WriteAllSections(localSections);
         }
 
         public void SyncToSharedWithDeletions()
         {
             var tempManager = GetManager(tempPath);
+            var localSharedManager = GetManager(LocalSharedPath);
+            var sharedManager = GetManager(SharedPath);
+
+            var tempSections = tempManager.ReadAllSections().Where(s => s.ProjectName == projectName).ToList();
+            var localSharedSections = localSharedManager.ReadAllSections().Where(s => s.ProjectName == projectName).ToList();
+            var sharedSections = sharedManager.ReadAllSections();
+
+            SaveToLocal();
+            RowComparer comparer = new RowComparer();
+            foreach (var tempSection in tempSections)
+            {
+
+                var localSaveSection = localSharedSections.FirstOrDefault(s => s.SecondaryName == tempSection.SecondaryName)
+                                    ?? new SaveFileSection(projectName, tempSection.SecondaryName, tempSection.Header);
+                var sharedSection = sharedSections.FirstOrDefault(s => s.ProjectName == projectName && s.SecondaryName == tempSection.SecondaryName)
+                                    ?? new SaveFileSection(projectName, tempSection.SecondaryName, tempSection.Header);
+
+                var deletedRows = localSaveSection?.Rows.Except(tempSection.Rows, comparer).ToList() ?? new List<string[]>();
+                var addedRows = tempSection.Rows.Except(localSaveSection?.Rows ?? new List<string[]>(), comparer).ToList();
+
+                foreach (string[] rowD in deletedRows)
+                {
+                    foreach (string[] rowS in sharedSection.Rows)
+                    {
+                        if (rowD.SequenceEqual(rowS))
+                        {
+                            sharedSection.Rows.Remove(rowS);
+                        }
+                    }
+                }
+                foreach (string[] row in addedRows)
+                {
+                    sharedSection.Rows.Add(row);
+                }
+                sharedManager.AddOrUpdateSection(sharedSection);
+            }
+
             var localManager = GetManager(localPath);
-            var sharedManager = GetManager(sharedPath);
 
-            var tempSection = tempManager.ReadAllSections().FirstOrDefault(s => s.SectionName == projectName);
-            var localSection = localManager.ReadAllSections().FirstOrDefault(s => s.SectionName == projectName);
-            var sharedSections = sharedManager.ReadAllSections();
-            var sharedSection = sharedSections.FirstOrDefault(s => s.SectionName == projectName)
-                                ?? new SaveFileSection(projectName, tempSection?.Header ?? "");
+            var importantSharedSections = sharedManager.ReadAllSections().Where(s => s.ProjectName == projectName).ToList();
+            var localSections = localManager.ReadAllSections();
 
-            var comparer = new RowComparer();
+            tempSections.RemoveAll(s => s.ProjectName == projectName);
+            localSharedSections.RemoveAll(s => s.ProjectName == projectName);
+            localSections.RemoveAll(s => s.ProjectName == projectName);
+            tempSections.AddRange(importantSharedSections);
+            localSharedSections.AddRange(importantSharedSections);
+            localSections.AddRange(importantSharedSections);
 
-            // Identify deletions
-            var deletedRows = localSection?.Rows.Except(tempSection?.Rows ?? new List<string[]>(), comparer).ToList()
-                              ?? new List<string[]>();
+            localManager.WriteAllSections(localSections);
+            localSharedManager.WriteAllSections(localSharedSections);
+            tempManager.WriteAllSections(tempSections);
 
-            // Identify additions
-            var addedRows = tempSection?.Rows.Except(localSection?.Rows ?? new List<string[]>(), comparer).ToList()
-                             ?? new List<string[]>();
-
-            // Remove deleted rows from shared
-            sharedSection.Rows = sharedSection.Rows
-                .Where(row => !deletedRows.Any(del => comparer.Equals(row, del)))
-                .ToList();
-
-            // Add new rows to shared
-            sharedSection.Rows.AddRange(addedRows);
-
-            // Deduplicate
-            sharedSection.Rows = sharedSection.Rows.Distinct(comparer).ToList();
-
-            // Update section
-            sharedSections.RemoveAll(s => s.SectionName == projectName);
-            sharedSections.Add(sharedSection);
-            sharedManager.WriteAllSections(sharedSections);
-
-            // Pull back to local
-            localManager.AddOrUpdateSection(sharedSection);
         }
-
-        public void SyncGlobalSection()
-        {
-            var tempManager = GetManager(tempPath);
-            var sharedManager = GetManager(sharedPath);
-
-            var tempSection = tempManager.ReadAllSections()
-                .FirstOrDefault(s => s.SectionName == "__GLOBAL__");
-            if (tempSection == null) return;
-
-            var sharedSections = sharedManager.ReadAllSections();
-            var existing = sharedSections.FirstOrDefault(s => s.SectionName == "__GLOBAL__");
-
-            if (existing != null)
-            {
-                var mergedRows = existing.Rows.Concat(tempSection.Rows)
-                    .Distinct(new RowComparer()).ToList();
-                existing.Rows = mergedRows;
-                existing.Header = tempSection.Header;
-            }
-            else
-            {
-                sharedSections.Add(tempSection);
-            }
-
-            sharedManager.WriteAllSections(sharedSections);
-        }
-
-        private (List<string[]> added, List<string[]> removed) DiffRows(List<string[]> oldRows, List<string[]> newRows)
-        {
-            var comparer = new RowComparer();
-            var added = newRows.Except(oldRows, comparer).ToList();
-            var removed = oldRows.Except(newRows, comparer).ToList();
-            return (added, removed);
-        }
-
         private class RowComparer : IEqualityComparer<string[]>
         {
             public bool Equals(string[] x, string[] y) => x.SequenceEqual(y);

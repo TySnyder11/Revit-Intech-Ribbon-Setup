@@ -204,7 +204,7 @@ namespace Intech
 
                 //change this to selected directory in step 1
 
-                string basepath = typeof(RibbonTab).Assembly.Location.Replace("RibbonSetup.dll", null);
+                string basepath = App.BasePath;
                 string template = basepath + @"\BOMtemplate.xlsx";
                 string HeaderPath = basepath + @"\header.png";
 

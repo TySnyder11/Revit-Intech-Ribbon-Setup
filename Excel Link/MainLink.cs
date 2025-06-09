@@ -1,11 +1,13 @@
 ﻿using Autodesk.Revit.DB;
 using Autodesk.Revit.UI;
+using Intech.Revit;
 using OfficeOpenXml;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Windows.Forms;
+using static System.Collections.Specialized.BitVector32;
 
 namespace Intech
 {
@@ -14,7 +16,7 @@ namespace Intech
     {
         public static Document doc = null;
         public static UIDocument uidoc = null;
-        public static string settingsFile = typeof(RibbonTab).Assembly.Location.Replace("RibbonSetup.dll", "LinkSettings.txt");
+        public static string settingsFile = Path.Combine(App.BasePath, "LinkSettings.txt");
 
         public Result Execute(ExternalCommandData commandData, ref string message, ElementSet elements)
         {
@@ -96,69 +98,58 @@ namespace Intech
                 MessageBox.Show("Sheet not found: " + sheetName, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
-
-        public static string[][] readSave()
+        public static String[][] readSave()
         {
-            string[] localSettings = File.ReadAllText(settingsFile).Split('\n');
-            string saveFile = localSettings[1].Trim();
-            if (File.Exists(saveFile))
+            SaveFileManager saveFile = new SaveFileManager(Path.Combine(Path.Combine(App.BasePath, "SaveFileManager"), "temp.txt"), new TxtFormat());
+            List<SaveFileSection> sections = saveFile.GetSectionsByProject(doc.Title);
+            foreach (SaveFileSection section in sections)
             {
-                string[] lines = File.ReadAllLines(saveFile);
-                List<string[]> data = new List<string[]>();
-                foreach (string line in lines)
+                if (section.SecondaryName == "ExcelLinkData")
                 {
-                    string[] lineData = line.Split('\t');
-                    if (!string.IsNullOrWhiteSpace(line) && lineData[0].Equals(doc.Title))
-                    {
-                        data.Add(line.Split('\t'));
-                    }
+                    // If the section already exists, we can return its data
+                    return section.Rows.ToArray();
                 }
-                return data.ToArray();
             }
-            else
-            {
-                createSaveFile();
-            }
+            // If the section does not exist, return an empty array
             return new string[0][];
         }
 
         public static void appendSave(string[] data)
         {
-            string[] localSettings = File.ReadAllText(settingsFile).Split('\n');
-            string saveFile = localSettings[1].Trim();
-            if (File.Exists(saveFile))
+            SaveFileManager saveFile = new SaveFileManager(Path.Combine(Path.Combine(App.BasePath, "SaveFileManager") , "temp.txt"), new TxtFormat());
+            List<SaveFileSection> sections = saveFile.GetSectionsByProject(doc.Title);
+            foreach (SaveFileSection section in sections)
             {
-                using (StreamWriter sw = new StreamWriter(saveFile, true))
+                if (section.SecondaryName == "ExcelLinkData")
                 {
-                    sw.WriteLine(string.Join("\t", data));
+                    // If the section already exists, we can update it
+                    section.Rows.Add(data);
+                    saveFile.AddOrUpdateSection(section);
+                    return;
                 }
             }
-            else
-            {
-                MessageBox.Show("Save file not found: " + saveFile, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
+            // If the section does not exist, create a new one
+            SaveFileSection newSection = new SaveFileSection(doc.Title, "ExcelLinkData", "Excel Link Data Section");
+            newSection.Rows.Add(data);
+            saveFile.AddOrUpdateSection(newSection);
         }
         public static void removeLineFromSave(int lineVal)
         {
-            string[] localSettings = File.ReadAllText(settingsFile).Split('\n');
-            string saveFile = localSettings[1].Trim();
-            if (File.Exists(saveFile))
+            SaveFileManager saveFile = new SaveFileManager(Path.Combine(Path.Combine(App.BasePath, "SaveFileManager"), "temp.txt"), new TxtFormat());
+            List<SaveFileSection> sections = saveFile.GetSectionsByProject(doc.Title);
+            foreach (SaveFileSection section in sections)
             {
-                List<string> lines = new List<string>(File.ReadAllLines(saveFile));
-                if (lineVal >= 0 && lineVal < lines.Count)
+                if (section.SecondaryName == "ExcelLinkData")
                 {
-                    lines.RemoveAt(lineVal);
-                    File.WriteAllLines(saveFile, lines);
-                }
-                else
-                {
-                    MessageBox.Show("Invalid line number: " + lineVal, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    // If the section already exists, we can update it
+                    section.Rows.RemoveAt(lineVal);
+                    saveFile.AddOrUpdateSection(section);
+                    return;
                 }
             }
-            else
-            {
-                MessageBox.Show("Save file not found: " + saveFile, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
+            SaveFileSection newSection = new SaveFileSection(doc.Title, "ExcelLinkData", "Excel Link Data Section");
+            newSection.Rows.RemoveAt(lineVal);
+            saveFile.AddOrUpdateSection(newSection);
         }
 
         public static void newLink(string path, string workSheet, string area, string viewSheet, string schedule)
@@ -174,52 +165,34 @@ namespace Intech
             string user = Environment.UserName; // Get the current user's name
 
             // Append the new link to the save file
-            appendSave(new string[] { doc.Title, path, workSheet, area, viewSheet, timeStamp, user, schedule });
-        }
-
-        public static void createSaveFile()
-        {
-            string[] localSettings = File.ReadAllLines(settingsFile);
-            string saveFile = localSettings[1].Trim();
-            if (!File.Exists(saveFile))
-            {
-                using (StreamWriter sw = new StreamWriter(saveFile, false))
-                {
-                    sw.WriteLine("Project\tPath\tWorksheet\tArea\tViewSheet\tTimestamp\tUser\tSchedule");
-                }
-            }
+            appendSave(new string[] {path, workSheet, area, viewSheet, timeStamp, user, schedule });
         }
 
         public static string getSaveFile()
         {
-            string[] localSettings = File.ReadAllLines(settingsFile);
-            return localSettings[1].Trim();
+            return Path.Combine(Path.Combine(App.BasePath, "SaveFileManager"), "temp.txt");
         }
 
         public static int findLineIndexFromDataRow(string[] dataRow)
         {
-            string[] localSettings = File.ReadAllText(settingsFile).Split('\n');
-            string saveFile = localSettings[1].Trim();
-            if (File.Exists(saveFile))
+            SaveFileManager saveFile = new SaveFileManager(Path.Combine(Path.Combine(App.BasePath, "SaveFileManager"), "temp.txt"), new TxtFormat());
+            List<SaveFileSection> sections = saveFile.GetSectionsByProject(doc.Title);
+
+            foreach (SaveFileSection section in sections)
             {
-                string[] lines = File.ReadAllLines(saveFile);
-                for (int i = 0; i < lines.Length; i++)
+                if (section.SecondaryName == "ExcelLinkData")
                 {
-                    string[] lineData = lines[i].Split('\t');
-                    if (dataRow.SequenceEqual(lineData))
+                    // If the section already exists, we can search for the data row
+                    for (int i = 0; i < section.Rows.Count; i++)
                     {
-                        return i; // Return the index of the matching line
+                        if (dataRow.SequenceEqual(section.Rows[i]))
+                        {
+                            return i; // Return the index of the matching row
+                        }
                     }
                 }
             }
             return -1;
-        }
-
-        public static void changeSaveFile(string newPath)
-        {
-            string[] localSettings = File.ReadAllLines(settingsFile);
-            localSettings[1] = newPath;
-            File.WriteAllLines(settingsFile, localSettings);
         }
     }
 }

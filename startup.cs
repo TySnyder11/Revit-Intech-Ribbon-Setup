@@ -1,5 +1,4 @@
-﻿using AW = Autodesk.Windows;
-using Autodesk.Revit.DB;
+﻿using Autodesk.Revit.DB;
 using Autodesk.Revit.DB.Events;
 using Autodesk.Revit.UI;
 using Intech;
@@ -7,7 +6,9 @@ using Intech.Revit;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Windows.Media.Imaging;
+using AW = Autodesk.Windows;
 
 public class App : IExternalApplication
 {
@@ -32,13 +33,30 @@ public class App : IExternalApplication
 
     public Result OnShutdown(UIControlledApplication application)
     {
+        try
+        {
+            string baseDir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Intech");
+            string tempPath = Path.Combine(baseDir, "temp.txt");
+
+            if (File.Exists(tempPath))
+            {
+                File.Delete(tempPath);
+            }
+        }
+        catch (Exception ex)
+        {
+            TaskDialog.Show("Shutdown Cleanup", $"Failed to delete temp file:\n{ex.Message}");
+        }
+
         return Result.Succeeded;
     }
+
 
     private void OnDocumentOpened(object sender, DocumentOpenedEventArgs e)
     {
         var manager = new RevitFileManager(e.Document, new TxtFormat());
         manager.InitializeTempFromLocal();
+        manager.SyncToSharedWithDeletions();
     }
 
     private void OnDocumentSaved(object sender, DocumentSavedEventArgs e)
@@ -50,7 +68,7 @@ public class App : IExternalApplication
     private void OnDocumentSynced(object sender, DocumentSynchronizedWithCentralEventArgs e)
     {
         var manager = new RevitFileManager(e.Document, new TxtFormat());
-        manager.SyncToShared();
+        manager.SyncToSharedWithDeletions();
     }
 
     // ExternalCommands assembly path
@@ -59,7 +77,7 @@ public class App : IExternalApplication
     {
         get
         {
-            string basePath = AddInPath;
+            string basePath = Path.GetDirectoryName(AddInPath);
             basePath = basePath.Replace("RibbonSetup.dll", null);
             return basePath;
         }
@@ -78,8 +96,7 @@ public class App : IExternalApplication
         PushButton pb# = ribbonSamplePanel.AddItem(b#Data) as PushButton;
         */
 
-        string BasePath = AddInPath.Replace("RibbonSetup.dll", null);
-        string IconPath = BasePath + @"Icon.png";
+        string IconPath = BasePath + @"\Icon.png";
         Debug.WriteLine("Search " + IconPath);
 
         //Create different panels
@@ -142,13 +159,13 @@ public class App : IExternalApplication
 
         //Export Ribbon
         {
-            String ExcelLogo = BasePath + @"SmallExcelLogo.png";
+            String ExcelLogo = BasePath + @"\SmallExcelLogo.png";
             PushButtonData b2Data = new PushButtonData("BOM", "BOM Export", AddInPath, "Intech.ExportBOM");
             b2Data.ToolTip = "Export schedules into Excel in a BOM format.";
             b2Data.LargeImage = new BitmapImage(new Uri(ExcelLogo));
             PushButton pb2 = ExportPanel.AddItem(b2Data) as PushButton;
 
-            String CSVIcon = BasePath + @"CSVIcon.jpg";
+            String CSVIcon = BasePath + @"\CSVIcon.jpg";
             PushButtonData b3Data = new PushButtonData("TS Export", "TigerStop Export", AddInPath, "Intech.TigerStopExport");
             b3Data.ToolTip = "Export schedules in tigerstop format";
             b3Data.LargeImage = new BitmapImage(new Uri(CSVIcon));
@@ -157,7 +174,7 @@ public class App : IExternalApplication
 
         //Import Ribbon
         {
-            String ExcelLogo = BasePath + @"SmallExcelLogo.png";
+            String ExcelLogo = BasePath + @"\SmallExcelLogo.png";
             PushButtonData b4Data = new PushButtonData("Import", "Excel Import", AddInPath, "Intech.linkUI");
             b4Data.ToolTip = "Export schedules into Excel in a BOM format.";
             b4Data.LargeImage = new BitmapImage(new Uri(ExcelLogo));
@@ -210,8 +227,8 @@ public class App : IExternalApplication
             for (int i = 1; i <= 10; i++)
             {
                 PushButtonData newb = new PushButtonData("Tag" + i.ToString(), "Tag" + i.ToString(), AddInPath, "Intech.Tag" + i.ToString());
-                newb.LargeImage = new BitmapImage(new Uri(BasePath + @"Tag Images\Tag" + i.ToString() + ".png"));
-                newb.Image = new BitmapImage(new Uri(BasePath + @"Tag Images\SmallTag" + i.ToString() + ".png"));
+                newb.LargeImage = new BitmapImage(new Uri(BasePath + @"\Tag Images\Tag" + i.ToString() + ".png"));
+                newb.Image = new BitmapImage(new Uri(BasePath + @"\Tag Images\SmallTag" + i.ToString() + ".png"));
                 Debug.WriteLine("Search " + BasePath + @"\Tag Images\Tag" + i.ToString() + ".png");
                 sb1.AddPushButton(newb);
             }

@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Windows.Forms;
 
 namespace Intech
 {
@@ -17,59 +16,81 @@ namespace Intech
             this.format = format ?? throw new ArgumentNullException(nameof(format));
         }
 
+
         public List<SaveFileSection> ReadAllSections()
         {
             var sections = new List<SaveFileSection>();
             if (!File.Exists(filePath)) return sections;
 
-            string[] lines = File.ReadAllLines(filePath);
-            SaveFileSection currentSection = null;
-
-            foreach (string line in lines)
+            using (StreamReader sr = new StreamReader(filePath))
             {
-                if (line.StartsWith("# "))
+                SaveFileSection currentSection = null;
+                string line;
+                while ((line = sr.ReadLine()) != null)
                 {
-                    if (currentSection != null)
-                        sections.Add(currentSection);
+                    if (line.StartsWith("# "))
+                    {
+                        if (currentSection != null)
+                            sections.Add(currentSection);
 
-                    string sectionName = line.Substring(2).Trim();
-                    currentSection = new SaveFileSection(sectionName, "");
+                        string fullName = line.Substring(2).Trim();
+                        string[] parts = fullName.Split(new[] { "::" }, StringSplitOptions.None);
+                        string projectName = parts[0];
+                        string secondaryName = parts.Length > 1 ? parts[1] : "";
+
+                        currentSection = new SaveFileSection(projectName, secondaryName, "");
+                    }
+                    else if (currentSection != null && string.IsNullOrEmpty(currentSection.Header))
+                    {
+                        currentSection.Header = line;
+                    }
+                    else if (currentSection != null)
+                    {
+                        currentSection.Rows.Add(format.DeserializeRow(line));
+                    }
                 }
-                else if (currentSection != null && string.IsNullOrEmpty(currentSection.Header))
-                {
-                    currentSection.Header = line;
-                }
-                else if (currentSection != null)
-                {
-                    currentSection.Rows.Add(format.DeserializeRow(line));
-                }
+
+                if (currentSection != null)
+                    sections.Add(currentSection);
             }
-
-            if (currentSection != null)
-                sections.Add(currentSection);
 
             return sections;
         }
-
         public void WriteAllSections(List<SaveFileSection> sections)
         {
-            StreamWriter sw = new StreamWriter(filePath, false);
-            foreach (var section in sections)
+            Directory.CreateDirectory(Path.GetDirectoryName(filePath));
+
+            using (StreamWriter sw = new StreamWriter(filePath, false))
             {
-                sw.WriteLine($"# {section.SectionName}");
-                sw.WriteLine(format.SerializeHeader(section.Header));
-                foreach (var row in section.Rows)
+                for (int i = 0; i < sections.Count; i++)
                 {
-                    sw.WriteLine(format.SerializeRow(row));
+                    var section = sections[i];
+                    string fullName = section.ProjectName +
+                    (string.IsNullOrEmpty(section.SecondaryName) ? "" : $"::{section.SecondaryName}");
+
+                    sw.WriteLine($"# {fullName}");
+                    sw.WriteLine(format.SerializeHeader(section.Header));
+
+                    foreach (var row in section.Rows)
+                    {
+                        sw.WriteLine(format.SerializeRow(row));
+                    }
+
+                    if (i < sections.Count - 1)
+                        sw.WriteLine(); // Only between sections
                 }
-                sw.WriteLine(); // Blank line between sections
             }
         }
+
+
 
         public void AddOrUpdateSection(SaveFileSection newSection)
         {
             var sections = ReadAllSections();
-            var existing = sections.FirstOrDefault(s => s.SectionName == newSection.SectionName);
+            var existing = sections.FirstOrDefault(s =>
+                s.ProjectName == newSection.ProjectName &&
+                s.SecondaryName == newSection.SecondaryName);
+
             if (existing != null)
             {
                 existing.Header = newSection.Header;
@@ -82,37 +103,32 @@ namespace Intech
             WriteAllSections(sections);
         }
 
-        public void RemoveSection(string sectionName)
+        public void RemoveSection(string projectName, string secondaryName)
         {
             var sections = ReadAllSections();
-            sections.RemoveAll(s => s.SectionName.Equals(sectionName, StringComparison.OrdinalIgnoreCase));
+            sections.RemoveAll(s =>
+                s.ProjectName == projectName &&
+                s.SecondaryName == secondaryName);
             WriteAllSections(sections);
         }
 
-        public void ExportSection(string sectionName, string exportPath, ISaveFileFormat exportFormat)
+        public List<SaveFileSection> GetSectionsByProject(string projectName)
         {
-            var section = ReadAllSections().FirstOrDefault(s => s.SectionName == sectionName);
-            if (section == null) return;
-
-            StreamWriter sw = new StreamWriter(exportPath);
-            sw.WriteLine(exportFormat.SerializeHeader(section.Header));
-            foreach (var row in section.Rows)
-            {
-                sw.WriteLine(exportFormat.SerializeRow(row));
-            }
+            return ReadAllSections().Where(s => s.ProjectName == projectName).ToList();
         }
     }
 
-
     public class SaveFileSection
     {
-        public string SectionName { get; set; }
+        public string ProjectName { get; set; }
+        public string SecondaryName { get; set; }
         public string Header { get; set; }
         public List<string[]> Rows { get; set; } = new List<string[]>();
 
-        public SaveFileSection(string sectionName, string header)
+        public SaveFileSection(string projectName, string secondaryName, string header)
         {
-            SectionName = sectionName;
+            ProjectName = projectName;
+            SecondaryName = secondaryName;
             Header = header;
         }
     }
