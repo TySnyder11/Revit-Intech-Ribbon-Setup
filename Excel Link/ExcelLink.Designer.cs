@@ -43,7 +43,6 @@
             this.nt1 = new System.Windows.Forms.TextBox();
             this.richTextBox1 = new System.Windows.Forms.RichTextBox();
             this.richTextBox2 = new System.Windows.Forms.RichTextBox();
-            this.Settings = new System.Windows.Forms.Button();
             this.FolderTextBox = new System.Windows.Forms.TextBox();
             this.FileTextBox = new System.Windows.Forms.TextBox();
             this.StatusTextBox = new System.Windows.Forms.TextBox();
@@ -217,16 +216,6 @@
             this.richTextBox2.TabIndex = 11;
             this.richTextBox2.Text = "Shedule:\n\nArea:\n\nView:";
             // 
-            // Settings
-            // 
-            this.Settings.Location = new System.Drawing.Point(756, 381);
-            this.Settings.Name = "Settings";
-            this.Settings.Size = new System.Drawing.Size(75, 23);
-            this.Settings.TabIndex = 14;
-            this.Settings.Text = "Settings";
-            this.Settings.UseVisualStyleBackColor = true;
-            this.Settings.Click += new System.EventHandler(this.Settings_Click);
-            // 
             // FolderTextBox
             // 
             this.FolderTextBox.BackColor = System.Drawing.SystemColors.Menu;
@@ -303,7 +292,6 @@
             this.Controls.Add(this.StatusTextBox);
             this.Controls.Add(this.FileTextBox);
             this.Controls.Add(this.FolderTextBox);
-            this.Controls.Add(this.Settings);
             this.Controls.Add(this.richTextBox2);
             this.Controls.Add(this.richTextBox1);
             this.Controls.Add(this.nt1);
@@ -337,7 +325,6 @@
         private System.Windows.Forms.TextBox nt1;
         private System.Windows.Forms.RichTextBox richTextBox1;
         private System.Windows.Forms.RichTextBox richTextBox2;
-        private System.Windows.Forms.Button Settings;
         private System.Windows.Forms.DataGridViewTextBoxColumn NameColumn;
         private System.Windows.Forms.DataGridViewTextBoxColumn Status;
         private System.Windows.Forms.DataGridViewTextBoxColumn LastUpdate;

@@ -38,13 +38,33 @@ namespace Intech.Revit
             FilteredElementCollector collector = new FilteredElementCollector(doc)
                 .WhereElementIsNotElementType()
                 .WherePasses(filter);
+
             if (collector.Count() == 0)
             {
                 return new List<string>();
             }
-            Element e = collector.First<Element>();
+            Element e = collector.FirstOrDefault<Element>();
+
+            FabricationPart fab = null;
+            foreach (Element el in collector)
+            {
+                fab = el as FabricationPart;
+                if (fab != null)
+                {
+                    break;
+                }
+            }
             List<string> paramNames = new List<string>();
-            foreach (Parameter def in GetParameters(e))
+            if (fab != null)
+            {
+                ParameterSet parameters =  fab.Parameters;
+                foreach (Parameter param in parameters)
+                {
+                    paramNames.Add(param.Definition.Name);
+                }
+                return paramNames;
+            }
+            foreach (Parameter def in e.Parameters)
             {
                 paramNames.Add(def.Definition.Name);
             }
@@ -107,7 +127,7 @@ namespace Intech.Revit
 
             foreach (var unitId in allUnits)
             {
-                string displayName = UnitUtils.GetTypeCatalogStringForUnit(unitId);
+                string displayName = LabelUtils.GetLabelForUnit(unitId);
 
                 if (string.Equals(displayName, unitName, StringComparison.OrdinalIgnoreCase))
                 {

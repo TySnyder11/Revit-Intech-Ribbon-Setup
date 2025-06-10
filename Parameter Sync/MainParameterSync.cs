@@ -61,12 +61,12 @@ namespace Intech
 
             Dictionary<Element, string> paramValues = new Dictionary<Element, string>();
 
-            List<Element> elem = Revit.RevitHelperFunctions.GetElementsOfCategory(cat);
+            List<Element> elems = Revit.RevitHelperFunctions.GetElementsOfCategory(cat);
             Transaction trans = new Transaction(doc, "Parameter Sync");
             trans.Start();
             try
             {
-                if (elem.Count == 0)
+                if (elems.Count == 0)
                 {
                     TaskDialog.Show("Error", $"No elements found in category '{category}'.");
                     return;
@@ -76,51 +76,135 @@ namespace Intech
                     if (parse.StartsWith("[") && parse.EndsWith("}"))
                     {
 
-                        var match = Regex.Match(input, @"\(.*?)\?");
-                        string paramName = string.Empty;
-                        string unitName = string.Empty;
-                        if (match.Success)
-                        {
-                            paramName = match.Groups[1].Value;
-                            unitName = match.Groups[2].Success ? match.Groups[2].Value : "";
-                        }
+
+                        int startParam = input.IndexOf('[') + 1;
+                        int endParam = input.IndexOf(']');
+                        string paramName = input.Substring(startParam, endParam - startParam);
+
+                        int startUnit = input.IndexOf('{') + 1;
+                        int endUnit = input.IndexOf('}');
+                        string unitName = input.Substring(startUnit, endUnit - startUnit);
+
                         Parameter param = Revit.RevitHelperFunctions.GetParameter(cat, paramName);
                         ForgeTypeId outUnit = Revit.RevitHelperFunctions.GetUnit(unitName);
                         ForgeTypeId inUnit = param.GetUnitTypeId();
                         ForgeTypeId unitType = param.Definition.GetDataType();
-                        Units units = doc.GetUnits();
-                        FormatOptions origonal = units.GetFormatOptions(unitType);
-                        FormatOptions temp = units.GetFormatOptions(unitType);
-                        temp.SetUnitTypeId(outUnit);
-                        units.SetFormatOptions(unitType, temp);
+                        Units customUnits = new Units(UnitSystem.Imperial);
+
+                        FormatOptions fo = new FormatOptions(outUnit);
+                        if (!unitName.Equals("General"))
+                        {
+                            fo.Accuracy = 0.01;
+                            if(LabelUtils.GetLabelForUnit(inUnit).Contains("Fraction"))
+                            {
+                                fo.Accuracy = (1.0 / 64.0);
+                            }
+                        }
+                        fo.UseDefault = false;
+                        customUnits.SetFormatOptions(unitType, fo);
+
                         FilteredElementCollector collector = new FilteredElementCollector(doc)
                             .OfCategoryId(cat.Id)
                             .WhereElementIsNotElementType();
                         foreach (Element e in collector)
                         {
                             Parameter p = e.LookupParameter(paramName);
-                            double paramVal = p.AsDouble();
-                            paramVal = UnitUtils.Convert(paramVal, inUnit, outUnit);
-                            String outputString = UnitFormatUtils.Format(units, unitType, paramVal, true);
-                            paramValues.Add(e, (paramValues[e] ?? string.Empty) + outputString);
+                            if (p == null && e as FabricationPart != null)
+                            {
+                                FabricationPart part = e as FabricationPart;
+                                foreach (Parameter par in part.Parameters)
+                                {
+                                    if (par.Definition.Name.ToLower().Equals(paramName.ToLower()))
+                                        p = par;
+                                }
+                            }
+                            else if (p == null)
+                            {
+                                foreach (Parameter par in e.Parameters)
+                                {
+                                    if (par.Definition.Name.ToLower().Equals(paramName.ToLower()))
+                                        p = par;
+                                }
+                            }
+                            if(p == null)
+                            {
+                                continue;
+                            }
+                            if (StorageType.Double == p.StorageType)
+                            {
+                                double paramVal = p.AsDouble();
+                                String outputString = UnitFormatUtils.Format(customUnits, unitType, paramVal, false);
+                                if (paramValues.ContainsKey(e))
+                                {
+                                    paramValues[e] += outputString;
+                                }
+                                else
+                                {
+                                    paramValues.Add(e, outputString);
+                                }
+                            }
+                            else
+                            {
+                                string outputString = p.AsString();
+                                if (paramValues.ContainsKey(e))
+                                {
+                                    paramValues[e] += outputString;
+                                }
+                                else
+                                {
+                                    paramValues.Add(e, outputString);
+                                }
+                            }
                         }
-                        units.SetFormatOptions(unitType, origonal);
                         continue;
                     }
                     else if(parse.StartsWith("[") && parse.EndsWith("]"))
                     {
-                        parse.Remove(0, 1);
-                        parse.Remove(parse.Length - 1, 1);
+                        string paramName = parse.Substring(1, parse.Length - 2);
                         Units units = doc.GetUnits();
-                        foreach (Element e in elem) 
+                        foreach (Element e in elems) 
                         {
-                            Parameter p = e.LookupParameter(parse);
-                            double paramVal = p.AsDouble();
-                            String outputString = UnitFormatUtils.Format(units, p.Definition.GetDataType(), paramVal, true);
-                            paramValues.Add(e, (paramValues[e] ?? string.Empty) + outputString);
+                            Parameter p = e.LookupParameter(paramName);
+                            if (p == null)
+                            {
+                                foreach (Parameter param in e.Parameters)
+                                {
+                                    if (param.Definition.Name.ToLower().Equals(paramName))
+                                        p = param;
+                                }
+                            }
+                            if (p != null)
+                            {
+                                double paramVal = p.AsDouble();
+                                String outputString = UnitFormatUtils.Format(units, p.Definition.GetDataType(), paramVal, true);
+
+                                if (paramValues.ContainsKey(e))
+                                {
+                                    paramValues[e] += outputString;
+                                }
+                                else
+                                {
+                                    paramValues.Add(e, outputString);
+                                }
+                            }
+                        }
+                        continue;
+                    }
+                    else
+                    {
+                        string outputString = parse;
+                        List<Element> els = paramValues.Keys.ToList();
+                        foreach (Element e in els)
+                        {
+                            paramValues[e] += outputString;
                         }
                     }
                 }
+                foreach (Element elem in paramValues.Keys)
+                {
+                    elem.LookupParameter(outParameter).Set(paramValues[elem]);
+                }
+
                 trans.Commit();
             }
             catch (FormatException ex)

@@ -30,20 +30,22 @@
         {
             this.dataGridView1 = new System.Windows.Forms.DataGridView();
             this.NameColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.Element = new System.Windows.Forms.DataGridViewComboBoxColumn();
+            this.Element = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.baseParam = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.Output = new System.Windows.Forms.DataGridViewComboBoxColumn();
-            this.Description = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.Output = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.reloadselect = new System.Windows.Forms.Button();
             this.reloadAll = new System.Windows.Forms.Button();
             this.Close = new System.Windows.Forms.Button();
-            this.settings = new System.Windows.Forms.Button();
             this.addButton = new System.Windows.Forms.Button();
+            this.Remove = new System.Windows.Forms.Button();
+            this.edit = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).BeginInit();
             this.SuspendLayout();
             // 
             // dataGridView1
             // 
+            this.dataGridView1.AllowUserToAddRows = false;
+            this.dataGridView1.AllowUserToDeleteRows = false;
             this.dataGridView1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
@@ -52,13 +54,11 @@
             this.NameColumn,
             this.Element,
             this.baseParam,
-            this.Output,
-            this.Description});
+            this.Output});
             this.dataGridView1.Location = new System.Drawing.Point(12, 43);
             this.dataGridView1.Name = "dataGridView1";
             this.dataGridView1.Size = new System.Drawing.Size(750, 243);
             this.dataGridView1.TabIndex = 0;
-            this.dataGridView1.CellValueChanged += new System.Windows.Forms.DataGridViewCellEventHandler(this.dataGridView1_CellChanged);
             // 
             // NameColumn
             // 
@@ -70,24 +70,19 @@
             this.Element.HeaderText = "ElementType";
             this.Element.Name = "Element";
             this.Element.Resizable = System.Windows.Forms.DataGridViewTriState.True;
-            this.Element.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic;
             // 
             // baseParam
             // 
             this.baseParam.HeaderText = "Base Parameter";
             this.baseParam.Name = "baseParam";
+            this.baseParam.Width = 300;
             // 
             // Output
             // 
             this.Output.HeaderText = "Output Parameter";
             this.Output.Name = "Output";
             this.Output.Resizable = System.Windows.Forms.DataGridViewTriState.True;
-            this.Output.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic;
-            // 
-            // Description
-            // 
-            this.Description.HeaderText = "Description";
-            this.Description.Name = "Description";
+            this.Output.Width = 200;
             // 
             // reloadselect
             // 
@@ -97,6 +92,7 @@
             this.reloadselect.TabIndex = 1;
             this.reloadselect.Text = "Reload Selected";
             this.reloadselect.UseVisualStyleBackColor = true;
+            this.reloadselect.Click += new System.EventHandler(this.reloadselect_Click);
             // 
             // reloadAll
             // 
@@ -106,6 +102,7 @@
             this.reloadAll.TabIndex = 2;
             this.reloadAll.Text = "Reload All";
             this.reloadAll.UseVisualStyleBackColor = true;
+            this.reloadAll.Click += new System.EventHandler(this.reloadAll_Click);
             // 
             // Close
             // 
@@ -118,16 +115,6 @@
             this.Close.Text = "Close";
             this.Close.UseVisualStyleBackColor = true;
             // 
-            // settings
-            // 
-            this.settings.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.settings.Location = new System.Drawing.Point(687, 392);
-            this.settings.Name = "settings";
-            this.settings.Size = new System.Drawing.Size(75, 23);
-            this.settings.TabIndex = 4;
-            this.settings.Text = "Settings";
-            this.settings.UseVisualStyleBackColor = true;
-            // 
             // addButton
             // 
             this.addButton.Location = new System.Drawing.Point(12, 411);
@@ -138,14 +125,35 @@
             this.addButton.UseVisualStyleBackColor = true;
             this.addButton.Click += new System.EventHandler(this.addButton_Click);
             // 
+            // Remove
+            // 
+            this.Remove.Location = new System.Drawing.Point(93, 411);
+            this.Remove.Name = "Remove";
+            this.Remove.Size = new System.Drawing.Size(75, 23);
+            this.Remove.TabIndex = 8;
+            this.Remove.Text = "Remove";
+            this.Remove.UseVisualStyleBackColor = true;
+            this.Remove.Click += new System.EventHandler(this.Remove_Click);
+            // 
+            // edit
+            // 
+            this.edit.Location = new System.Drawing.Point(174, 411);
+            this.edit.Name = "edit";
+            this.edit.Size = new System.Drawing.Size(75, 23);
+            this.edit.TabIndex = 9;
+            this.edit.Text = "Edit";
+            this.edit.UseVisualStyleBackColor = true;
+            this.edit.Click += new System.EventHandler(this.edit_Click);
+            // 
             // ParameterSyncForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.CancelButton = this.Close;
             this.ClientSize = new System.Drawing.Size(774, 456);
+            this.Controls.Add(this.edit);
+            this.Controls.Add(this.Remove);
             this.Controls.Add(this.addButton);
-            this.Controls.Add(this.settings);
             this.Controls.Add(this.Close);
             this.Controls.Add(this.reloadAll);
             this.Controls.Add(this.reloadselect);
@@ -163,12 +171,12 @@
         private System.Windows.Forms.Button reloadselect;
         private System.Windows.Forms.Button reloadAll;
         private System.Windows.Forms.Button Close;
-        private System.Windows.Forms.Button settings;
-        private System.Windows.Forms.DataGridViewTextBoxColumn NameColumn;
-        private System.Windows.Forms.DataGridViewComboBoxColumn Element;
-        private System.Windows.Forms.DataGridViewTextBoxColumn baseParam;
-        private System.Windows.Forms.DataGridViewComboBoxColumn Output;
-        private System.Windows.Forms.DataGridViewTextBoxColumn Description;
         private System.Windows.Forms.Button addButton;
+        private System.Windows.Forms.Button Remove;
+        private System.Windows.Forms.DataGridViewTextBoxColumn NameColumn;
+        private System.Windows.Forms.DataGridViewTextBoxColumn Element;
+        private System.Windows.Forms.DataGridViewTextBoxColumn baseParam;
+        private System.Windows.Forms.DataGridViewTextBoxColumn Output;
+        private System.Windows.Forms.Button edit;
     }
 }

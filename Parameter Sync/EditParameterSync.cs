@@ -14,7 +14,7 @@ using System.Windows.Forms;
 
 namespace Intech
 {
-    public partial class NewParameterSync : System.Windows.Forms.Form
+    public partial class EditParameterSync : System.Windows.Forms.Form
     {
         CategoryNameMap catagories = new CategoryNameMap();
         List<string> categoryNames = new List<string>();
@@ -27,7 +27,7 @@ namespace Intech
 
         private Label ghostLabel;
 
-        public NewParameterSync()
+        public EditParameterSync(string name, string category, string smartbox, string output)
         {
             InitializeComponent();
             CenterToParent();
@@ -40,7 +40,28 @@ namespace Intech
             categoryComboBox.DataSource = categoryNames;
 
             InitializeSmartParameterBox();
-
+            nameTextBox.Text = name;
+            if (catagories.Contains(category))
+            {
+                categoryComboBox.Text = category;
+                Category cat = catagories.get_Item(category);
+                parameters = Intech.Revit.RevitHelperFunctions.GetParameters(cat);
+                parameters.Sort();
+                parameterComboBox.DataSource = parameters;
+            }
+            else
+            {
+                categoryComboBox.Text = string.Empty;
+            }
+            smartParameterBox.Text = smartbox;
+            if (parameters.Contains(output))
+            {
+                parameterComboBox.Text = output;
+            }
+            else
+            {
+                parameterComboBox.Text = string.Empty;
+            }
         }
 
         private void InitializeSmartParameterBox()
@@ -343,70 +364,20 @@ namespace Intech
 
         private void save_Click(object sender, EventArgs e)
         {
-            saveOperation();
+            this.DialogResult = DialogResult.OK;
+            this.Close();
         }
 
         private void saveAndLoad_Click(object sender, EventArgs e)
         {
-            saveOperation();
             Intech.ParameterSyncMenu.compute(smartParameterBox.Text.Trim(), categoryComboBox.Text, parameterComboBox.Text);
-        }
-
-        private bool saveOperation()
-        {
-            // Reset background colors first
-            nameTextBox.BackColor = SystemColors.Window;
-            categoryComboBox.BackColor = SystemColors.Window;
-            smartParameterBox.BackColor = SystemColors.Window;
-            parameterComboBox.BackColor = SystemColors.Window;
-
-            string Name = nameTextBox.Text.Trim();
-            string category = categoryComboBox.SelectedItem?.ToString();
-            bool hasError = false;
-
-            if (string.IsNullOrWhiteSpace(category))
-            {
-                categoryComboBox.BackColor = System.Drawing.Color.LightCoral;
-                MessageBox.Show("Please fill in category.");
-                hasError = true;
-            }
-
-            string parameter = smartParameterBox.Text.Trim();
-            if (string.IsNullOrWhiteSpace(parameter))
-            {
-                smartParameterBox.BackColor = System.Drawing.Color.LightCoral;
-                MessageBox.Show("Please fill in input parameter box.");
-                hasError = true;
-            }
-
-            string outputParameter = parameterComboBox.SelectedItem?.ToString();
-            if (string.IsNullOrWhiteSpace(outputParameter))
-            {
-                parameterComboBox.BackColor = System.Drawing.Color.LightCoral;
-                MessageBox.Show("Please fill in output parameter.");
-                hasError = true;
-            }
-
-            if (string.IsNullOrWhiteSpace(Name))
-            {
-                Name = category + " - " + outputParameter;
-            }
-
-            if (hasError)
-            {
-                return false;
-            }
-
-            Document doc = Intech.ParameterSyncMenu.doc;
-            SaveFileSection section = new SaveFileSection(doc.Title, "ParameterSyncMenu", "Name\tCategory\tInput\tOutput");
-            section.Rows.Add(new string[] { Name, category, parameter, outputParameter });
-            SaveFileManager manager = new SaveFileManager(Path.Combine(App.BasePath,"ParameterSync.txt"), new TxtFormat());
-            manager.AddOrUpdateSection(section);
-            return true;
+            this.DialogResult = DialogResult.OK;
+            this.Close();
         }
 
         private void cancel_Click(object sender, EventArgs e)
         {
+            this.DialogResult = DialogResult.Cancel;
             this.Close();
         }
 
