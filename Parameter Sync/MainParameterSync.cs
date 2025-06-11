@@ -100,9 +100,10 @@ namespace Intech
                             {
                                 fo.Accuracy = (1.0 / 64.0);
                             }
+                            fo.UseDefault = false;
+                            customUnits.SetFormatOptions(unitType, fo);
                         }
-                        fo.UseDefault = false;
-                        customUnits.SetFormatOptions(unitType, fo);
+
                         List<Element> tempEls = new List<Element>(elems);
                         foreach (Element e in tempEls)
                         {

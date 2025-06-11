@@ -20,6 +20,7 @@ namespace Intech
         {
             InitializeComponent();
             CenterToParent();
+            dataGridView1.Columns["NameColumn"].ReadOnly = true;
             catagories = Revit.RevitHelperFunctions.GetAllCategories();
             // Populate the combo box in the Element type row  on the dataGrid with category names
             DataGridViewComboBoxCell comboBoxCell = new DataGridViewComboBoxCell();
@@ -73,7 +74,7 @@ namespace Intech
 
         private void Remove_Click(object sender, EventArgs e)
         {
-            SaveFileManager manager = new SaveFileManager(Path.Combine(App.BasePath, "ParameterSync.txt"), new TxtFormat());
+            SaveFileManager manager = new SaveFileManager(Path.Combine(Path.Combine(App.BasePath, "SaveFileManager"), "temp.txt"), new TxtFormat());
             List<Intech.SaveFileSection> sections = manager.GetSectionsByProject(Intech.ParameterSyncMenu.doc.Title);
             SaveFileSection section = null;
             foreach (SaveFileSection sec in sections)
@@ -91,11 +92,22 @@ namespace Intech
 
         private void reloadselect_Click(object sender, EventArgs e)
         {
-            foreach (DataGridViewRow row in dataGridView1.SelectedRows)
+            List<int> rows = new List<int>();
+            DataGridViewSelectedCellCollection cells = dataGridView1.SelectedCells;
+            foreach (DataGridViewCell cell in cells)
             {
-                string elementType = row.Cells["Element"].Value.ToString();
-                string baseParam = row.Cells["baseParam"].Value.ToString();
-                string outputParam = row.Cells["Output"].Value.ToString();
+                if (rows.Contains(cell.RowIndex))
+                    continue; // Skip if the row is already added
+                rows.Add(cell.RowIndex);
+            }
+
+
+            foreach (int row in rows)
+            {
+
+                string elementType = dataGridView1.Rows[row].Cells["Element"].Value.ToString();
+                string baseParam = dataGridView1.Rows[row].Cells["baseParam"].Value.ToString();
+                string outputParam = dataGridView1.Rows[row].Cells["Output"].Value.ToString();
                 Intech.ParameterSyncMenu.compute(baseParam, elementType, outputParam);
             }
         }
@@ -114,39 +126,42 @@ namespace Intech
 
         private void edit_Click(object sender, EventArgs e)
         {
-            DataGridViewCell cell = dataGridView1.SelectedCells[0];
-            if (cell == null || cell.RowIndex < 0 || cell.ColumnIndex < 0)
+            if(dataGridView1.SelectedCells.Count > 0)
             {
-                MessageBox.Show("Please select a valid cell to edit.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                return;
-            }
-            string name = dataGridView1.Rows[cell.RowIndex].Cells["NameColumn"].Value.ToString();
-            string elementType = dataGridView1.Rows[cell.RowIndex].Cells["Element"].Value.ToString();
-            string baseParam = dataGridView1.Rows[cell.RowIndex].Cells["baseParam"].Value.ToString();
-            string outputParam = dataGridView1.Rows[cell.RowIndex].Cells["Output"].Value.ToString();
-
-            EditParameterSync editParameterSync = new EditParameterSync(name, elementType, baseParam, outputParam);
-            if (editParameterSync.ShowDialog() == DialogResult.OK)
-            {
-                // Save changes to the file
-                SaveFileManager manager = new SaveFileManager(Path.Combine(App.BasePath, "ParameterSync.txt"), new TxtFormat());
-                List<Intech.SaveFileSection> sections = manager.GetSectionsByProject(Intech.ParameterSyncMenu.doc.Title);
-                SaveFileSection section = null;
-                foreach (SaveFileSection sec in sections)
+                DataGridViewCell cell = dataGridView1.SelectedCells[0];
+                if (cell == null || cell.RowIndex < 0 || cell.ColumnIndex < 0)
                 {
-                    if (sec.SecondaryName == "ParameterSyncMenu")
+                    MessageBox.Show("Please select a valid cell to edit.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return;
+                }
+                string name = dataGridView1.Rows[cell.RowIndex].Cells["NameColumn"].Value.ToString();
+                string elementType = dataGridView1.Rows[cell.RowIndex].Cells["Element"].Value.ToString();
+                string baseParam = dataGridView1.Rows[cell.RowIndex].Cells["baseParam"].Value.ToString();
+                string outputParam = dataGridView1.Rows[cell.RowIndex].Cells["Output"].Value.ToString();
+
+                EditParameterSync editParameterSync = new EditParameterSync(name, elementType, baseParam, outputParam);
+                if (editParameterSync.ShowDialog() == DialogResult.OK)
+                {
+                    // Save changes to the file
+                    SaveFileManager manager = new SaveFileManager(Path.Combine(Path.Combine(App.BasePath, "SaveFileManager"), "temp.txt"), new TxtFormat());
+                    List<Intech.SaveFileSection> sections = manager.GetSectionsByProject(Intech.ParameterSyncMenu.doc.Title);
+                    SaveFileSection section = null;
+                    foreach (SaveFileSection sec in sections)
                     {
-                        section = sec;
+                        if (sec.SecondaryName == "ParameterSyncMenu")
+                        {
+                            section = sec;
+                        }
+                    }
+                    if (section != null)
+                    {
+                        section.Rows[cell.RowIndex] = new string[] { editParameterSync.nameTextBox.Text, 
+                            editParameterSync.categoryComboBox.Text, editParameterSync.smartParameterBox.Text, editParameterSync.parameterComboBox.Text };
+                        manager.AddOrUpdateSection(section);
                     }
                 }
-                if (section != null)
-                {
-                    section.Rows[cell.RowIndex] = new string[] { editParameterSync.nameTextBox.Text, 
-                        editParameterSync.categoryComboBox.Text, editParameterSync.smartParameterBox.Text, editParameterSync.parameterComboBox.Text };
-                    manager.AddOrUpdateSection(section);
-                }
+                dataGridView_Update();
             }
-            dataGridView_Update();
         }
     }
 }
