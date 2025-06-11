@@ -1,12 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using WinForms = System.Windows.Forms;
-using Autodesk.Revit.DB;
+﻿using Autodesk.Revit.DB;
+using Autodesk.Revit.DB.Mechanical;
+using Autodesk.Revit.DB.Plumbing;
 using Autodesk.Revit.UI;
 using Autodesk.Revit.UI.Selection;
-using Autodesk.Revit.DB.Plumbing;
-using Autodesk.Revit.DB.Mechanical;
+using System;
+using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
+using System.Numerics;
+using WinForms = System.Windows.Forms;
 
 namespace Intech
 {
@@ -23,10 +25,36 @@ namespace Intech
             try
             {
                 // STEP 1: Select the fitting (a FamilyInstance with a valid MEPModel).
-                Reference fittingRef = uidoc.Selection.PickObject(
+
+
+                // Get the current selection
+                Selection sel = uidoc.Selection;
+                ICollection<ElementId> selectedIds = sel.GetElementIds();
+
+                Reference fittingRef = null;
+
+                // If something is already selected, use it
+                if (selectedIds.Count == 1)
+                {
+                    ElementId selectedId = selectedIds.First();
+                    Element selectedElement = doc.GetElement(selectedId);
+
+                    // Optional: check if it's a fitting
+                    if (new FittingSelectionFilter().AllowElement(selectedElement))
+                    {
+                        fittingRef = new Reference(selectedElement);
+                    }
+                }
+
+                // If nothing selected or not a fitting, prompt the user
+                if (fittingRef == null)
+                {
+                    fittingRef = sel.PickObject(
                     ObjectType.Element,
                     new FittingSelectionFilter(),
                     "Select the fitting to rotate.");
+                }
+
                 Element fitting = doc.GetElement(fittingRef.ElementId);
                 if (fitting == null)
                 {
@@ -44,13 +72,8 @@ namespace Intech
                     return Result.Failed;
                 }
 
-                // STEP 3: Determine the main axis by finding the pair of connectors with the maximum separation.
-                double x = 0;
-                if (fitting is FamilyInstance fi)
-                    x = fitting.LookupParameter("Total Height").AsDouble();
-                else if (fitting is FabricationPart)
-                    x = fitting.LookupParameter("eM_CenterlineLength").AsDouble();
-                if (!GetCloseDistanceConnectorPair(x, connectors, out Connector connectorA, out Connector connectorB))
+                // STEP 3: Determine the main axis by finding the pair of connectors with the maximum separation.                
+                if (!GetMainAxisConnectorPair(connectors, out Connector connectorA, out Connector connectorB))
                 {
                     message = "Unable to determine the main axis from the fitting's connectors.";
                     return Result.Failed;
@@ -62,7 +85,7 @@ namespace Intech
                 XYZ basePoint = (pointA + pointB) * 0.5;
 
                 // STEP 4: Prompt the user for a rotation angle (in degrees).
-                string angleStr = MyInputBox.Show("Enter rotation angle in degrees:", "Rotation Angle", "0");
+                string angleStr = MyInputBox.Show("Enter rotation angle in degrees:", "Rotation Angle", "");
                 if (string.IsNullOrEmpty(angleStr))
                 {
                     message = "No rotation angle provided.";
@@ -119,24 +142,34 @@ namespace Intech
         /// <summary>
         /// Finds the pair of connectors with the maximum distance between them.
         /// </summary>
-        private bool GetCloseDistanceConnectorPair(double close, ConnectorSet connectors, out Connector bestA, out Connector bestB)
+        private bool GetMainAxisConnectorPair(ConnectorSet connectors, out Connector bestA, out Connector bestB)
         {
             bestA = null;
             bestB = null;
-            double minDist = double.PositiveInfinity;
             foreach (Connector conn1 in connectors)
             {
+                XYZ basis1 = conn1.CoordinateSystem.BasisZ;
+                XYZ xyz1 = conn1.CoordinateSystem.Origin;
                 foreach (Connector conn2 in connectors)
                 {
-                    if (conn1.Id == conn2.Id)
-                        continue;
-                    double d = Math.Abs(close - conn1.Origin.DistanceTo(conn2.Origin));
-                    Debug.WriteLine(d);
-                    if (d < minDist)
+                    if (conn1.Equals(conn2)) continue;
+                    XYZ xyz2 = conn2.CoordinateSystem.Origin;
+                    XYZ delta = xyz2 - xyz1;
+
+                    // Check if delta is parallel to basis1
+                    XYZ cross = delta.CrossProduct(basis1);
+                    if (cross.GetLength() < 1e-9)
                     {
-                        minDist = d;
-                        bestA = conn1;
-                        bestB = conn2;
+                        if(xyz1.GetLength() >= xyz2.GetLength())
+                        {
+                            bestA = conn1;
+                            bestB = conn2;
+                        }
+                        else
+                        {
+                            bestA = conn2;
+                            bestB = conn1;
+                        }
                     }
                 }
             }

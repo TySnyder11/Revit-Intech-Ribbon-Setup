@@ -228,7 +228,7 @@ namespace Intech
             string areaData = "@Nonstandard Scopebox Info\r\n*ScopeBox Name\tTitle Block Parameter Name\tSheet Number Value";
             for (int row = 0; row < AreaGrid.Rows.Count - 1; row++)
             {
-                if (AreaGrid.Rows[row].Cells[0].Value == null) ;
+                if (AreaGrid.Rows[row].Cells[0].Value == null);
                 else if (AreaGrid.Rows[row].Cells[0].Value.ToString() == "" || AreaGrid.Rows[row].Cells[0].Value.ToString() == "\t") { }
                 //Breaks into individual cells
                 else
@@ -265,7 +265,7 @@ namespace Intech
             string disciplineData = "@Sheet Discipline\r\n*Discipline Name\tDiscipline#";
             for (int row = 0; row < DisciplineGrid.Rows.Count - 1; row++)
             {
-                if (DisciplineGrid.Rows[row].Cells[0].Value == null) ;
+                if (DisciplineGrid.Rows[row].Cells[0].Value == null);
                 else if (DisciplineGrid.Rows[row].Cells[0].Value.ToString() == "" || DisciplineGrid.Rows[row].Cells[0].Value.ToString() == "\t") { }
                 //Breaks into individual cells
                 else
@@ -282,7 +282,7 @@ namespace Intech
             string subDisciplineData = "@Sheet Sub Discipline\r\n*Disipline";
             for (int row = 0; row < SubDisciplineGrid.Rows.Count - 1; row++)
             {
-                if (SubDisciplineGrid.Rows[row].Cells[0].Value == null) ;
+                if (SubDisciplineGrid.Rows[row].Cells[0].Value == null);
                 else if (SubDisciplineGrid.Rows[row].Cells[0].Value.ToString() == "" || SubDisciplineGrid.Rows[row].Cells[0].Value.ToString() == "\t") { }
                 //Breaks into individual cells
                 else

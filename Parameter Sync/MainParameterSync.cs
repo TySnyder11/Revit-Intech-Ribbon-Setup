@@ -21,7 +21,6 @@ namespace Intech
         public Result Execute(ExternalCommandData commandData, ref string message, ElementSet elements)
         {
             Revit.RevitHelperFunctions.init(commandData.Application.ActiveUIDocument.Document);
-            SaveFileManager saveFileManager = new SaveFileManager("ParameterSync.txt", new TxtFormat());
             doc = commandData.Application.ActiveUIDocument.Document;
             Revit.RevitHelperFunctions.init(doc);
             ParameterSyncForm parameterSyncForm = new ParameterSyncForm();
@@ -61,7 +60,9 @@ namespace Intech
 
             Dictionary<Element, string> paramValues = new Dictionary<Element, string>();
 
-            List<Element> elems = Revit.RevitHelperFunctions.GetElementsOfCategory(cat);
+            List<Element> elems = new FilteredElementCollector(doc)
+                            .OfCategoryId(cat.Id)
+                            .WhereElementIsNotElementType().ToList();
             Transaction trans = new Transaction(doc, "Parameter Sync");
             trans.Start();
             try
@@ -77,13 +78,13 @@ namespace Intech
                     {
 
 
-                        int startParam = input.IndexOf('[') + 1;
-                        int endParam = input.IndexOf(']');
-                        string paramName = input.Substring(startParam, endParam - startParam);
+                        int startParam = parse.IndexOf('[') + 1;
+                        int endParam = parse.IndexOf(']');
+                        string paramName = parse.Substring(startParam, endParam - startParam);
 
-                        int startUnit = input.IndexOf('{') + 1;
-                        int endUnit = input.IndexOf('}');
-                        string unitName = input.Substring(startUnit, endUnit - startUnit);
+                        int startUnit = parse.IndexOf('{') + 1;
+                        int endUnit = parse.IndexOf('}');
+                        string unitName = parse.Substring(startUnit, endUnit - startUnit);
 
                         Parameter param = Revit.RevitHelperFunctions.GetParameter(cat, paramName);
                         ForgeTypeId outUnit = Revit.RevitHelperFunctions.GetUnit(unitName);
@@ -102,23 +103,11 @@ namespace Intech
                         }
                         fo.UseDefault = false;
                         customUnits.SetFormatOptions(unitType, fo);
-
-                        FilteredElementCollector collector = new FilteredElementCollector(doc)
-                            .OfCategoryId(cat.Id)
-                            .WhereElementIsNotElementType();
-                        foreach (Element e in collector)
+                        List<Element> tempEls = new List<Element>(elems);
+                        foreach (Element e in tempEls)
                         {
                             Parameter p = e.LookupParameter(paramName);
-                            if (p == null && e as FabricationPart != null)
-                            {
-                                FabricationPart part = e as FabricationPart;
-                                foreach (Parameter par in part.Parameters)
-                                {
-                                    if (par.Definition.Name.ToLower().Equals(paramName.ToLower()))
-                                        p = par;
-                                }
-                            }
-                            else if (p == null)
+                            if (p == null)
                             {
                                 foreach (Parameter par in e.Parameters)
                                 {
@@ -128,32 +117,19 @@ namespace Intech
                             }
                             if(p == null)
                             {
+                                elems.Remove(e);
+                                paramValues.Remove(e);
                                 continue;
                             }
-                            if (StorageType.Double == p.StorageType)
+                            double paramVal = p.AsDouble();
+                            String outputString = UnitFormatUtils.Format(customUnits, unitType, paramVal, false);
+                            if (paramValues.ContainsKey(e))
                             {
-                                double paramVal = p.AsDouble();
-                                String outputString = UnitFormatUtils.Format(customUnits, unitType, paramVal, false);
-                                if (paramValues.ContainsKey(e))
-                                {
-                                    paramValues[e] += outputString;
-                                }
-                                else
-                                {
-                                    paramValues.Add(e, outputString);
-                                }
+                                paramValues[e] += outputString;
                             }
                             else
                             {
-                                string outputString = p.AsString();
-                                if (paramValues.ContainsKey(e))
-                                {
-                                    paramValues[e] += outputString;
-                                }
-                                else
-                                {
-                                    paramValues.Add(e, outputString);
-                                }
+                                paramValues.Add(e, outputString);
                             }
                         }
                         continue;
@@ -162,16 +138,23 @@ namespace Intech
                     {
                         string paramName = parse.Substring(1, parse.Length - 2);
                         Units units = doc.GetUnits();
-                        foreach (Element e in elems) 
+                        List<Element> tempEls = new List<Element>(elems);
+                        foreach (Element e in tempEls) 
                         {
                             Parameter p = e.LookupParameter(paramName);
                             if (p == null)
                             {
                                 foreach (Parameter param in e.Parameters)
                                 {
-                                    if (param.Definition.Name.ToLower().Equals(paramName))
+                                    if (param.Definition.Name.ToLower().Equals(paramName.ToLower()))
                                         p = param;
                                 }
+                            }
+                            if (p == null)
+                            {
+                                elems.Remove(e);
+                                paramValues.Remove(e);
+                                continue;
                             }
                             if (p != null)
                             {
@@ -193,10 +176,16 @@ namespace Intech
                     else
                     {
                         string outputString = parse;
-                        List<Element> els = paramValues.Keys.ToList();
-                        foreach (Element e in els)
+                        foreach (Element e in elems)
                         {
-                            paramValues[e] += outputString;
+                            if (paramValues.ContainsKey(e))
+                            { 
+                                paramValues[e] += outputString;
+                            }
+                            else
+                            {
+                                paramValues.Add(e, outputString);
+                            }
                         }
                     }
                 }

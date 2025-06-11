@@ -41,7 +41,7 @@ namespace Intech
         private void dataGridView_Update()
         {
             dataGridView1.Rows.Clear();
-            SaveFileManager manager = new SaveFileManager(Path.Combine(App.BasePath, "ParameterSync.txt"), new TxtFormat());
+            SaveFileManager manager = new SaveFileManager(Path.Combine(Path.Combine(App.BasePath, "SaveFileManager"), "temp.txt"), new TxtFormat());
             List<Intech.SaveFileSection> sections = manager.GetSectionsByProject(Intech.ParameterSyncMenu.doc.Title);
             if (sections.Count > 0)
             {

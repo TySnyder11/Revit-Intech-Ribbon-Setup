@@ -122,7 +122,7 @@ namespace Intech
             {
                 return alpha[a];
             }
-            catch (IndexOutOfRangeException e)
+            catch
             {
                 //if this error appears. Change the array above to include alphabets such as "AA", "AB" and so on.
                 TaskDialog.Show("Error", "This program was coded to handle 26 rows or less. Please edit source code to fix this error");

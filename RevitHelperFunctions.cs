@@ -34,41 +34,42 @@ namespace Intech.Revit
 
         static public List<string> GetParameters(Category category)
         {
-            ElementCategoryFilter filter = new ElementCategoryFilter(category.Id);
-            FilteredElementCollector collector = new FilteredElementCollector(doc)
-                .WhereElementIsNotElementType()
-                .WherePasses(filter);
 
-            if (collector.Count() == 0)
-            {
-                return new List<string>();
-            }
-            Element e = collector.FirstOrDefault<Element>();
+            var instances = new FilteredElementCollector(doc)
+             .OfCategoryId(category.Id)
+             .WhereElementIsNotElementType()
+             .ToElements();
 
-            FabricationPart fab = null;
-            foreach (Element el in collector)
+            // Step 2: Map from typeId to one instance
+            Dictionary<ElementId, Element> typeToInstance = new Dictionary<ElementId, Element>();
+
+            foreach (Element instance in instances)
             {
-                fab = el as FabricationPart;
-                if (fab != null)
+                ElementId typeId = instance.GetTypeId();
+                if (!typeToInstance.ContainsKey(typeId))
                 {
-                    break;
+                    typeToInstance[typeId] = instance;
                 }
             }
-            List<string> paramNames = new List<string>();
-            if (fab != null)
+
+            // Step 3: Collect unique parameter names from one instance per type
+            HashSet<string> paramNames = new HashSet<string>();
+
+            foreach (Element instance in typeToInstance.Values)
             {
-                ParameterSet parameters =  fab.Parameters;
-                foreach (Parameter param in parameters)
+                foreach (Parameter p in instance.Parameters)
                 {
-                    paramNames.Add(param.Definition.Name);
+                    paramNames.Add(p.Definition.Name);
                 }
-                return paramNames;
             }
-            foreach (Parameter def in e.Parameters)
-            {
-                paramNames.Add(def.Definition.Name);
-            }
-            return paramNames;
+
+            return paramNames.ToList();
+
+        }
+
+        static public Parameter GetParameters(Family family)
+        {
+            return null;
         }
 
         static public Parameter GetParameter(Category category, string paramName)

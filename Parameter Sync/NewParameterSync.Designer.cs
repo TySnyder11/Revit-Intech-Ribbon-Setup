@@ -131,6 +131,7 @@
             // Close
             // 
             this.Close.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.Close.DialogResult = System.Windows.Forms.DialogResult.Cancel;
             this.Close.Location = new System.Drawing.Point(378, 133);
             this.Close.Name = "Close";
             this.Close.Size = new System.Drawing.Size(75, 23);
@@ -165,6 +166,7 @@
             this.AcceptButton = this.save;
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.CancelButton = this.Close;
             this.ClientSize = new System.Drawing.Size(463, 166);
             this.Controls.Add(this.saveAndLoad);
             this.Controls.Add(this.parameterComboBox);

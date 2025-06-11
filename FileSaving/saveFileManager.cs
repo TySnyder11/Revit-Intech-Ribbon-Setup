@@ -120,10 +120,21 @@ namespace Intech
 
     public class SaveFileSection
     {
+        public class NoEmptyList : List<string[]>
+        {
+            public NoEmptyList() : base() { }
+            public NoEmptyList(int capacity) : base(capacity) { }
+            public new void Add(string[] item)
+            {
+                if (item != null || item.Length != 0)
+                base.Add(item);
+            }
+        }
+
         public string ProjectName { get; set; }
         public string SecondaryName { get; set; }
         public string Header { get; set; }
-        public List<string[]> Rows { get; set; } = new List<string[]>();
+        public NoEmptyList Rows { get; set; } = new NoEmptyList();
 
         public SaveFileSection(string projectName, string secondaryName, string header)
         {

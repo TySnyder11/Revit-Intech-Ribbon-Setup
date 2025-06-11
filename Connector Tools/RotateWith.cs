@@ -1,12 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using WinForms = System.Windows.Forms;
-using Autodesk.Revit.DB;
+﻿using Autodesk.Revit.DB;
+using Autodesk.Revit.DB.Mechanical;
+using Autodesk.Revit.DB.Plumbing;
 using Autodesk.Revit.UI;
 using Autodesk.Revit.UI.Selection;
-using Autodesk.Revit.DB.Plumbing;
-using Autodesk.Revit.DB.Mechanical;
+using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Linq;
+using WinForms = System.Windows.Forms;
 
 namespace Intech
 {
@@ -23,12 +24,34 @@ namespace Intech
 
             try
             {
-                // STEP 1: Select ducts or pipes.
-                IList<Reference> ductPipeRefs = uidoc.Selection.PickObjects(
-                    ObjectType.Element,
-                    new DuctPipeSelectionFilter(),
-                    "Select ducts or pipes."
-                );
+
+                // Get the current selection
+                Selection sel = uidoc.Selection;
+                ICollection<ElementId> selectedIds = sel.GetElementIds();
+
+                List<Reference> ductPipeRefs = new List<Reference>();
+
+                // Filter the current selection for ducts or pipes
+                if (selectedIds.Count > 0)
+                {
+                    foreach (ElementId id in selectedIds)
+                    {
+                        Element elem = doc.GetElement(id);
+                        if (new DuctPipeSelectionFilter().AllowElement(elem))
+                        {
+                            ductPipeRefs.Add(new Reference(elem));
+                        }
+                    }
+                }
+
+
+                ductPipeRefs = uidoc.Selection.PickObjects(
+                ObjectType.Element,
+                new DuctPipeSelectionFilter(),
+                "Select ducts or pipes."
+                ,ductPipeRefs
+                ).ToList();
+
                 List<ElementId> ductPipeIds = new List<ElementId>();
                 foreach (Reference r in ductPipeRefs)
                 {
@@ -87,7 +110,7 @@ namespace Intech
                 }
 
                 // STEP 5: Determine the connector pair using the provided distance "close".
-                if (!GetCloseDistanceConnectorPair(close, connectors, out Connector connectorA, out Connector connectorB))
+                if (!GetMainAxisConnectorPair(connectors, out Connector connectorA, out Connector connectorB))
                 {
                     message = "Unable to determine the main axis from the fitting's connectors.";
                     return Result.Failed;
@@ -99,7 +122,7 @@ namespace Intech
                 XYZ basePoint = (pointA + pointB) * 0.5;
 
                 // STEP 6: Prompt the user for a rotation angle (in degrees).
-                string angleStr = MyInputBox.Show("Enter rotation angle in degrees:", "Rotation Angle", "0");
+                string angleStr = MyInputBox.Show("Enter rotation angle in degrees:", "Rotation Angle", "");
                 if (string.IsNullOrEmpty(angleStr))
                 {
                     message = "No rotation angle provided.";
@@ -165,24 +188,34 @@ namespace Intech
         /// <summary>
         /// Finds the pair of connectors whose separation is closest to the given distance parameter.
         /// </summary>
-        private bool GetCloseDistanceConnectorPair(double close, ConnectorSet connectors, out Connector bestA, out Connector bestB)
+        private bool GetMainAxisConnectorPair(ConnectorSet connectors, out Connector bestA, out Connector bestB)
         {
             bestA = null;
             bestB = null;
-            double minDist = double.PositiveInfinity;
             foreach (Connector conn1 in connectors)
             {
+                XYZ basis1 = conn1.CoordinateSystem.BasisZ;
+                XYZ xyz1 = conn1.CoordinateSystem.Origin;
                 foreach (Connector conn2 in connectors)
                 {
-                    if (conn1.Id == conn2.Id)
-                        continue;
-                    double d = Math.Abs(close - conn1.Origin.DistanceTo(conn2.Origin));
-                    Debug.WriteLine(d);
-                    if (d < minDist)
+                    if (conn1.Equals(conn2)) continue;
+                    XYZ xyz2 = conn2.CoordinateSystem.Origin;
+                    XYZ delta = xyz2 - xyz1;
+
+                    // Check if delta is parallel to basis1
+                    XYZ cross = delta.CrossProduct(basis1);
+                    if (cross.GetLength() < 1e-9)
                     {
-                        minDist = d;
-                        bestA = conn1;
-                        bestB = conn2;
+                        if (xyz1.GetLength() >= xyz2.GetLength())
+                        {
+                            bestA = conn1;
+                            bestB = conn2;
+                        }
+                        else
+                        {
+                            bestA = conn2;
+                            bestB = conn1;
+                        }
                     }
                 }
             }

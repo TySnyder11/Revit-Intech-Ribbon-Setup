@@ -348,8 +348,8 @@ namespace Intech
 
         private void saveAndLoad_Click(object sender, EventArgs e)
         {
-            saveOperation();
-            Intech.ParameterSyncMenu.compute(smartParameterBox.Text.Trim(), categoryComboBox.Text, parameterComboBox.Text);
+            if (saveOperation())
+                Intech.ParameterSyncMenu.compute(smartParameterBox.Text.Trim(), categoryComboBox.Text, parameterComboBox.Text);
         }
 
         private bool saveOperation()
@@ -400,8 +400,10 @@ namespace Intech
             Document doc = Intech.ParameterSyncMenu.doc;
             SaveFileSection section = new SaveFileSection(doc.Title, "ParameterSyncMenu", "Name\tCategory\tInput\tOutput");
             section.Rows.Add(new string[] { Name, category, parameter, outputParameter });
-            SaveFileManager manager = new SaveFileManager(Path.Combine(App.BasePath,"ParameterSync.txt"), new TxtFormat());
+            SaveFileManager manager = new SaveFileManager(Path.Combine(Path.Combine(App.BasePath, "SaveFileManager"), "temp.txt"), new TxtFormat());
             manager.AddOrUpdateSection(section);
+            smartParameterBox.Text = string.Empty;
+            nameTextBox.Text = string.Empty;
             return true;
         }
 

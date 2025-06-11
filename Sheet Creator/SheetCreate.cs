@@ -179,7 +179,7 @@ namespace Intech
                     foreach (Parameter p in title_block[0].Parameters)
                     {
                         string[] areaREF = p.Definition.Name.Split('-');
-                        if (areaREF.Length == 0) ;
+                        if (areaREF.Length == 0);
                         else if (areaREF[areaREF.Count() - 1].Equals(area[area.Count() - 1]))
                             p.Set(1);
                     }

@@ -3,9 +3,11 @@ using Autodesk.Revit.DB.Mechanical;
 using Autodesk.Revit.DB.Plumbing;
 using Autodesk.Revit.UI;
 using Autodesk.Revit.UI.Selection;
+using OfficeOpenXml.FormulaParsing.Excel.Functions.Finance.FinancialDayCount;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -123,6 +125,8 @@ namespace Intech
 
                 // STEP 4: Modify the pipe's geometry without reversing its direction.
                 // This version only rebuilds the pipe’s curve when the pipe connector is at an endpoint.
+                XYZ start = null;
+                XYZ end = null;
                 using (Transaction t = new Transaction(doc, "Reposition Pipe"))
                 {
                     t.Start();
@@ -135,8 +139,8 @@ namespace Intech
                     }
 
                     // Retrieve the current endpoints.
-                    XYZ start = locCurve.Curve.GetEndPoint(0);
-                    XYZ end = locCurve.Curve.GetEndPoint(1);
+                    start = locCurve.Curve.GetEndPoint(0);
+                    end = locCurve.Curve.GetEndPoint(1);
                     double tolerance = 0.001; // Adjust tolerance as needed in project units
 
                     Line newLine = null;
@@ -251,7 +255,7 @@ namespace Intech
                     // Re-retrieve the pipe connector now that the pipe has been repositioned.
                     Connector adjustedConnector = GetClosestConnectorByPosition(Duct1, pair.targetConnector.Origin);
                     if (adjustedConnector != null)
-                    {
+                    {   
                         adjustedConnector.ConnectTo(pair.targetConnector);
                     }
                     t.Commit();
