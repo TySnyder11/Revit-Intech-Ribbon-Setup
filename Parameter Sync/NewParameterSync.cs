@@ -350,6 +350,10 @@ namespace Intech
         {
             if (saveOperation())
                 Intech.ParameterSyncMenu.compute(smartParameterBox.Text.Trim(), categoryComboBox.Text, parameterComboBox.Text);
+            else
+            {
+                MessageBox.Show("Failed to save. Make sure you are using latest code.");
+            }
         }
 
         private bool saveOperation()
@@ -398,9 +402,16 @@ namespace Intech
             }
 
             Document doc = Intech.ParameterSyncMenu.doc;
-            SaveFileSection section = new SaveFileSection(doc.Title, "ParameterSyncMenu", "Name\tCategory\tInput\tOutput");
-            section.Rows.Add(new string[] { Name, category, parameter, outputParameter });
             SaveFileManager manager = new SaveFileManager(Path.Combine(Path.Combine(App.BasePath, "SaveFileManager"), "temp.txt"), new TxtFormat());
+            SaveFileSection section = new SaveFileSection(doc.Title, "ParameterSyncMenu", "Name\tCategory\tInput\tOutput");
+            foreach (SaveFileSection sec in manager.GetSectionsByProject(doc.Title))
+            {
+                if (sec.SecondaryName == "ParameterSyncMenu")
+                {
+                    section = sec;
+                }
+            }
+            section.Rows.Add(new string[] { Name, category, parameter, outputParameter });
             manager.AddOrUpdateSection(section);
             smartParameterBox.Text = string.Empty;
             nameTextBox.Text = string.Empty;

@@ -62,11 +62,14 @@ namespace Intech
                 List<string[]> saveRows = section.Rows;
                 foreach(string[] row in saveRows)
                 {
-                    int index = dataGridView1.Rows.Add();
-                    dataGridView1.Rows[index].Cells["NameColumn"].Value = row[0];
-                    dataGridView1.Rows[index].Cells["Element"].Value = row[1];
-                    dataGridView1.Rows[index].Cells["baseParam"].Value = row[2];
-                    dataGridView1.Rows[index].Cells["Output"].Value = row[3];
+                    if(row.Count() != 0)
+                    {
+                        int index = dataGridView1.Rows.Add();
+                        dataGridView1.Rows[index].Cells["NameColumn"].Value = row[0];
+                        dataGridView1.Rows[index].Cells["Element"].Value = row[1];
+                        dataGridView1.Rows[index].Cells["baseParam"].Value = row[2];
+                        dataGridView1.Rows[index].Cells["Output"].Value = row[3];
+                    }
                 }
             }
             dataGridView1.ClearSelection();

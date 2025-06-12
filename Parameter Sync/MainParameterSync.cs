@@ -95,7 +95,11 @@ namespace Intech
                         FormatOptions fo = new FormatOptions(outUnit);
                         if (!unitName.Equals("General"))
                         {
-                            fo.Accuracy = 0.01;
+                            fo.Accuracy = 0.001;
+                            if (fo.CanSuppressTrailingZeros())
+                            {
+                                fo.SuppressTrailingZeros = true;
+                            }
                             if(LabelUtils.GetLabelForUnit(inUnit).Contains("Fraction"))
                             {
                                 fo.Accuracy = (1.0 / 64.0);
@@ -159,16 +163,32 @@ namespace Intech
                             }
                             if (p != null)
                             {
-                                double paramVal = p.AsDouble();
-                                String outputString = UnitFormatUtils.Format(units, p.Definition.GetDataType(), paramVal, true);
-
-                                if (paramValues.ContainsKey(e))
+                                if (p.StorageType == StorageType.Double)
                                 {
-                                    paramValues[e] += outputString;
+                                    double paramVal = p.AsDouble();
+                                    String outputString = UnitFormatUtils.Format(units, p.Definition.GetDataType(), paramVal, true);
+
+                                    if (paramValues.ContainsKey(e))
+                                    {
+                                        paramValues[e] += outputString;
+                                    }
+                                    else
+                                    {
+                                        paramValues.Add(e, outputString);
+                                    }
+                                    continue;
                                 }
                                 else
                                 {
-                                    paramValues.Add(e, outputString);
+                                    string outputString = p.AsValueString();
+                                    if (paramValues.ContainsKey(e))
+                                    {
+                                        paramValues[e] += outputString;
+                                    }
+                                    else
+                                    {
+                                        paramValues.Add(e, outputString);
+                                    }
                                 }
                             }
                         }
