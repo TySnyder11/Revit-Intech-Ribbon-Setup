@@ -165,7 +165,7 @@ public class App : IExternalApplication
             b5Data.ToolTip = "Opens menu to do fancy parameter stuff.";
             b5Data.Image = new BitmapImage(new Uri(IconPath));
             b5Data.LargeImage = new BitmapImage(new Uri(IconPath));
-            PushButton pb05 = pulldownButton.AddPushButton(b5Data);
+            //PushButton pb05 = pulldownButton.AddPushButton(b5Data);
         }
 
         //Export Ribbon

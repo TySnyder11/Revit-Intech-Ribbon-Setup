@@ -61,7 +61,7 @@ namespace Intech
             Dictionary<string, (string, string)> scale = new Dictionary<string, (string, string)> ();
 
             //Get txt Path
-            string BasePath = typeof(RibbonTab).Assembly.Location.Replace("RibbonSetup.dll", "SheetSettings.txt");
+            string BasePath = Path.Combine(App.BasePath, "SheetSettings.txt");
 
             //Get Rows
             string fileContents = File.ReadAllText(BasePath);

@@ -9,36 +9,29 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using static System.Windows.Forms.ListBox;
 
 namespace Intech.SharedParameter
 {
     public partial class SharedParameterAdd : System.Windows.Forms.Form
     {
-        Dictionary<Family, List<FamilySymbol>> famSymMap = new Dictionary<Family, List<FamilySymbol>>();
+        List<Family> families = new List<Family>();
         DefinitionGroups defGroups = null;
         Definitions definitions = null;
         Dictionary<string, bool> defCheckStore = new Dictionary<string, bool>();
+        Dictionary<string, bool> famCheckStore = new Dictionary<string, bool>();
 
         public SharedParameterAdd()
         {
             InitializeComponent();
             CenterToParent();
-            famSymMap = Intech.Revit.RevitHelperFunctions.GetFamilySymbolMap();
+            families = Intech.Revit.RevitHelperFunctions.GetFamilies();
             defGroups = Intech.Revit.RevitHelperFunctions.GetDefinitionGroups();
 
             // Populate the FamilySelect TreeView with families and their symbols
-            List<Family> fams = famSymMap.Keys.ToList();
-            fams.Sort(new CompareFam());
-            foreach (Family family in fams)
-            {
-                TreeNode familyNode = new TreeNode(family.Name);
-                FamilySelect.Nodes.Add(familyNode);
-                foreach (FamilySymbol symbol in famSymMap[family])
-                {
-                    TreeNode symbolNode = new TreeNode(symbol.Name);
-                    familyNode.Nodes.Add(symbolNode);
-                }
-            }
+            families = families.OrderBy(f => f.Name).ToList();
+            families.ForEach(f => FamilySelect.Items.Add(f.Name));
+            families.ForEach(f => famCheckStore.Add(f.Name, false));
 
             // Populate the definition groups into the ComboBox
             defGroupSelect.Items.Clear();
@@ -52,13 +45,7 @@ namespace Intech.SharedParameter
             }
 
         }
-        private class CompareFam : Comparer<Family>
-        {
-            public override int Compare(Family x, Family y)
-            {
-                return string.Compare(x.Name, y.Name);
-            }
-        }
+
         private void cancel_Click(object sender, EventArgs e)
         {
             this.Close();
@@ -88,11 +75,22 @@ namespace Intech.SharedParameter
             }
         }
 
-        private void definitionSelect_ItemCheck(object sender, ItemCheckEventArgs e)
+        private void FamilySelect_SelectedIndexChanged(object sender, EventArgs e)
         {
-            // Update the defCheckStore dictionary when an item is checked or unchecked
-            string definitionName = definitionSelect.Items[e.Index].ToString();
-            defCheckStore[definitionName] = e.NewValue == CheckState.Checked;
+            SelectedObjectCollection selected = FamilySelect.SelectedItems;
+            if (selected.Count > 0)
+            {
+                string selectedFamily = selected[0].ToString();
+                famCheckStore[selectedFamily] = !famCheckStore[selectedFamily]; // Toggle the check state
+                FamilySelect.SetItemChecked(FamilySelect.SelectedIndex, famCheckStore[selectedFamily]);
+                famCheckStore[selectedFamily] = FamilySelect.GetItemChecked(FamilySelect.SelectedIndex); // Update the store
+            }
+        }
+
+        private void familySearch_TextChanged(object sender, EventArgs e)
+        {
+            FamilySelect.Items.Clear();
+            //List<Family> filtered = families.Where(f => f.Name.ToLower().Contains(familySearch.Text.ToLower())).ToList();
         }
     }
 }
