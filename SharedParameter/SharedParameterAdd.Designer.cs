@@ -66,12 +66,10 @@
             // 
             this.definitionSelect.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left)));
-            this.definitionSelect.CheckOnClick = true;
             this.definitionSelect.FormattingEnabled = true;
             this.definitionSelect.IntegralHeight = false;
             this.definitionSelect.Location = new System.Drawing.Point(12, 54);
             this.definitionSelect.Name = "definitionSelect";
-            this.definitionSelect.SelectionMode = System.Windows.Forms.SelectionMode.None;
             this.definitionSelect.Size = new System.Drawing.Size(228, 379);
             this.definitionSelect.TabIndex = 3;
             // 
@@ -125,10 +123,8 @@
             this.FamilySelect.IntegralHeight = false;
             this.FamilySelect.Location = new System.Drawing.Point(260, 54);
             this.FamilySelect.Name = "FamilySelect";
-            this.FamilySelect.SelectionMode = System.Windows.Forms.SelectionMode.None;
             this.FamilySelect.Size = new System.Drawing.Size(228, 379);
             this.FamilySelect.TabIndex = 9;
-            this.FamilySelect.SelectedIndexChanged += new System.EventHandler(this.FamilySelect_SelectedIndexChanged);
             // 
             // PushParameter
             // 

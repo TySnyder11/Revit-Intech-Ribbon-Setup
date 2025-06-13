@@ -62,7 +62,7 @@ namespace Intech
                 List<string[]> saveRows = section.Rows;
                 foreach(string[] row in saveRows)
                 {
-                    if(row.Count() != 0)
+                    if(row.Length == 4)
                     {
                         int index = dataGridView1.Rows.Add();
                         dataGridView1.Rows[index].Cells["NameColumn"].Value = row[0];

@@ -28,11 +28,11 @@ namespace Intech.SharedParameter
             families = Intech.Revit.RevitHelperFunctions.GetFamilies();
             defGroups = Intech.Revit.RevitHelperFunctions.GetDefinitionGroups();
 
+            FamilySelect.ItemCheck += FamilySelect_ItemCheck;
+
             // Populate the FamilySelect TreeView with families and their symbols
             families = families.OrderBy(f => f.Name).ToList();
-            families.ForEach(f => FamilySelect.Items.Add(f.Name));
-            families.ForEach(f => famCheckStore.Add(f.Name, false));
-
+            LoadItems(families);
             // Populate the definition groups into the ComboBox
             defGroupSelect.Items.Clear();
             foreach (DefinitionGroup group in defGroups)
@@ -75,22 +75,83 @@ namespace Intech.SharedParameter
             }
         }
 
-        private void FamilySelect_SelectedIndexChanged(object sender, EventArgs e)
+        int lastCheckedIndex = -1;
+
+        void LoadItems(List<Family> items)
         {
-            SelectedObjectCollection selected = FamilySelect.SelectedItems;
-            if (selected.Count > 0)
+            foreach (Family family in items)
             {
-                string selectedFamily = selected[0].ToString();
-                famCheckStore[selectedFamily] = !famCheckStore[selectedFamily]; // Toggle the check state
-                FamilySelect.SetItemChecked(FamilySelect.SelectedIndex, famCheckStore[selectedFamily]);
-                famCheckStore[selectedFamily] = FamilySelect.GetItemChecked(FamilySelect.SelectedIndex); // Update the store
+                if (!famCheckStore.ContainsKey(family.Name))
+                    famCheckStore[family.Name] = false;
+            }
+
+            UpdateFamilySelect(""); // Load all items initially
+        }
+
+
+
+        void UpdateFamilySelect(string filter)
+        {
+            FamilySelect.Items.Clear();
+
+            var filtered = famCheckStore
+            .Where(kvp => kvp.Key.IndexOf(filter, StringComparison.OrdinalIgnoreCase) >= 0)
+            .ToList();
+
+            foreach (var kvp in filtered)
+            {
+                FamilySelect.Items.Add(kvp.Key, kvp.Value);
             }
         }
 
+
+
+        private void FamilySelect_ItemCheck(object sender, ItemCheckEventArgs e)
+        {
+            string currentItem = FamilySelect.Items[e.Index].ToString();
+
+            if (ModifierKeys == Keys.Shift && lastCheckedIndex != -1)
+            {
+                int start = Math.Min(lastCheckedIndex, e.Index);
+                int end = Math.Max(lastCheckedIndex, e.Index);
+                bool newState = (e.NewValue == CheckState.Checked);
+
+                // Temporarily detach the event handler to prevent recursion
+                FamilySelect.ItemCheck -= FamilySelect_ItemCheck;
+
+                for (int i = start; i <= end && i < FamilySelect.Items.Count; i++)
+                {
+                    string itemText = FamilySelect.Items[i].ToString();
+                    famCheckStore[itemText] = newState;
+                    FamilySelect.SetItemChecked(i, newState); // This would normally trigger ItemCheck
+                }
+
+                // Reattach the event handler
+                FamilySelect.ItemCheck += FamilySelect_ItemCheck;
+
+                // Cancel default behavior
+                e.NewValue = FamilySelect.GetItemChecked(e.Index) ? CheckState.Checked : CheckState.Unchecked;
+            }
+            else
+            {
+                // Normal click: update backing store after event completes
+                this.BeginInvoke((MethodInvoker)(() =>
+                {
+                    famCheckStore[currentItem] = FamilySelect.GetItemChecked(e.Index);
+                }));
+            }
+
+            lastCheckedIndex = e.Index;
+        }
+
+
+
+
         private void familySearch_TextChanged(object sender, EventArgs e)
         {
-            FamilySelect.Items.Clear();
-            //List<Family> filtered = families.Where(f => f.Name.ToLower().Contains(familySearch.Text.ToLower())).ToList();
+            UpdateFamilySelect(familySearch.Text);
         }
+
+
     }
 }
