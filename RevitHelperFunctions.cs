@@ -1,4 +1,6 @@
-﻿using Autodesk.Revit.DB;
+﻿using Autodesk.Revit.ApplicationServices;
+using Autodesk.Revit.DB;
+using Autodesk.Revit.UI;
 using OfficeOpenXml.Export.ToDataTable;
 using System;
 using System.Collections.Generic;
@@ -11,7 +13,6 @@ namespace Intech.Revit
     internal class RevitHelperFunctions
     {
         static Document doc;
-
         static public void init(Document document)
         {
             // Constructor logic if needed
@@ -181,6 +182,131 @@ namespace Intech.Revit
             }
         }
 
+        static public List<Family> GetFamilies()
+        {
+            List<Family> families = new FilteredElementCollector(doc)
+                .OfClass(typeof(Family))
+                .Cast<Family>()
+                .ToList();
+            return families;
+        }
+
+        static public List<FamilySymbol> GetFamilySymbols(Family family)
+        {
+            if (family == null) return new List<FamilySymbol>();
+            List<ElementId> fSd = family.GetFamilySymbolIds().ToList();
+            List<FamilySymbol> symbols = new List<FamilySymbol>();
+            foreach (ElementId familySymbolId in fSd)
+            {
+                FamilySymbol familySymbol = doc.GetElement(familySymbolId) as FamilySymbol;
+                symbols.Add(familySymbol);
+            }
+            return symbols;
+        }
+
+        static public Dictionary<Family, List<FamilySymbol>> GetFamilySymbolMap()
+        {
+            Dictionary<Family, List<FamilySymbol>> familySymbols = new Dictionary<Family, List<FamilySymbol>>();
+            List<Family> families = GetFamilies();
+            foreach (Family family in families)
+            {
+                List<FamilySymbol> symbols = GetFamilySymbols(family);
+                if (symbols.Count > 0)
+                {
+                    familySymbols[family] = symbols;
+                }
+            }
+            return familySymbols;
+        }
+
+        public static DefinitionGroups GetDefinitionGroups()
+        {
+            Application app = doc.Application;
+            // Ensure the shared parameter file is set
+            string sharedParamFile = app.SharedParametersFilename;
+            if (string.IsNullOrEmpty(sharedParamFile))
+            {
+                TaskDialog.Show("Error", "Shared parameter file path is not set.");
+                return null;
+            }
+
+            // Open the shared parameter file
+            DefinitionFile defFile = app.OpenSharedParameterFile();
+            if (defFile == null)
+            {
+                TaskDialog.Show("Error", "Failed to open shared parameter file.");
+                return null;
+            }
+
+            // Collect all definition groups
+            DefinitionGroups groups = defFile.Groups;
+            return groups;
+        }
+
+        public static List<Definition> GetSharedParameterDefinitions(DefinitionGroup group)
+        {
+            List<Definition> definitions = new List<Definition>();
+
+            if (group == null)
+                return definitions;
+
+            foreach (Definition def in group.Definitions)
+            {
+                definitions.Add(def);
+            }
+
+            return definitions;
+        }
+
+        public void AddSharedParameterToFamily(Document famDoc, Definition definition, ForgeTypeId group, bool isInstance)
+        {
+            FamilyManager famMgr = famDoc.FamilyManager;
+
+            using (Transaction t = new Transaction(famDoc, "Add Shared Parameter"))
+            {
+                t.Start();
+
+                // Check if the parameter already exists
+                bool exists = famMgr.Parameters.Cast<FamilyParameter>().Any(p => p.Definition.Name == definition.Name);
+                if (!exists)
+                {
+
+                    ExternalDefinition extDef = definition as ExternalDefinition;
+                    famMgr.AddParameter(extDef, group, isInstance);
+                }
+
+                t.Commit();
+            }
+        }
+        public static void AddSharedParametersToFamily(Document famDoc, List<Definition> definitions, ForgeTypeId group, bool isInstance)
+        {
+            FamilyManager famMgr = famDoc.FamilyManager;
+
+            using (Transaction t = new Transaction(famDoc, "Add Shared Parameter"))
+            {
+                t.Start();
+                foreach (Definition definition in definitions)
+                {
+                    // Check if the parameter already exists
+                    bool exists = famMgr.Parameters.Cast<FamilyParameter>().Any(p => p.Definition.Name == definition.Name);
+                    if (!exists)
+                    {
+
+                        ExternalDefinition extDef = definition as ExternalDefinition;
+                        famMgr.AddParameter(extDef, group, isInstance);
+                    }
+                }
+                t.Commit();
+            }
+        }
+
+        public static void AddSharedParametersToFamilies(List<Document> familyDocs, List<Definition> definitions, ForgeTypeId group, bool isInstance)
+        {
+            foreach (Document famDoc in familyDocs)
+            {
+                AddSharedParametersToFamily(famDoc, definitions, group, isInstance);
+            }
+        }
 
     }
 }

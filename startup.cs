@@ -7,6 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Windows.Forms;
 using System.Windows.Media.Imaging;
 using AW = Autodesk.Windows;
 
@@ -150,11 +151,21 @@ public class App : IExternalApplication
             b3Data.LargeImage = new BitmapImage(new Uri(IconPath));
             PushButton pb03 = ConnectTools.AddItem(b3Data) as PushButton;
 
+            PulldownButtonData pulldownData = new PulldownButtonData("ParameterTools", "Parameter Tools");
+            pulldownData.LargeImage = new BitmapImage(new Uri(IconPath));
+            PulldownButton pulldownButton = ConnectTools.AddItem(pulldownData) as PulldownButton;
+
             PushButtonData b4Data = new PushButtonData("ParameterSync", "Parameter Sync", AddInPath, "Intech.ParameterSyncMenu");
             b4Data.ToolTip = "Opens menu to do fancy parameter stuff.";
             b4Data.Image = new BitmapImage(new Uri(IconPath));
             b4Data.LargeImage = new BitmapImage(new Uri(IconPath));
-            PushButton pb04 = ConnectTools.AddItem(b4Data) as PushButton;
+            PushButton pb04 = pulldownButton.AddPushButton(b4Data) ;
+
+            PushButtonData b5Data = new PushButtonData("SharedParam", "Add Shared Parameter", AddInPath, "Intech.SharedParameter.FamilyTypeParameterAdd");
+            b5Data.ToolTip = "Opens menu to do fancy parameter stuff.";
+            b5Data.Image = new BitmapImage(new Uri(IconPath));
+            b5Data.LargeImage = new BitmapImage(new Uri(IconPath));
+            PushButton pb05 = pulldownButton.AddPushButton(b5Data);
         }
 
         //Export Ribbon
