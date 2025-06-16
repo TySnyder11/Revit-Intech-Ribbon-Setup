@@ -36,7 +36,10 @@
             this.cancel = new System.Windows.Forms.Button();
             this.Confirm = new System.Windows.Forms.Button();
             this.FamilySelect = new System.Windows.Forms.CheckedListBox();
-            this.PushParameter = new System.Windows.Forms.Button();
+            this.ParameterCategory = new System.Windows.Forms.ComboBox();
+            this.textBox2 = new System.Windows.Forms.TextBox();
+            this.InstanceSelect = new System.Windows.Forms.RadioButton();
+            this.TypeSelect = new System.Windows.Forms.RadioButton();
             this.SuspendLayout();
             // 
             // textBox1
@@ -70,7 +73,7 @@
             this.definitionSelect.IntegralHeight = false;
             this.definitionSelect.Location = new System.Drawing.Point(12, 54);
             this.definitionSelect.Name = "definitionSelect";
-            this.definitionSelect.Size = new System.Drawing.Size(228, 379);
+            this.definitionSelect.Size = new System.Drawing.Size(228, 337);
             this.definitionSelect.TabIndex = 3;
             // 
             // textBox3
@@ -113,6 +116,7 @@
             this.Confirm.TabIndex = 8;
             this.Confirm.Text = "Confirm...";
             this.Confirm.UseVisualStyleBackColor = true;
+            this.Confirm.Click += new System.EventHandler(this.Confirm_Click);
             // 
             // FamilySelect
             // 
@@ -123,18 +127,55 @@
             this.FamilySelect.IntegralHeight = false;
             this.FamilySelect.Location = new System.Drawing.Point(260, 54);
             this.FamilySelect.Name = "FamilySelect";
-            this.FamilySelect.Size = new System.Drawing.Size(228, 379);
+            this.FamilySelect.Size = new System.Drawing.Size(228, 337);
             this.FamilySelect.TabIndex = 9;
             // 
-            // PushParameter
+            // ParameterCategory
             // 
-            this.PushParameter.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.PushParameter.Location = new System.Drawing.Point(96, 439);
-            this.PushParameter.Name = "PushParameter";
-            this.PushParameter.Size = new System.Drawing.Size(134, 23);
-            this.PushParameter.TabIndex = 10;
-            this.PushParameter.Text = "Push Parameter...";
-            this.PushParameter.UseVisualStyleBackColor = true;
+            this.ParameterCategory.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.ParameterCategory.FormattingEnabled = true;
+            this.ParameterCategory.Location = new System.Drawing.Point(101, 408);
+            this.ParameterCategory.Name = "ParameterCategory";
+            this.ParameterCategory.Size = new System.Drawing.Size(118, 21);
+            this.ParameterCategory.TabIndex = 11;
+            this.ParameterCategory.SelectedIndexChanged += new System.EventHandler(this.ParameterCategory_SelectedIndexChanged);
+            // 
+            // textBox2
+            // 
+            this.textBox2.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.textBox2.BackColor = System.Drawing.SystemColors.Menu;
+            this.textBox2.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.textBox2.Location = new System.Drawing.Point(12, 411);
+            this.textBox2.Name = "textBox2";
+            this.textBox2.Size = new System.Drawing.Size(83, 13);
+            this.textBox2.TabIndex = 12;
+            this.textBox2.Text = "Parameter Group";
+            // 
+            // InstanceSelect
+            // 
+            this.InstanceSelect.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.InstanceSelect.AutoSize = true;
+            this.InstanceSelect.Location = new System.Drawing.Point(260, 398);
+            this.InstanceSelect.Name = "InstanceSelect";
+            this.InstanceSelect.Size = new System.Drawing.Size(66, 17);
+            this.InstanceSelect.TabIndex = 13;
+            this.InstanceSelect.TabStop = true;
+            this.InstanceSelect.Text = "Instance";
+            this.InstanceSelect.UseVisualStyleBackColor = true;
+            this.InstanceSelect.CheckedChanged += new System.EventHandler(this.InstanceSelect_CheckedChanged);
+            // 
+            // TypeSelect
+            // 
+            this.TypeSelect.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.TypeSelect.AutoSize = true;
+            this.TypeSelect.Location = new System.Drawing.Point(260, 421);
+            this.TypeSelect.Name = "TypeSelect";
+            this.TypeSelect.Size = new System.Drawing.Size(49, 17);
+            this.TypeSelect.TabIndex = 14;
+            this.TypeSelect.TabStop = true;
+            this.TypeSelect.Text = "Type";
+            this.TypeSelect.UseVisualStyleBackColor = true;
+            this.TypeSelect.CheckedChanged += new System.EventHandler(this.TypeSelect_CheckedChanged);
             // 
             // SharedParameterAdd
             // 
@@ -142,7 +183,10 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.CancelButton = this.cancel;
             this.ClientSize = new System.Drawing.Size(500, 465);
-            this.Controls.Add(this.PushParameter);
+            this.Controls.Add(this.TypeSelect);
+            this.Controls.Add(this.InstanceSelect);
+            this.Controls.Add(this.textBox2);
+            this.Controls.Add(this.ParameterCategory);
             this.Controls.Add(this.FamilySelect);
             this.Controls.Add(this.Confirm);
             this.Controls.Add(this.cancel);
@@ -168,6 +212,10 @@
         private System.Windows.Forms.Button Confirm;
         private System.Windows.Forms.TextBox definitionSearch;
         private System.Windows.Forms.CheckedListBox FamilySelect;
-        private System.Windows.Forms.Button PushParameter;
+        private System.Windows.Forms.ComboBox ParameterCategory;
+        private System.Windows.Forms.TextBox textBox2;
+        private System.Windows.Forms.RadioButton InstanceSelect;
+        private System.Windows.Forms.RadioButton TypeSelect;
+        private System.Windows.Forms.CheckBox ReportingParameter;
     }
 }

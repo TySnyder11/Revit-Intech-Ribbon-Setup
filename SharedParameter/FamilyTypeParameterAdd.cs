@@ -6,6 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using System.Windows.Forms;
 
 namespace Intech.SharedParameter
 {
@@ -15,9 +16,10 @@ namespace Intech.SharedParameter
     {
         public Result Execute(ExternalCommandData commandData, ref string message, ElementSet elements)
         {
+            UIApplication app = commandData.Application;
             Document doc = commandData.Application.ActiveUIDocument.Document;
             Revit.RevitHelperFunctions.init(doc);
-            SharedParameter.SharedParameterAdd sharedParameterForm = new SharedParameter.SharedParameterAdd();
+            SharedParameter.SharedParameterAdd sharedParameterForm = new SharedParameter.SharedParameterAdd(app);
             sharedParameterForm.ShowDialog();
             return Result.Succeeded;
         }

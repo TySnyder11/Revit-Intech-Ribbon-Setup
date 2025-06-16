@@ -1,5 +1,6 @@
 ﻿using Autodesk.Revit.DB;
 using Autodesk.Revit.DB.Events;
+using Autodesk.Revit.UI;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -18,17 +19,22 @@ namespace Intech.SharedParameter
         List<Family> families = new List<Family>();
         DefinitionGroups defGroups = null;
         Definitions definitions = null;
-        Dictionary<string, bool> defCheckStore = new Dictionary<string, bool>();
         Dictionary<string, bool> famCheckStore = new Dictionary<string, bool>();
-
-        public SharedParameterAdd()
+        List<ForgeTypeId> groups = new List<ForgeTypeId>();
+        UIApplication app = null;
+        public SharedParameterAdd(UIApplication app)
         {
+            this.app = app;
             InitializeComponent();
             CenterToParent();
             families = Intech.Revit.RevitHelperFunctions.GetFamilies();
             defGroups = Intech.Revit.RevitHelperFunctions.GetDefinitionGroups();
 
             FamilySelect.ItemCheck += FamilySelect_ItemCheck;
+            FamilySelect.CheckOnClick = true;
+            definitionSelect.Sorted = true;
+            definitionSelect.CheckOnClick = true;
+            InstanceSelect.Checked = true;
 
             // Populate the FamilySelect TreeView with families and their symbols
             families = families.OrderBy(f => f.Name).ToList();
@@ -44,6 +50,18 @@ namespace Intech.SharedParameter
                 defGroupSelect.SelectedIndex = 0; // Select the first group by default
             }
 
+
+            groups = Revit.RevitHelperFunctions.GetAllGroupTypeIds();
+            groups.Add(new ForgeTypeId(string.Empty));
+            foreach (ForgeTypeId id in groups)
+            {
+                ParameterCategory.Items.Add(LabelUtils.GetLabelForGroup(id));
+            }
+            ParameterCategory.Sorted = true;
+            if (ParameterCategory.Items.Count > 0)
+            {
+                ParameterCategory.SelectedIndex = 0; // Select the first group by default
+            }
         }
 
         private void cancel_Click(object sender, EventArgs e)
@@ -51,27 +69,16 @@ namespace Intech.SharedParameter
             this.Close();
         }
 
-
-        private void Confirm_Click(object sender, EventArgs e)
-        {
-            // Logic to handle confirmation of shared parameter addition
-            // This could include validation and saving the selected parameters
-            // For now, we will just close the form
-            this.Close();
-        }
-
         private void defGroupSelect_SelectedIndexChanged(object sender, EventArgs e)
         {
             // Update the definitionSelect CheckedListBox based on the selected definition group
             definitionSelect.Items.Clear();
-            defCheckStore.Clear();
             string selectedGroup = defGroupSelect.SelectedItem.ToString();
             DefinitionGroup group = defGroups.get_Item(selectedGroup);
             definitions = group.Definitions;
             foreach (Definition definition in definitions)
             {
                 definitionSelect.Items.Add(definition.Name, false); // Add definitions with unchecked state
-                defCheckStore.Add(definition.Name, false); // Store the unchecked state
             }
         }
 
@@ -152,6 +159,52 @@ namespace Intech.SharedParameter
             UpdateFamilySelect(familySearch.Text);
         }
 
+        private void Confirm_Click(object sender, EventArgs e)
+        {
+            List<Family> selectedFamilies = famCheckStore?
+             .Where(kvp => kvp.Value)
+             .Select(kvp => families?.FirstOrDefault(f => f?.Name == kvp.Key))
+             .Where(f => f != null)
+             .ToList() ?? new List<Family>();
 
+            List<Definition> selectedDefinitions = definitionSelect?.CheckedItems?
+             .Cast<string>()
+             .Select(name => definitions?.get_Item(name))
+             .Where(def => def != null)
+             .ToList() ?? new List<Definition>();
+
+            ForgeTypeId group = groups?.FirstOrDefault(g =>string.Equals(LabelUtils.GetLabelForGroup(g), 
+                ParameterCategory.SelectedItem?.ToString(), StringComparison.OrdinalIgnoreCase));
+
+            Intech.Revit.AddSharedParametersHandler test = new Intech.Revit.AddSharedParametersHandler(selectedFamilies, selectedDefinitions, group, InstanceSelect.Checked);
+            test.Execute(app);
+        }
+
+        private void PushParameter_Click(object sender, EventArgs e)
+        {
+            //Open the push formula dialog
+        }
+
+        private void ParameterCategory_SelectedIndexChanged(object sender, EventArgs e)
+        {
+
+        }
+
+        private void TypeSelect_CheckedChanged(object sender, EventArgs e)
+        {
+            InstanceSelect.CheckedChanged -= InstanceSelect_CheckedChanged;
+            InstanceSelect.Checked = !TypeSelect.Checked;
+            ReportingParameter.Checked = InstanceSelect.Checked;
+            ReportingParameter.Enabled = InstanceSelect.Checked;
+            InstanceSelect.CheckedChanged += InstanceSelect_CheckedChanged;
+        }
+
+        private void InstanceSelect_CheckedChanged(object sender, EventArgs e)
+        {
+            TypeSelect.CheckedChanged -= TypeSelect_CheckedChanged;
+            TypeSelect.Checked = !InstanceSelect.Checked;
+
+            TypeSelect.CheckedChanged += TypeSelect_CheckedChanged;
+        }
     }
 }

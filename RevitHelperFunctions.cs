@@ -1,12 +1,17 @@
-﻿using Autodesk.Revit.ApplicationServices;
+﻿using Autodesk.Private.Windows.ToolBars;
+using Autodesk.Revit.ApplicationServices;
 using Autodesk.Revit.DB;
+using Autodesk.Revit.DB.Analysis;
 using Autodesk.Revit.UI;
 using OfficeOpenXml.Export.ToDataTable;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Forms;
 
 namespace Intech.Revit
 {
@@ -182,13 +187,12 @@ namespace Intech.Revit
             }
         }
 
-        static public List<Family> GetFamilies()
+        public static List<Family> GetFamilies()
         {
-            List<Family> families = new FilteredElementCollector(doc)
-                .OfClass(typeof(Family))
-                .Cast<Family>()
-                .ToList();
-            return families;
+            return new FilteredElementCollector(doc)
+            .OfClass(typeof(Family))
+            .Cast<Family>()
+            .ToList();
         }
 
         static public List<FamilySymbol> GetFamilySymbols(Family family)
@@ -221,7 +225,7 @@ namespace Intech.Revit
 
         public static DefinitionGroups GetDefinitionGroups()
         {
-            Application app = doc.Application;
+            Autodesk.Revit.ApplicationServices.Application app = doc.Application;
             // Ensure the shared parameter file is set
             string sharedParamFile = app.SharedParametersFilename;
             if (string.IsNullOrEmpty(sharedParamFile))
@@ -258,8 +262,9 @@ namespace Intech.Revit
             return definitions;
         }
 
-        public void AddSharedParameterToFamily(Document famDoc, Definition definition, ForgeTypeId group, bool isInstance)
+        public void AddSharedParameterToFamily(Family family, Definition definition, ForgeTypeId group, bool isInstance)
         {
+            Document famDoc = doc.EditFamily(family);
             FamilyManager famMgr = famDoc.FamilyManager;
 
             using (Transaction t = new Transaction(famDoc, "Add Shared Parameter"))
@@ -277,36 +282,217 @@ namespace Intech.Revit
 
                 t.Commit();
             }
-        }
-        public static void AddSharedParametersToFamily(Document famDoc, List<Definition> definitions, ForgeTypeId group, bool isInstance)
-        {
-            FamilyManager famMgr = famDoc.FamilyManager;
 
-            using (Transaction t = new Transaction(famDoc, "Add Shared Parameter"))
+            using (Transaction t = new Transaction(doc, "Save family changes to project"))
             {
                 t.Start();
-                foreach (Definition definition in definitions)
-                {
-                    // Check if the parameter already exists
-                    bool exists = famMgr.Parameters.Cast<FamilyParameter>().Any(p => p.Definition.Name == definition.Name);
-                    if (!exists)
-                    {
-
-                        ExternalDefinition extDef = definition as ExternalDefinition;
-                        famMgr.AddParameter(extDef, group, isInstance);
-                    }
-                }
+                famDoc.LoadFamily(doc);
                 t.Commit();
             }
         }
 
-        public static void AddSharedParametersToFamilies(List<Document> familyDocs, List<Definition> definitions, ForgeTypeId group, bool isInstance)
+
+        public static void AddSharedParametersToFamily(
+            Document doc,
+            Family family,
+            List<Definition> definitions,
+            ForgeTypeId group,
+            bool isInstance,
+            bool makeReporting)
         {
-            foreach (Document famDoc in familyDocs)
+            Document famDoc = doc.EditFamily(family);
+            FamilyManager famMgr = famDoc.FamilyManager;
+
+            using (Transaction t = new Transaction(famDoc, "Add Shared Parameters"))
             {
-                AddSharedParametersToFamily(famDoc, definitions, group, isInstance);
+                t.Start();
+
+                foreach (Definition definition in definitions)
+                {
+                    bool exists = famMgr.Parameters.Cast<FamilyParameter>().Any(p => p.Definition.Name == definition.Name);
+                    if (!exists)
+                    {
+                        ExternalDefinition extDef = definition as ExternalDefinition;
+                        if (extDef == null)
+                        {
+                            TaskDialog.Show("Error", $"Definition '{definition.Name}' is not an ExternalDefinition.");
+                            continue;
+                        }
+
+                        FamilyParameter param = famMgr.AddParameter(extDef, group, isInstance);
+
+                        try
+                        {
+                            ForgeTypeId dataType = extDef.GetDataType();
+
+                            if (makeReporting && dataType == SpecTypeId.Length && isInstance)
+                            {
+                                famMgr.MakeReporting(param);
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            TaskDialog.Show("Reporting Parameter Error", $"Could not make '{definition.Name}' a reporting parameter: {ex.Message}");
+                        }
+                    }
+                }
+
+                t.Commit();
+            }
+
+            using (Transaction t = new Transaction(doc, "Load Family into Project"))
+            {
+                t.Start();
+                famDoc.LoadFamily(doc);
+                t.Commit();
             }
         }
 
+
+
+
+
+
+        public static void AddSharedParametersToFamilies(List<Family> families, List<Definition> definitions, ForgeTypeId group, bool isInstance)
+        {
+            List<Document> familyDocs = new List<Document>();
+            string path = string.Empty;
+
+            foreach (Family fam in families)
+            {
+                Document famDoc = doc.EditFamily(fam);
+                FamilyManager famMgr = famDoc.FamilyManager;
+
+                using (Transaction t = new Transaction(famDoc, "Add Shared Parameter"))
+                {
+                    t.Start();
+                    foreach (Definition definition in definitions)
+                    {
+                        if (definition is ExternalDefinition extDef)
+                        {
+                            bool exists = famMgr.Parameters.Cast<FamilyParameter>().Any(p => p.Definition.Name == extDef.Name);
+                            if (!exists)
+                            {
+                                famMgr.AddParameter(extDef, group, isInstance);
+                            }
+                        }
+                        else
+                        {
+                            TaskDialog.Show("Error", $"Definition {definition.Name} is not an ExternalDefinition.");
+                        }
+                    }
+                    t.Commit();
+                }
+
+                string savePath = famDoc.PathName;
+                if (string.IsNullOrEmpty(savePath))
+                {
+                    if (string.IsNullOrWhiteSpace(path))
+                    {
+                        using (SaveFileDialog saveDialog = new SaveFileDialog())
+                        {
+                            saveDialog.Title = "Save Family As";
+                            saveDialog.Filter = "Revit Family (*.rfa)|*.rfa";
+                            saveDialog.FileName = famDoc.Title;
+                            DialogResult result = saveDialog.ShowDialog();
+                            if (result == DialogResult.OK && !string.IsNullOrWhiteSpace(saveDialog.FileName))
+                            {
+                                path = Path.GetDirectoryName(saveDialog.FileName);
+                            }
+                            else
+                            {
+                                TaskDialog.Show("Cancelled", "No file selected. Operation aborted.");
+                                famDoc.Close(false);
+                                return;
+                            }
+                        }
+                    }
+                    savePath = path;
+                }
+                else
+                {
+                    savePath = Path.GetDirectoryName(savePath);
+                }
+
+                    SaveAsOptions saveOptions = new SaveAsOptions { OverwriteExistingFile = true };
+                famDoc.SaveAs(Path.Combine(savePath, famDoc.Title), saveOptions);
+
+                familyDocs.Add(famDoc); // Keep open for reloading
+            }
+
+            // Now reload families into the project
+            OverwriteFamilyLoadOptions loadOptions = new OverwriteFamilyLoadOptions();
+
+            foreach (Document famDoc in familyDocs)
+            {
+                famDoc.LoadFamily(doc, loadOptions);
+                famDoc.Close(false);
+            }
+        }
+
+
+
+
+        public class OverwriteFamilyLoadOptions : IFamilyLoadOptions
+        {
+            public bool OnFamilyFound(bool familyInUse, out bool overwriteParameterValues)
+            {
+                overwriteParameterValues = true; // Overwrite existing parameter values
+                return true; // Always overwrite the family
+            }
+
+            public bool OnSharedFamilyFound(Family sharedFamily, bool familyInUse, out FamilySource source, out bool overwriteParameterValues)
+            {
+                source = FamilySource.Project;
+                overwriteParameterValues = true;
+                return true;
+            }
+        }
+
+
+        public static List<ForgeTypeId> GetAllGroupTypeIds()
+        {
+            List<ForgeTypeId> groupTypeIds = new List<ForgeTypeId>();
+
+            PropertyInfo[] properties = typeof(GroupTypeId).GetProperties(BindingFlags.Public | BindingFlags.Static);
+            foreach (PropertyInfo prop in properties)
+            {
+                if (prop.PropertyType == typeof(ForgeTypeId))
+                {
+                    ForgeTypeId id = prop.GetValue(null) as ForgeTypeId;
+                    if (id != null && id.TypeId.StartsWith("autodesk.parameter.group"))
+                    {
+                        groupTypeIds.Add(id);
+                    }
+                }
+
+            }
+
+            return groupTypeIds;
+        }
+
+
+
+        public static List<ForgeTypeId> GetAllPossibleGroupTypeIds()
+        {
+            List<ForgeTypeId> groupTypeIds = new List<ForgeTypeId>();
+
+            PropertyInfo[] properties = typeof(GroupTypeId).GetProperties(BindingFlags.Public | BindingFlags.Static);
+            foreach (PropertyInfo prop in properties)
+            {
+                if (prop.PropertyType == typeof(ForgeTypeId))
+                {
+                    ForgeTypeId id = prop.GetValue(null) as ForgeTypeId;
+
+                    // Optional: filter to only those that look like parameter groups
+                    if (id != null && id.TypeId.StartsWith("autodesk.parameter.group"))
+                    {
+                        groupTypeIds.Add(id);
+                    }
+                }
+            }
+
+            return groupTypeIds;
+        }
     }
 }
