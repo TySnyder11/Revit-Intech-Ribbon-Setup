@@ -155,17 +155,26 @@ public class App : IExternalApplication
             pulldownData.LargeImage = new BitmapImage(new Uri(IconPath));
             PulldownButton pulldownButton = ConnectTools.AddItem(pulldownData) as PulldownButton;
 
-            PushButtonData b4Data = new PushButtonData("ParameterSync", "Parameter Sync", AddInPath, "Intech.ParameterSyncMenu");
-            b4Data.ToolTip = "Opens menu to do fancy parameter stuff.";
-            b4Data.Image = new BitmapImage(new Uri(IconPath));
-            b4Data.LargeImage = new BitmapImage(new Uri(IconPath));
-            PushButton pb04 = pulldownButton.AddPushButton(b4Data) ;
+            //Parameter Tool Pull Down
+            {
+                PushButtonData b4Data = new PushButtonData("ParameterSync", "Parameter Sync", AddInPath, "Intech.ParameterSyncMenu");
+                b4Data.ToolTip = "Opens menu to do fancy parameter stuff.";
+                b4Data.Image = new BitmapImage(new Uri(IconPath));
+                b4Data.LargeImage = new BitmapImage(new Uri(IconPath));
+                PushButton pb04 = pulldownButton.AddPushButton(b4Data);
 
-            PushButtonData b5Data = new PushButtonData("SharedParam", "Add Shared Parameter", AddInPath, "Intech.SharedParameter.FamilyTypeParameterAdd");
-            b5Data.ToolTip = "Opens menu to do fancy parameter stuff.";
-            b5Data.Image = new BitmapImage(new Uri(IconPath));
-            b5Data.LargeImage = new BitmapImage(new Uri(IconPath));
-            PushButton pb05 = pulldownButton.AddPushButton(b5Data);
+                PushButtonData b5Data = new PushButtonData("SharedParam", "Add Shared Parameter", AddInPath, "Intech.SharedParameter.FamilyTypeParameterAdd");
+                b5Data.ToolTip = "Opens menu to do fancy parameter stuff.";
+                b5Data.Image = new BitmapImage(new Uri(IconPath));
+                b5Data.LargeImage = new BitmapImage(new Uri(IconPath));
+                PushButton pb05 = pulldownButton.AddPushButton(b5Data);
+
+                PushButtonData b6Data = new PushButtonData("FormulaPush", "Formula Push", AddInPath, "Intech.SharedParameter.FormulaAddMain");
+                b6Data.ToolTip = "Opens menu to do fancy parameter stuff.";
+                b6Data.Image = new BitmapImage(new Uri(IconPath));
+                b6Data.LargeImage = new BitmapImage(new Uri(IconPath));
+                PushButton pb06 = pulldownButton.AddPushButton(b6Data);
+            }
         }
 
         //Export Ribbon
