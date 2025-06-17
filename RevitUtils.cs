@@ -15,7 +15,7 @@ using System.Windows.Forms;
 
 namespace Intech.Revit
 {
-    internal class RevitHelperFunctions
+    internal class RevitUtils
     {
         static Document doc;
         static public void init(Document document)
@@ -430,8 +430,49 @@ namespace Intech.Revit
             }
         }
 
+        public static void AddSharedParametersToFamiliesNoSave(List<Family> families, List<Definition> definitions, ForgeTypeId group, bool isInstance)
+        {
+            List<Document> familyDocs = new List<Document>();
+            string path = string.Empty;
 
+            foreach (Family fam in families)
+            {
+                Document famDoc = doc.EditFamily(fam);
+                FamilyManager famMgr = famDoc.FamilyManager;
 
+                using (Transaction t = new Transaction(famDoc, "Add Shared Parameter"))
+                {
+                    t.Start();
+                    foreach (Definition definition in definitions)
+                    {
+                        if (definition is ExternalDefinition extDef)
+                        {
+                            bool exists = famMgr.Parameters.Cast<FamilyParameter>().Any(p => p.Definition.Name == extDef.Name);
+                            if (!exists)
+                            {
+                                famMgr.AddParameter(extDef, group, isInstance);
+                            }
+                        }
+                        else
+                        {
+                            TaskDialog.Show("Error", $"Definition {definition.Name} is not an ExternalDefinition.");
+                        }
+                    }
+                    t.Commit();
+                }
+
+                familyDocs.Add(famDoc); // Keep open for reloading
+            }
+
+            // Now reload families into the project
+            OverwriteFamilyLoadOptions loadOptions = new OverwriteFamilyLoadOptions();
+
+            foreach (Document famDoc in familyDocs)
+            {
+                famDoc.LoadFamily(doc, loadOptions);
+                famDoc.Close(false);
+            }
+        }
 
         public class OverwriteFamilyLoadOptions : IFamilyLoadOptions
         {
@@ -494,5 +535,69 @@ namespace Intech.Revit
 
             return groupTypeIds;
         }
+
+
+        public bool IsFormulaValid(Document doc, FamilyParameter param, string formula, out string errorMessage)
+        {
+            errorMessage = null;
+            FamilyManager familyManager = doc.FamilyManager;
+
+            using (Transaction tx = new Transaction(doc, "Test Formula"))
+            {
+                tx.Start();
+                try
+                {
+                    familyManager.SetFormula(param, formula);
+                    tx.RollBack(); // Don't keep the change
+                    return true;
+                }
+                catch (Exception ex)
+                {
+                    errorMessage = ex.Message;
+                    tx.RollBack();
+                    return false;
+                }
+            }
+        }
+
+        public static List<string> GetCommonParameters(List<Family> families)
+        {
+            if (families == null || families.Count == 0)
+                return new List<string>();
+
+            // Initialize with parameters from the first family
+            HashSet<string> commonParams = GetParameterNamesFromFamily(families[0]);
+
+            // Intersect with the rest
+            for (int i = 1; i < families.Count; i++)
+            {
+                var currentParams = GetParameterNamesFromFamily(families[i]);
+                commonParams.IntersectWith(currentParams);
+            }
+
+            return commonParams.ToList();
+        }
+
+        private static HashSet<string> GetParameterNamesFromFamily(Family family)
+        {
+            HashSet<string> paramNames = new HashSet<string>();
+
+            // Get all symbols (types) of the family
+            foreach (ElementId symbolId in family.GetFamilySymbolIds())
+            {
+                FamilySymbol symbol = doc.GetElement(symbolId) as FamilySymbol;
+                if (symbol == null) continue;
+
+                foreach (Parameter param in symbol.Parameters)
+                {
+                    if (param != null)
+                        paramNames.Add(param.Definition.Name);
+                }
+            }
+
+            return paramNames;
+        }
+
+
     }
 }

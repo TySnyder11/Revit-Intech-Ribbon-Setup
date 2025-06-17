@@ -27,8 +27,8 @@ namespace Intech.SharedParameter
             this.app = app;
             InitializeComponent();
             CenterToParent();
-            families = Intech.Revit.RevitHelperFunctions.GetFamilies();
-            defGroups = Intech.Revit.RevitHelperFunctions.GetDefinitionGroups();
+            families = Intech.Revit.RevitUtils.GetFamilies();
+            defGroups = Intech.Revit.RevitUtils.GetDefinitionGroups();
 
             FamilySelect.ItemCheck += FamilySelect_ItemCheck;
             FamilySelect.CheckOnClick = true;
@@ -51,7 +51,7 @@ namespace Intech.SharedParameter
             }
 
 
-            groups = Revit.RevitHelperFunctions.GetAllGroupTypeIds();
+            groups = Revit.RevitUtils.GetAllGroupTypeIds();
             groups.Add(new ForgeTypeId(string.Empty));
             foreach (ForgeTypeId id in groups)
             {

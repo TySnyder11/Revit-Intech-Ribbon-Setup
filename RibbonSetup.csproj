@@ -181,7 +181,7 @@
       <DependentUpon>Settings.settings</DependentUpon>
     </Compile>
     <Compile Include="FileSaving\RevitFileManager.cs" />
-    <Compile Include="RevitHelperFunctions.cs" />
+    <Compile Include="RevitUtils.cs" />
     <Compile Include="FileSaving\saveFileManager.cs" />
     <Compile Include="SharedParameter\AddParameterEvent.cs" />
     <Compile Include="SharedParameter\FamilyTypeParameterAdd.cs" />
@@ -192,6 +192,7 @@
       <DependentUpon>FormulaAdd.cs</DependentUpon>
     </Compile>
     <Compile Include="SharedParameter\FormulaAddMain.cs" />
+    <Compile Include="SharedParameter\FormulaReference.cs" />
     <Compile Include="SharedParameter\SharedParameterAdd.cs">
       <SubType>Form</SubType>
     </Compile>

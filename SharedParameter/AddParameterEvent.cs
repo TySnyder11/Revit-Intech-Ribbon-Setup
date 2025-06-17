@@ -28,7 +28,7 @@ namespace Intech.Revit
         {
             try
             {
-                Intech.Revit.RevitHelperFunctions.AddSharedParametersToFamilies(Families, Definitions, Group, IsInstance);
+                Intech.Revit.RevitUtils.AddSharedParametersToFamiliesNoSave(Families, Definitions, Group, IsInstance);
             }
             catch (Exception ex)
             {

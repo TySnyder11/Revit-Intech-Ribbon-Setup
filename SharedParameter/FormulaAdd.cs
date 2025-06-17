@@ -14,74 +14,71 @@ namespace Intech.SharedParameter
 {
     public partial class FormulaAdd : System.Windows.Forms.Form
     {
+        List<Family> familyList = new List<Family>();
+
+        private bool suppressCopy = false;
+
         public FormulaAdd()
         {
             InitializeComponent();
             CenterToParent();
             InitializeTree();
+            FamilySelect.SelectedIndexChanged += FamilySelect_CheckedChanged;
         }
 
         private void InitializeTree()
         {
-            parameterTypes.CheckBoxes = true;
-            parameterTypes.AfterCheck += parameterTypes_AfterCheck;
-            Dictionary<Family, List<FamilySymbol>> famMap = Revit.RevitHelperFunctions.GetFamilySymbolMap();
-            Dictionary<string, List<string>> nameMap = new Dictionary<string, List<string>>();
-            foreach (Family fam in famMap.Keys)
-            {
-                List<string> typeNames = new List<string>();
-                foreach(FamilySymbol fSym in famMap[fam])
-                {
-                    typeNames.Add(fSym.Name);
-                }
-                nameMap.Add(fam.Name, typeNames);
-            }
-
-            parameterTypes.SetData(nameMap);
-            parameterTypes.Sort();
+            familyList = Revit.RevitUtils.GetFamilies();
+            List<string> names = new List<string>();
+            familyList.Where(f => f.IsEditable).ToList().ForEach(fam => names.Add(fam.Name));
+            FamilySelect.AllItems = names;
         }
 
-        private void paramSearch_TextChanged(object sender, EventArgs e)
+        private void famSearch_TextChanged(object sender, EventArgs e)
         {
-            parameterTypes.ApplyFilter(paramSearch.Text);
+            FamilySelect.Filter = famSearch.Text;
         }
 
-        private void parameterTypes_AfterCheck(object sender, TreeViewEventArgs e)
+        private void FamilySelect_CheckedChanged(object sender, EventArgs e)
         {
-            if (e.Action == TreeViewAction.Unknown)
-                return;
+            List<string> checkList = FamilySelect.GetCheckedItems();
+            List<Family> FamilyList = familyList.Where(t => checkList.Contains(t.Name)).ToList();
+            List<string> comName = RevitUtils.GetCommonParameters(FamilyList);
+            comName.Sort();
 
-            parameterTypes.AfterCheck -= parameterTypes_AfterCheck;
-            parameterTypes.Enabled = false;
+            suppressCopy = true;
+            parameters.DataSource = comName;
+            parameters.ClearSelected(); // Optional: clear selection
+            suppressCopy = false;
 
-            if (e.Node.Parent == null)
-            {
-                // Root node was checked/unchecked
-                foreach (TreeNode child in e.Node.Nodes)
-                {
-                    child.Checked = e.Node.Checked;
-                }
-            }
-            else
-            {
-                // Child node was checked/unchecked
-                TreeNode parent = e.Node.Parent;
-
-                bool allChecked = true;
-                foreach (TreeNode sibling in parent.Nodes)
-                {
-                    if (!sibling.Checked)
-                    {
-                        allChecked = false;
-                        break;
-                    }
-                }
-
-                parent.Checked = allChecked;
-            }
-
-            parameterTypes.Enabled = true;
-            parameterTypes.AfterCheck += parameterTypes_AfterCheck;
         }
+
+        ToolTip copyToolTip = new ToolTip();
+
+        private void parameters_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (parameters.SelectedItem != null)
+            {
+
+                if (suppressCopy)
+                    return;
+
+                // Copy the selected item to clipboard
+                Clipboard.SetText(parameters.SelectedItem.ToString());
+
+                // Get the rectangle of the selected item
+                int index = parameters.SelectedIndex;
+                System.Drawing.Rectangle itemRect = parameters.GetItemRectangle(index);
+
+                // Convert to screen coordinates
+                System.Drawing.Point screenPoint = parameters.PointToScreen(new System.Drawing.Point(itemRect.X, itemRect.Y));
+
+                // Show tooltip near the selected item for 1 second
+                copyToolTip.Show("Parameter Copied", parameters,
+                 parameters.PointToClient(screenPoint),
+                 1000);
+            }
+        }
+
     }
 }

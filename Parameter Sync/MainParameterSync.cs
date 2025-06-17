@@ -20,9 +20,9 @@ namespace Intech
         public static Document doc = null;
         public Result Execute(ExternalCommandData commandData, ref string message, ElementSet elements)
         {
-            Revit.RevitHelperFunctions.init(commandData.Application.ActiveUIDocument.Document);
+            Revit.RevitUtils.init(commandData.Application.ActiveUIDocument.Document);
             doc = commandData.Application.ActiveUIDocument.Document;
-            Revit.RevitHelperFunctions.init(doc);
+            Revit.RevitUtils.init(doc);
             ParameterSyncForm parameterSyncForm = new ParameterSyncForm();
             parameterSyncForm.ShowDialog();
 
@@ -51,7 +51,7 @@ namespace Intech
         {
             string[] inputParse = inputStringParse(input);
             List<Parameter> parameters = new List<Parameter>();
-            CategoryNameMap categories = Revit.RevitHelperFunctions.GetAllCategories();
+            CategoryNameMap categories = Revit.RevitUtils.GetAllCategories();
             if (!categories.Contains(category))
             {
                 throw new ArgumentException($"Category '{category}' does not exist in the document.");
@@ -86,8 +86,8 @@ namespace Intech
                         int endUnit = parse.IndexOf('}');
                         string unitName = parse.Substring(startUnit, endUnit - startUnit);
 
-                        Parameter param = Revit.RevitHelperFunctions.GetParameter(cat, paramName);
-                        ForgeTypeId outUnit = Revit.RevitHelperFunctions.GetUnit(unitName);
+                        Parameter param = Revit.RevitUtils.GetParameter(cat, paramName);
+                        ForgeTypeId outUnit = Revit.RevitUtils.GetUnit(unitName);
                         ForgeTypeId inUnit = param.GetUnitTypeId();
                         ForgeTypeId unitType = param.Definition.GetDataType();
                         Units customUnits = new Units(UnitSystem.Imperial);

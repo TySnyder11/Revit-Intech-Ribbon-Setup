@@ -31,7 +31,7 @@ namespace Intech
         {
             InitializeComponent();
             CenterToParent();
-            catagories = Intech.Revit.RevitHelperFunctions.GetAllCategories();
+            catagories = Intech.Revit.RevitUtils.GetAllCategories();
             // Populate the category combo box with category names
             foreach (Category cat in catagories)
             {
@@ -67,7 +67,7 @@ namespace Intech
             if (catagories.Contains(categoryComboBox.Text))
             {
                 Category cat = catagories.get_Item(categoryComboBox.Text);
-                parameters = Revit.RevitHelperFunctions.GetParameters(cat);
+                parameters = Revit.RevitUtils.GetParameters(cat);
                 parameters.Sort();
                 if (!parameters.Contains(parameterComboBox.Text))
                 {
@@ -206,7 +206,7 @@ namespace Intech
                 {
                     suggestionIndex = 0;
                     string match = currentSuggestions[suggestionIndex];
-                    Revit.RevitHelperFunctions.GetUnit(catagories.get_Item(categoryComboBox.Text), match, out string unit, out ForgeTypeId unitID);
+                    Revit.RevitUtils.GetUnit(catagories.get_Item(categoryComboBox.Text), match, out string unit, out ForgeTypeId unitID);
                     match += "]";
                     if (unit != null)
                     {
@@ -224,7 +224,7 @@ namespace Intech
             else if (lastOpenBrac > lastCloseBrac && lastClose != -1 && lastOpen != -1)
             {
                 string parameter = text.Substring(lastOpen + 1, lastClose - lastOpen - 1 ).Trim();
-                Revit.RevitHelperFunctions.GetUnit(catagories.get_Item(categoryComboBox.Text), parameter, out string unit, out ForgeTypeId unitID, out ForgeTypeId specTypeId);
+                Revit.RevitUtils.GetUnit(catagories.get_Item(categoryComboBox.Text), parameter, out string unit, out ForgeTypeId unitID, out ForgeTypeId specTypeId);
 
                 if (UnitUtils.IsMeasurableSpec(specTypeId))
                 {
@@ -313,7 +313,7 @@ namespace Intech
                 {
                     string partial = text.Substring(lastBracket + 1);
                     string match = currentSuggestions[suggestionIndex];
-                    Revit.RevitHelperFunctions.GetUnit(catagories.get_Item(categoryComboBox.Text), match, out string unit, out ForgeTypeId unitID);
+                    Revit.RevitUtils.GetUnit(catagories.get_Item(categoryComboBox.Text), match, out string unit, out ForgeTypeId unitID);
                     match += "]";
                     if( unit != null)
                     {

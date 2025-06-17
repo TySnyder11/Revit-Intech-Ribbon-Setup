@@ -18,7 +18,7 @@ namespace Intech.SharedParameter
         {
             UIApplication app = commandData.Application;
             Document doc = commandData.Application.ActiveUIDocument.Document;
-            Revit.RevitHelperFunctions.init(doc);
+            Revit.RevitUtils.init(doc);
             FormulaAdd formulaAdd = new FormulaAdd();
             formulaAdd.ShowDialog();
             return Result.Succeeded;

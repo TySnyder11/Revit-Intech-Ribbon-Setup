@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -132,7 +133,122 @@ namespace Intech.Windows
 
                 base.WndProc(ref m);
             }
+        }
 
+
+        public class FilterableCheckedListBox : CheckedListBox
+        {
+            private List<string> _allItems = new List<string>();
+            private HashSet<string> _checkedItems = new HashSet<string>();
+            private string _filter = "";
+            private int _lastClickedIndex = -1;
+            private bool _isShiftClick = false;
+
+            [Category("Data")]
+            [Description("The full list of items to display and filter.")]
+            public List<string> AllItems
+            {
+                get => _allItems;
+                set
+                {
+                    _allItems = value ?? new List<string>();
+                    ApplyFilter();
+                }
+            }
+
+            [Category("Behavior")]
+            [Description("The current filter string used to filter visible items.")]
+            public string Filter
+            {
+                get => _filter;
+                set
+                {
+                    _filter = value ?? "";
+                    ApplyFilter();
+                }
+            }
+
+            public FilterableCheckedListBox()
+            {
+                this.CheckOnClick = true;
+                this.SelectionMode = SelectionMode.One;
+                this.ItemCheck += OnItemCheck;
+                this.MouseDown += OnMouseDown;
+            }
+
+            private void OnMouseDown(object sender, MouseEventArgs e)
+            {
+                int index = this.IndexFromPoint(e.Location);
+                if (index >= 0 && index < this.Items.Count)
+                {
+                    _isShiftClick = (ModifierKeys & Keys.Shift) == Keys.Shift;
+                }
+            }
+
+
+            private void OnItemCheck(object sender, ItemCheckEventArgs e)
+            {
+                string item = this.Items[e.Index].ToString();
+
+                if (_isShiftClick && _lastClickedIndex != -1 && _lastClickedIndex != e.Index)
+                {
+                    int start = Math.Min(_lastClickedIndex, e.Index);
+                    int end = Math.Max(_lastClickedIndex, e.Index);
+                    bool newState = e.NewValue == CheckState.Checked;
+
+                    // Temporarily detach to avoid recursion
+                    this.ItemCheck -= OnItemCheck;
+
+                    for (int i = start; i <= end; i++)
+                    {
+                        string rangeItem = this.Items[i].ToString();
+                        this.SetItemChecked(i, newState);
+
+                        if (newState)
+                            _checkedItems.Add(rangeItem);
+                        else
+                            _checkedItems.Remove(rangeItem);
+                    }
+
+                    this.ItemCheck += OnItemCheck;
+
+                    // Cancel the default toggle for the current item
+                    e.NewValue = this.GetItemChecked(e.Index) ? CheckState.Checked : CheckState.Unchecked;
+                }
+                else
+                {
+                    if (e.NewValue == CheckState.Checked)
+                        _checkedItems.Add(item);
+                    else
+                        _checkedItems.Remove(item);
+                }
+
+                _lastClickedIndex = e.Index;
+                _isShiftClick = false;
+            }
+
+
+            private void ApplyFilter()
+            {
+                var filtered = _allItems
+                .Where(i => i.IndexOf(_filter, StringComparison.OrdinalIgnoreCase) >= 0)
+                .ToList();
+
+                this.Items.Clear();
+
+                foreach (var item in filtered)
+                {
+                    this.Items.Add(item, _checkedItems.Contains(item));
+                }
+            }
+
+            public List<string> GetCheckedItems() => _checkedItems.ToList();
+
+            public void SetCheckedItems(IEnumerable<string> items)
+            {
+                _checkedItems = new HashSet<string>(items ?? Enumerable.Empty<string>());
+                ApplyFilter();
+            }
         }
     }
 }

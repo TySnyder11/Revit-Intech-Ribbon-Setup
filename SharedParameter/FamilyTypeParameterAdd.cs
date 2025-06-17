@@ -18,7 +18,7 @@ namespace Intech.SharedParameter
         {
             UIApplication app = commandData.Application;
             Document doc = commandData.Application.ActiveUIDocument.Document;
-            Revit.RevitHelperFunctions.init(doc);
+            Revit.RevitUtils.init(doc);
             SharedParameter.SharedParameterAdd sharedParameterForm = new SharedParameter.SharedParameterAdd(app);
             sharedParameterForm.ShowDialog();
             return Result.Succeeded;
