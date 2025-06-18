@@ -422,7 +422,5 @@ namespace Intech
         {
             this.Close();
         }
-
-
     }
 }

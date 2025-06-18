@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Autodesk.Revit.DB;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
@@ -248,6 +249,173 @@ namespace Intech.Windows
             {
                 _checkedItems = new HashSet<string>(items ?? Enumerable.Empty<string>());
                 ApplyFilter();
+            }
+        }
+
+        [DesignerCategory("Code")]
+        public class FilteredComboBox : FilteredComboBox<object>
+        {
+            public FilteredComboBox() : base() { }
+        }
+
+        public class FilteredComboBox<T> : ComboBox
+        {
+            protected class ItemWrapper
+            {
+                public string Display { get; set; }
+                public T Value { get; set; }
+
+                public override string ToString() => Display;
+            }
+
+            protected List<ItemWrapper> _items = new List<ItemWrapper>();
+            protected ItemWrapper _selectedItem;
+            protected bool _suppressSelectionChange = false;
+
+            public T DefaultValue { get; set; } = default;
+
+            public FilteredComboBox()
+            {
+                this.DropDownStyle = ComboBoxStyle.DropDown;
+                this.AutoCompleteMode = AutoCompleteMode.None;
+                this.AutoCompleteSource = AutoCompleteSource.None;
+
+                this.TextChanged += OnTextChanged;
+                this.SelectedIndexChanged += OnSelectedIndexChanged;
+            }
+
+            public void SetItems(IEnumerable<(string display, T value)> items)
+            {
+                T currentValue = _selectedItem != null ? _selectedItem.Value : default;
+                _items = items.Select(i => new ItemWrapper { Display = i.display, Value = i.value }).ToList();
+                RefreshItems(currentValue);
+            }
+
+            public void SetItems(IList<string> displayStrings, IList<T> values)
+            {
+                if (displayStrings.Count != values.Count)
+                    throw new ArgumentException("Display and value lists must be the same length.");
+
+                T currentValue = _selectedItem != null ? _selectedItem.Value : default;
+                _items = displayStrings.Select((d, i) => new ItemWrapper { Display = d, Value = values[i] }).ToList();
+                RefreshItems(currentValue);
+            }
+
+            public void SetItems(IEnumerable<string> displayStrings)
+            {
+                var oldMap = _items.ToDictionary(i => i.Display, i => i.Value);
+                T currentValue = _selectedItem != null ? _selectedItem.Value : default;
+
+                _items = displayStrings
+                .Select(display => new ItemWrapper
+                {
+                    Display = display,
+                    Value = oldMap.TryGetValue(display, out var val) ? val : DefaultValue
+                })
+                .ToList();
+
+                RefreshItems(currentValue);
+            }
+
+            public bool UpdateItem(string display, T newValue)
+            {
+                var item = _items.FirstOrDefault(i => string.Equals(i.Display, display));
+                if (item != null)
+                {
+                    item.Value = newValue;
+                    return true;
+                }
+                return false;
+            }
+
+            public bool UpdateItem(T newValue)
+            {
+                var obj = this.SelectedItem;
+                if (obj == null)
+                    return false;
+                return UpdateItem(this.SelectedItem.ToString(),newValue);
+            }
+
+            public T SelectedValueTyped => _selectedItem != null ? _selectedItem.Value : default;
+
+            public T GetValue(int index)
+            {
+                if (index >= 0 && index < _items.Count)
+                    return _items[index].Value;
+
+                throw new ArgumentOutOfRangeException(nameof(index));
+            }
+
+            public T GetValue(string display)
+            {
+                return GetValue(display, false);
+            }
+            public T GetValue() 
+            {
+                string text = this.SelectedText;
+                if (string.IsNullOrEmpty(text))
+                    return DefaultValue;
+                return GetValue(this.SelectedText, true); 
+            }
+
+            public T GetValue(string display, bool ignoreCase)
+            {
+                var comparison = ignoreCase ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal;
+                var match = _items.FirstOrDefault(i => string.Equals(i.Display, display, comparison));
+                if (match != null)
+                    return match.Value;
+
+                throw new KeyNotFoundException($"No item found with display string '{display}'.");
+            }
+
+            protected void RefreshItems(T currentValue)
+            {
+                _suppressSelectionChange = true;
+
+                this.BeginUpdate();
+                base.Items.Clear();
+                base.Items.AddRange(_items.Cast<object>().ToArray());
+                this.EndUpdate();
+
+                var match = _items.FirstOrDefault(i => EqualityComparer<T>.Default.Equals(i.Value, currentValue));
+                this.SelectedItem = match ?? null;
+
+                _selectedItem = this.SelectedItem as ItemWrapper;
+                _suppressSelectionChange = false;
+            }
+
+            protected void OnTextChanged(object sender, EventArgs e)
+            {
+                string typedText = this.Text;
+                int selStart = this.SelectionStart;
+
+                bool isExactMatch = _items.Any(item =>
+                string.Equals(item.Display, typedText, StringComparison.OrdinalIgnoreCase));
+
+                var filtered = isExactMatch
+                ? _items
+                : _items.Where(item =>
+                item.Display.IndexOf(typedText, StringComparison.OrdinalIgnoreCase) >= 0)
+                .ToList();
+
+                this.BeginUpdate();
+                base.Items.Clear();
+                base.Items.AddRange(filtered.Cast<object>().ToArray());
+
+                if (!this.DroppedDown && this.Focused)
+                    this.DroppedDown = true;
+
+                this.SelectionStart = selStart;
+                this.SelectionLength = 0;
+                this.EndUpdate();
+            }
+
+            protected void OnSelectedIndexChanged(object sender, EventArgs e)
+            {
+                if (_suppressSelectionChange)
+                    return;
+
+                _selectedItem = this.SelectedItem as ItemWrapper;
             }
         }
     }

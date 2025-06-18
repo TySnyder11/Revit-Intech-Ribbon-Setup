@@ -6,6 +6,7 @@ using System.ComponentModel;
 using System.Data;
 using System.Drawing;
 using System.Linq;
+using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -22,11 +23,28 @@ namespace Intech.SharedParameter
         {
             InitializeComponent();
             CenterToParent();
-            InitializeTree();
+            InitializeCheckBox();
             FamilySelect.SelectedIndexChanged += FamilySelect_CheckedChanged;
+            FormulaTextBox.TextChanged += FormulaTextBox_TextChanged;
+            parameters.Sorted = true;
+            FamilySelect.Sorted = true;
+            SelectParameterComboBox.DefaultValue = string.Empty;
+            SelectParameterComboBox.Sorted = true;
         }
 
-        private void InitializeTree()
+        private void FormulaTextBox_TextChanged(object sender, EventArgs e)
+        {
+            string text = string.Empty;
+            if (FormulaTextBox.Text.StartsWith("="))
+                text = FormulaTextBox.Text.Substring(1);
+            else 
+                text = FormulaTextBox.Text;
+            string parameterName =  SelectParameterComboBox.SelectedItem.ToString();
+            SelectParameterComboBox.UpdateItem(parameterName, text);
+
+        }
+
+        private void InitializeCheckBox()
         {
             familyList = Revit.RevitUtils.GetFamilies();
             List<string> names = new List<string>();
@@ -50,6 +68,8 @@ namespace Intech.SharedParameter
             parameters.DataSource = comName;
             parameters.ClearSelected(); // Optional: clear selection
             suppressCopy = false;
+
+            SelectParameterComboBox.SetItems(RevitUtils.GetCommonSharedParametersFromFamilies(FamilyList));
 
         }
 
@@ -80,5 +100,22 @@ namespace Intech.SharedParameter
             }
         }
 
+        private void SelectParameterComboBox_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            FormulaTextBox.TextChanged -= FormulaTextBox_TextChanged;
+            FormulaTextBox.Text = "=" + SelectParameterComboBox.GetValue(SelectParameterComboBox.SelectedItem.ToString());
+            FormulaTextBox.TextChanged += FormulaTextBox_TextChanged;
+        }
+
+        private void AllParamButton_Click(object sender, EventArgs e)
+        {
+            List<string> checkList = FamilySelect.GetCheckedItems();
+            List<Family> FamilyList = familyList.Where(t => checkList.Contains(t.Name)).ToList();
+            List<string> names = Revit.RevitUtils.GetCommonFormulaUsableParameters(FamilyList).ToList();
+            suppressCopy = true;
+            parameters.DataSource = names;
+            parameters.ClearSelected(); // Optional: clear selection
+            suppressCopy = false;
+        }
     }
 }

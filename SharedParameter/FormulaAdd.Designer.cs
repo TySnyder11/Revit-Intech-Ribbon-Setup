@@ -1,4 +1,5 @@
-﻿using System.Windows.Forms;
+﻿using Autodesk.Revit.DB;
+using System.Windows.Forms;
 
 namespace Intech.SharedParameter
 {
@@ -42,8 +43,9 @@ namespace Intech.SharedParameter
             this.parameters = new System.Windows.Forms.ListBox();
             this.textBox3 = new System.Windows.Forms.TextBox();
             this.FamilySelect = new Intech.Windows.CustomWindowsForms.FilterableCheckedListBox();
-            this.SelectParameterComboBox = new System.Windows.Forms.ComboBox();
+            this.SelectParameterComboBox = new Intech.Windows.CustomWindowsForms.FilteredComboBox();
             this.textBox4 = new System.Windows.Forms.TextBox();
+            this.AllParamButton = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // FormulaTextBox
@@ -128,7 +130,7 @@ namespace Intech.SharedParameter
             this.parameters.IntegralHeight = false;
             this.parameters.Location = new System.Drawing.Point(388, 27);
             this.parameters.Name = "parameters";
-            this.parameters.Size = new System.Drawing.Size(143, 318);
+            this.parameters.Size = new System.Drawing.Size(143, 295);
             this.parameters.TabIndex = 8;
             this.parameters.SelectedIndexChanged += new System.EventHandler(this.parameters_SelectedIndexChanged);
             // 
@@ -157,11 +159,13 @@ namespace Intech.SharedParameter
             // 
             // SelectParameterComboBox
             // 
+            this.SelectParameterComboBox.DefaultValue = null;
             this.SelectParameterComboBox.FormattingEnabled = true;
             this.SelectParameterComboBox.Location = new System.Drawing.Point(388, 370);
             this.SelectParameterComboBox.Name = "SelectParameterComboBox";
             this.SelectParameterComboBox.Size = new System.Drawing.Size(143, 21);
             this.SelectParameterComboBox.TabIndex = 11;
+            this.SelectParameterComboBox.SelectedIndexChanged += new System.EventHandler(this.SelectParameterComboBox_SelectedIndexChanged);
             // 
             // textBox4
             // 
@@ -174,11 +178,22 @@ namespace Intech.SharedParameter
             this.textBox4.TabIndex = 12;
             this.textBox4.Text = "Active Parameter";
             // 
+            // AllParamButton
+            // 
+            this.AllParamButton.Location = new System.Drawing.Point(388, 326);
+            this.AllParamButton.Name = "AllParamButton";
+            this.AllParamButton.Size = new System.Drawing.Size(143, 23);
+            this.AllParamButton.TabIndex = 13;
+            this.AllParamButton.Text = "Pull All Parameters";
+            this.AllParamButton.UseVisualStyleBackColor = true;
+            this.AllParamButton.Click += new System.EventHandler(this.AllParamButton_Click);
+            // 
             // FormulaAdd
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(538, 451);
+            this.Controls.Add(this.AllParamButton);
             this.Controls.Add(this.textBox4);
             this.Controls.Add(this.SelectParameterComboBox);
             this.Controls.Add(this.FamilySelect);
@@ -209,7 +224,8 @@ namespace Intech.SharedParameter
         private ListBox parameters;
         private TextBox textBox3;
         private Intech.Windows.CustomWindowsForms.FilterableCheckedListBox FamilySelect;
-        private ComboBox SelectParameterComboBox;
+        private Intech.Windows.CustomWindowsForms.FilteredComboBox SelectParameterComboBox;
         private TextBox textBox4;
+        private Button AllParamButton;
     }
 }

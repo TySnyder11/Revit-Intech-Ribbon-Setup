@@ -597,6 +597,99 @@ namespace Intech.Revit
 
             return paramNames;
         }
+        public static List<string> GetCommonSharedParametersFromFamilies(List<Family> families)
+        {
+            HashSet<string> commonParams = null;
+
+            foreach (Family family in families)
+            {
+                // Get one symbol from the family
+                ElementId symbolId = family.GetFamilySymbolIds().FirstOrDefault();
+                if (symbolId == null) continue;
+
+                FamilySymbol symbol = family.Document.GetElement(symbolId) as FamilySymbol;
+                if (symbol == null) continue;
+
+                var sharedParamNames = symbol.Parameters
+                .Cast<Parameter>()
+                .Where(p => p.IsShared)
+                .Select(p => p.Definition.Name)
+                .ToHashSet();
+
+                if (commonParams == null)
+                {
+                    commonParams = sharedParamNames;
+                }
+                else
+                {
+                    commonParams.IntersectWith(sharedParamNames);
+                }
+            }
+
+            return commonParams?.ToList() ?? new List<string>();
+        }
+
+        public static HashSet<string> GetCommonFormulaUsableParameters(List<Family> families)
+        {
+            HashSet<string> commonParams = null;
+
+            foreach (Family family in families)
+            {
+                using (Document famDoc = doc.EditFamily(family))
+                {
+                    FamilyManager famMgr = famDoc.FamilyManager;
+                    var usableParams = new HashSet<string>();
+
+                    foreach (FamilyParameter param in famMgr.Parameters)
+                    {
+                        if (IsFormulaUsable(param))
+                        {
+                            usableParams.Add(param.Definition.Name);
+                        }
+                    }
+
+                    if (commonParams == null)
+                    {
+                        commonParams = usableParams;
+                    }
+                    else
+                    {
+                        commonParams.IntersectWith(usableParams);
+                    }
+
+                    famDoc.Close(false); // Don't save changes
+                }
+            }
+
+            return commonParams ?? new HashSet<string>();
+        }
+
+        public static bool IsFormulaUsable(FamilyParameter param)
+        {
+            if (param == null || param.Definition == null)
+                return false;
+
+            ForgeTypeId dataType = param.Definition.GetDataType();
+
+            bool isDoubleBacked = false;
+
+            try
+            {
+                ForgeTypeId unitType = param.GetUnitTypeId();
+                isDoubleBacked = unitType != null && !unitType.Empty();
+            }
+            catch
+            {
+                isDoubleBacked = false;
+            }
+
+            bool isOtherUsableType =
+            dataType == SpecTypeId.Boolean.YesNo ||
+            dataType == SpecTypeId.Int.Integer ||
+            dataType == SpecTypeId.String.Text;
+
+            return isDoubleBacked || isOtherUsableType;
+        }
 
 
     }
