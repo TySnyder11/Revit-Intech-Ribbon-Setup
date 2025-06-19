@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
+using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
 using System.Security.Cryptography;
@@ -30,6 +31,26 @@ namespace Intech.SharedParameter
             FamilySelect.Sorted = true;
             SelectParameterComboBox.DefaultValue = string.Empty;
             SelectParameterComboBox.Sorted = true;
+            CheckFormula.Click += CheckFormula_Click;
+        }
+
+        private void CheckFormula_Click(object sender, EventArgs e)
+        {
+            string formula = string.Empty;
+            if (FormulaTextBox.Text.StartsWith("="))
+                formula = FormulaTextBox.Text.Substring(1);
+            else
+                formula = FormulaTextBox.Text;
+            List<string> checkList = FamilySelect.GetCheckedItems();
+            Family fam = familyList.Where(t => checkList.Contains(t.Name)).First();
+            if (!Intech.Revit.RevitUtils.IsFormulaValid(fam, formula,out string errorMessage))
+            {
+                Autodesk.Revit.UI.TaskDialog.Show("Formula Error", $"Invalid formula {formula}: {errorMessage}");
+            }
+            else
+            {
+                Autodesk.Revit.UI.TaskDialog.Show("Formula Valid", $"Valid formula: {formula}");
+            }
         }
 
         private void FormulaTextBox_TextChanged(object sender, EventArgs e)
@@ -39,6 +60,8 @@ namespace Intech.SharedParameter
                 text = FormulaTextBox.Text.Substring(1);
             else 
                 text = FormulaTextBox.Text;
+            if (SelectParameterComboBox.SelectedItem == null)
+                return;
             string parameterName =  SelectParameterComboBox.SelectedItem.ToString();
             SelectParameterComboBox.UpdateItem(parameterName, text);
 
@@ -111,11 +134,52 @@ namespace Intech.SharedParameter
         {
             List<string> checkList = FamilySelect.GetCheckedItems();
             List<Family> FamilyList = familyList.Where(t => checkList.Contains(t.Name)).ToList();
-            List<string> names = Revit.RevitUtils.GetCommonFormulaUsableParameters(FamilyList).ToList();
+            List<string> useableNames = Revit.RevitUtils.GetCommonFormulaUsableParameters(FamilyList).ToList();
             suppressCopy = true;
-            parameters.DataSource = names;
+            parameters.DataSource = useableNames;
             parameters.ClearSelected(); // Optional: clear selection
             suppressCopy = false;
+
+            List<string> hostableNames = Revit.RevitUtils.GetCommonFormulaHostableParameters(FamilyList).ToList();
+            SelectParameterComboBox.SetItems(hostableNames);
+        }
+
+        private void URLButton_Click(object sender, EventArgs e)
+        {
+
+            string url = "https://help.autodesk.com/view/RVT/2025/ENU/?guid=GUID-B37EA687-2BDF-4712-9951-2088B2A8E523";
+            try
+            {
+                Process.Start(new ProcessStartInfo
+                {
+                    FileName = url,
+                    UseShellExecute = true // Required for .NET Core and .NET 5+
+                });
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Failed to open URL: " + ex.Message);
+            }
+
+        }
+
+        private void Cancel_Click(object sender, EventArgs e)
+        {
+            this.Close();
+        }
+        private void Confirm_Click(object sender, EventArgs e)
+        {
+            string formula = string.Empty;
+            if (FormulaTextBox.Text.StartsWith("="))
+                formula = FormulaTextBox.Text.Substring(1);
+            else
+                formula = FormulaTextBox.Text;
+            List<string> checkList = FamilySelect.GetCheckedItems();
+            List<Family> fams = familyList.Where(t => checkList.Contains(t.Name)).ToList();
+            string host = SelectParameterComboBox.SelectedItem.ToString();
+            Revit.RevitUtils.SetFormulaForParameterInFamilies(fams, host, formula);
+
+            MessageBox.Show("Completed pushing: " + formula);
         }
     }
 }

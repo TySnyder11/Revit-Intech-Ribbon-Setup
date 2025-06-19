@@ -94,10 +94,18 @@ namespace Intech.Revit
                         }
                     }
                 }
+
                 foreach (string[] row in addedRows)
                 {
-                    sharedSection.Rows.Add(row);
+                    bool isNotBlank = row.All(cell => !string.IsNullOrWhiteSpace(cell));
+                    bool isUniqueInSection = !sharedSection.Rows.Any(existing => comparer.Equals(existing, row));
+
+                    if (isNotBlank && isUniqueInSection)
+                    {
+                        sharedSection.Rows.Add(row);
+                    }
                 }
+
                 sharedManager.AddOrUpdateSection(sharedSection);
             }
 

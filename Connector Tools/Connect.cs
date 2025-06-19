@@ -114,8 +114,6 @@ namespace Intech
 
             try
             {
-
-                // STEP 3: Get the closest connector pair between the pipe and the target.
                 (Connector pipeConnector, Connector targetConnector) pair = GetClosestConnectorPair(pipe, fitting);
                 if (pair.pipeConnector == null || pair.targetConnector == null)
                 {
@@ -123,50 +121,6 @@ namespace Intech
                     return;
                 }
 
-                // STEP 4: Modify the pipe's geometry without reversing its direction.
-                // This version only rebuilds the pipe’s curve when the pipe connector is at an endpoint.
-                XYZ start = null;
-                XYZ end = null;
-                using (Transaction t = new Transaction(doc, "Reposition Pipe"))
-                {
-                    t.Start();
-
-                    LocationCurve locCurve = pipe.Location as LocationCurve;
-                    if (locCurve == null)
-                    {
-                        TaskDialog.Show("Error", "Pipe does not have a valid LocationCurve.");
-                        return;
-                    }
-
-                    // Retrieve the current endpoints.
-                    start = locCurve.Curve.GetEndPoint(0);
-                    end = locCurve.Curve.GetEndPoint(1);
-                    double tolerance = 0.001; // Adjust tolerance as needed in project units
-
-                    Line newLine = null;
-                    if (pair.pipeConnector.Origin.IsAlmostEqualTo(start, tolerance))
-                    {
-                        // The connector is at the start; keep the end fixed.
-                        newLine = Line.CreateBound(pair.targetConnector.Origin, end);
-                    }
-                    else if (pair.pipeConnector.Origin.IsAlmostEqualTo(end, tolerance))
-                    {
-                        // The connector is at the end; keep the start fixed.
-                        newLine = Line.CreateBound(start, pair.targetConnector.Origin);
-                    }
-                    else
-                    {
-                        TaskDialog.Show("Info", "Pipe connector is not at an endpoint. Consider using a translation approach instead.");
-                        t.RollBack();
-                        return;
-                    }
-
-                    // Update the pipe with the new line.
-                    locCurve.Curve = newLine;
-                    t.Commit();
-                }
-
-                // STEP 5: Connect the pipe's connector to the target connector.
                 using (Transaction t = new Transaction(doc, "Connect Pipe"))
                 {
                     t.Start();
@@ -175,10 +129,17 @@ namespace Intech
                     Connector adjustedConnector = GetClosestConnectorByPosition(pipe, pair.targetConnector.Origin);
                     if (adjustedConnector != null)
                     {
+                        if( adjustedConnector.IsConnectedTo(pair.targetConnector))
+                        {
+                            adjustedConnector.DisconnectFrom(pair.targetConnector);
+                        }
+                        AlignConnectorToConnector(adjustedConnector, pair.targetConnector, doc);
                         adjustedConnector.ConnectTo(pair.targetConnector);
                     }
+
                     t.Commit();
                 }
+
                 return;
             }
             catch (Autodesk.Revit.Exceptions.OperationCanceledException)
@@ -191,6 +152,64 @@ namespace Intech
                 return;
             }
         }
+
+        public static void AlignConnectorToConnector(Connector fromConnector, Connector toConnector, Document doc)
+        {
+            Element element = fromConnector.Owner;
+
+            XYZ fromOrigin = fromConnector.Origin;
+            XYZ fromZ = fromConnector.CoordinateSystem.BasisZ;
+            XYZ toOrigin = toConnector.Origin;
+            XYZ toZ = toConnector.CoordinateSystem.BasisZ;
+
+            // Project toOrigin onto the line defined by fromOrigin and fromZ
+            XYZ vectorToTarget = toOrigin - fromOrigin;
+            double projectionLength = vectorToTarget.DotProduct(fromZ);
+            XYZ projectedPoint = fromOrigin + projectionLength * fromZ;
+
+            // Compute translation vector
+            XYZ translation = toOrigin - projectedPoint;
+
+            // Apply translation
+            if (!translation.IsZeroLength())
+            {
+                ElementTransformUtils.MoveElement(doc, element.Id, translation);
+            }
+
+            // Compute rotation
+            XYZ rotationAxis = fromZ.CrossProduct(-toZ);
+            double angle = fromZ.AngleTo(-toZ);
+
+            if (!rotationAxis.IsZeroLength() && angle > 1e-6)
+            {
+                rotationAxis = rotationAxis.Normalize();
+                Line rotationLine = Line.CreateUnbound(toOrigin, rotationAxis);
+                ElementTransformUtils.RotateElement(doc, element.Id, rotationLine, angle);
+            }
+
+            if (element is Pipe pipe)
+            {
+                LocationCurve locationCurve = pipe.Location as LocationCurve;
+                if (locationCurve?.Curve is Line line)
+                {
+                    XYZ start = line.GetEndPoint(0);
+                    XYZ end = line.GetEndPoint(1);
+
+                    // Find which end is closer to the toConnector
+                    double distToStart = start.DistanceTo(toOrigin);
+                    double distToEnd = end.DistanceTo(toOrigin);
+
+                    Line newLine = distToStart < distToEnd
+                    ? Line.CreateBound(toOrigin, end)
+                    : Line.CreateBound(start, toOrigin);
+
+                    locationCurve.Curve = newLine;
+                }
+            }
+
+        }
+
+
         public void ConnectDuct(Document doc, Duct Duct1, Element Duct2)
         {
             // Get basic Revit objects.

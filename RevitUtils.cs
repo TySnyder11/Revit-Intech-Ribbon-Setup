@@ -31,7 +31,6 @@ namespace Intech.Revit
             return categories;
         }
 
-        //get parameters of element
         static public ParameterMap GetParameters(Element e)
         {
             ParameterMap pMap = e.ParametersMap;
@@ -143,8 +142,7 @@ namespace Intech.Revit
             }
             return null;
         }
-
-
+        
         static public List<Element> GetElementsOfCategory(Category category)
         {
             ElementCategoryFilter filter = new ElementCategoryFilter(category.Id);
@@ -154,7 +152,6 @@ namespace Intech.Revit
             return collector.ToList();
         }
 
-
         static public List<Element> GetElementTypesOfCategory(Category category)
         {
             ElementCategoryFilter filter = new ElementCategoryFilter(category.Id);
@@ -163,7 +160,6 @@ namespace Intech.Revit
             .WherePasses(filter);
             return collector.ToList();
         }
-
 
         static public string GetParameterValueAsString(Element element, string paramName)
         {
@@ -291,7 +287,6 @@ namespace Intech.Revit
             }
         }
 
-
         public static void AddSharedParametersToFamily(
             Document doc,
             Family family,
@@ -347,11 +342,6 @@ namespace Intech.Revit
                 t.Commit();
             }
         }
-
-
-
-
-
 
         public static void AddSharedParametersToFamilies(List<Family> families, List<Definition> definitions, ForgeTypeId group, bool isInstance)
         {
@@ -490,7 +480,6 @@ namespace Intech.Revit
             }
         }
 
-
         public static List<ForgeTypeId> GetAllGroupTypeIds()
         {
             List<ForgeTypeId> groupTypeIds = new List<ForgeTypeId>();
@@ -512,8 +501,6 @@ namespace Intech.Revit
             return groupTypeIds;
         }
 
-
-
         public static List<ForgeTypeId> GetAllPossibleGroupTypeIds()
         {
             List<ForgeTypeId> groupTypeIds = new List<ForgeTypeId>();
@@ -534,30 +521,6 @@ namespace Intech.Revit
             }
 
             return groupTypeIds;
-        }
-
-
-        public bool IsFormulaValid(Document doc, FamilyParameter param, string formula, out string errorMessage)
-        {
-            errorMessage = null;
-            FamilyManager familyManager = doc.FamilyManager;
-
-            using (Transaction tx = new Transaction(doc, "Test Formula"))
-            {
-                tx.Start();
-                try
-                {
-                    familyManager.SetFormula(param, formula);
-                    tx.RollBack(); // Don't keep the change
-                    return true;
-                }
-                catch (Exception ex)
-                {
-                    errorMessage = ex.Message;
-                    tx.RollBack();
-                    return false;
-                }
-            }
         }
 
         public static List<string> GetCommonParameters(List<Family> families)
@@ -597,6 +560,7 @@ namespace Intech.Revit
 
             return paramNames;
         }
+
         public static List<string> GetCommonSharedParametersFromFamilies(List<Family> families)
         {
             HashSet<string> commonParams = null;
@@ -671,26 +635,183 @@ namespace Intech.Revit
 
             ForgeTypeId dataType = param.Definition.GetDataType();
 
-            bool isDoubleBacked = false;
-
-            try
-            {
-                ForgeTypeId unitType = param.GetUnitTypeId();
-                isDoubleBacked = unitType != null && !unitType.Empty();
-            }
-            catch
-            {
-                isDoubleBacked = false;
-            }
-
+            bool isDoubleBacked = param.StorageType == StorageType.Double && param.GetUnitTypeId() != null;
             bool isOtherUsableType =
             dataType == SpecTypeId.Boolean.YesNo ||
-            dataType == SpecTypeId.Int.Integer ||
-            dataType == SpecTypeId.String.Text;
+            dataType == SpecTypeId.Int.Integer;
 
             return isDoubleBacked || isOtherUsableType;
         }
 
+        public static bool IsFormulaValid(Family family, string formula, out string errorMessage)
+        {
+            errorMessage = null;
+
+            Document familyDoc = doc.EditFamily(family);
+            if (familyDoc == null || !familyDoc.IsFamilyDocument)
+            {
+                errorMessage = "Unable to open family document.";
+                return false;
+            }
+
+            FamilyManager famMgr = familyDoc.FamilyManager;
+            FamilyParameter tempParam = null;
+            bool isValid = false;
+
+            Transaction tx = new Transaction(familyDoc, "Validate Formula");
+
+            try
+            {
+                tx.Start();
+
+                ForgeTypeId groupId = GroupTypeId.Constraints;
+                ForgeTypeId specId = SpecTypeId.Length;
+
+                tempParam = famMgr.AddParameter("__FormulaTestParam", groupId, specId, true);
+                famMgr.SetFormula(tempParam, formula);
+
+                // If we got here, the formula is valid
+                isValid = true;
+
+                // Clean up
+                famMgr.RemoveParameter(tempParam);
+                tx.RollBack(); // Discard all changes
+            }
+            catch (Exception ex)
+            {
+                errorMessage = ex.Message;
+
+                // If the parameter was added before the failure, try to remove it before rollback
+                if (tx.HasStarted() && tempParam != null)
+                {
+                    try { famMgr.RemoveParameter(tempParam); } catch { /* ignore */ }
+                }
+
+                if (tx.HasStarted())
+                {
+                    tx.RollBack(); // Safely rollback if started
+                }
+            }
+            finally
+            {
+                if (familyDoc.IsModifiable)
+                {
+                    // Just in case, ensure no lingering transaction
+                    if (tx.GetStatus() == TransactionStatus.Started)
+                        tx.RollBack();
+                }
+
+                familyDoc.Close(false); // Always close without saving
+            }
+
+            return isValid;
+        }
+
+        public static HashSet<string> GetCommonFormulaHostableParameters(List<Family> families)
+        {
+            HashSet<string> commonParams = null;
+
+            foreach (Family family in families)
+            {
+                using (Document famDoc = doc.EditFamily(family))
+                {
+                    FamilyManager famMgr = famDoc.FamilyManager;
+                    var hostableParams = new HashSet<string>();
+
+                    foreach (FamilyParameter param in famMgr.Parameters)
+                    {
+                        if (IsFormulaHostable(param))
+                        {
+                            hostableParams.Add(param.Definition.Name);
+                        }
+                    }
+
+                    if (commonParams == null)
+                    {
+                        commonParams = hostableParams;
+                    }
+                    else
+                    {
+                        commonParams.IntersectWith(hostableParams);
+                    }
+
+                    famDoc.Close(false); // Don't save changes
+                }
+            }
+
+            return commonParams ?? new HashSet<string>();
+        }
+
+        public static bool IsFormulaHostable(FamilyParameter param)
+        {
+            if (param == null || param.Definition == null)
+                return false;
+
+            if (param.IsReadOnly || param.IsReporting)
+                return false;
+
+            ForgeTypeId dataType = param.Definition.GetDataType();
+
+            bool isDoubleBacked = param.StorageType == StorageType.Double && param.GetUnitTypeId() != null;
+            bool isOtherHostableType =
+            dataType == SpecTypeId.Boolean.YesNo ||
+            dataType == SpecTypeId.Int.Integer;
+
+            return isDoubleBacked || isOtherHostableType;
+        }
+
+        public static void SetFormulaForParameterInFamilies(
+         List<Family> families,
+         string parameterName,
+         string formula)
+        {
+            foreach (Family family in families)
+            {
+                using (Document famDoc = doc.EditFamily(family))
+                {
+                    FamilyManager famMgr = famDoc.FamilyManager;
+                    FamilyParameter param = famMgr.get_Parameter(parameterName);
+
+                    if (param == null)
+                    {
+                        TaskDialog.Show("Parameter Not Found", $"'{parameterName}' not found in family '{family.Name}'.");
+                        continue;
+                    }
+
+                    if (!IsFormulaHostable(param))
+                    {
+                        TaskDialog.Show("Not Formula Hostable", $"Parameter '{parameterName}' in family '{family.Name}' is not formula-hostable.");
+                        continue;
+                    }
+
+                    using (Transaction tx = new Transaction(famDoc, "Set Formula"))
+                    {
+                        tx.Start();
+                        famMgr.SetFormula(param, formula);
+                        tx.Commit();
+                    }
+
+                    famDoc.LoadFamily(doc, new FamilyLoadOptions());
+                    famDoc.Close(false); // Don't save to disk
+                }
+            }
+        }
+
+        public class FamilyLoadOptions : IFamilyLoadOptions
+        {
+            public bool OnFamilyFound(bool familyInUse, out bool overwriteParameterValues)
+            {
+                overwriteParameterValues = true; // or false, depending on your needs
+                return true; // reload the family
+            }
+
+            public bool OnSharedFamilyFound(Family sharedFamily, bool familyInUse, out FamilySource source, out bool overwriteParameterValues)
+            {
+                source = FamilySource.Project;
+                overwriteParameterValues = true;
+                return true;
+            }
+        }
 
     }
 }

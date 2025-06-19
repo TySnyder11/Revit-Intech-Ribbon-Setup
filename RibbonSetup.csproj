@@ -192,7 +192,6 @@
       <DependentUpon>FormulaAdd.cs</DependentUpon>
     </Compile>
     <Compile Include="SharedParameter\FormulaAddMain.cs" />
-    <Compile Include="SharedParameter\FormulaReference.cs" />
     <Compile Include="SharedParameter\SharedParameterAdd.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -200,6 +199,7 @@
       <DependentUpon>SharedParameterAdd.cs</DependentUpon>
     </Compile>
     <Compile Include="startup.cs" />
+    <Compile Include="Tagging\Renumbering.cs" />
     <Compile Include="TigerStopANDBomExport\BOMExport.cs" />
     <Compile Include="Sheet Creator\SettingsRead.cs" />
     <Compile Include="DependentView\Dependent View.cs" />

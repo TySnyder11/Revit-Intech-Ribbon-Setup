@@ -101,9 +101,9 @@ public class App : IExternalApplication
         Debug.WriteLine("Search " + IconPath);
 
         //Create different panels
-        RibbonPanel SheetPanel = application.CreateRibbonPanel(tabName, "Sheets");
-        RibbonPanel TaggingPanel = application.CreateRibbonPanel(tabName, "Tagging");
         RibbonPanel ConnectTools = application.CreateRibbonPanel(tabName, "Quick Tools");
+        RibbonPanel TaggingPanel = application.CreateRibbonPanel(tabName, "Tagging");
+        RibbonPanel SheetPanel = application.CreateRibbonPanel(tabName, "Sheets");
         RibbonPanel ExportPanel = application.CreateRibbonPanel(tabName, "Exports");
         RibbonPanel ImportPanel = application.CreateRibbonPanel(tabName, "Import");
 
@@ -253,10 +253,16 @@ public class App : IExternalApplication
                 sb1.AddPushButton(newb);
             }
 
-            PushButtonData b11Data = new PushButtonData("Tag Settings", "Tag Settings", AddInPath, "Intech.TagSettings");
-            b11Data.LargeImage = new BitmapImage(new Uri(IconPath));
-            PushButton pb3 = TaggingPanel.AddItem(b11Data) as PushButton;
+            PushButtonData b8Data = new PushButtonData("Length", "Length", AddInPath, "Intech.Length");
 
+            PulldownButtonData settingspulldown = new PulldownButtonData("ParameterTools", "Parameter Tools");
+            settingspulldown.LargeImage = new BitmapImage(new Uri(IconPath));
+            PulldownButton pulldownButton = ConnectTools.AddItem(settingspulldown) as PulldownButton;
+            {
+                PushButtonData b11Data = new PushButtonData("Tag Settings", "Tag Settings", AddInPath, "Intech.TagSettings");
+                b11Data.LargeImage = new BitmapImage(new Uri(IconPath));
+                PushButton pb3 = pulldownButton.AddPushButton(b11Data);
+            }
         }
     }
 
