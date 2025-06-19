@@ -253,15 +253,17 @@ public class App : IExternalApplication
                 sb1.AddPushButton(newb);
             }
 
-            PushButtonData b8Data = new PushButtonData("Length", "Length", AddInPath, "Intech.Length");
-
-            PulldownButtonData settingspulldown = new PulldownButtonData("ParameterTools", "Parameter Tools");
+            PulldownButtonData settingspulldown = new PulldownButtonData("settings", "Settings");
             settingspulldown.LargeImage = new BitmapImage(new Uri(IconPath));
-            PulldownButton pulldownButton = ConnectTools.AddItem(settingspulldown) as PulldownButton;
+            PulldownButton pulldownButton = TaggingPanel.AddItem(settingspulldown) as PulldownButton;
             {
+                PushButtonData b10Data = new PushButtonData("NumSet", "NumberSettings", AddInPath, "Intech.Tagging.RenumberMain");
+                b10Data.LargeImage = new BitmapImage(new Uri(IconPath));
+                pulldownButton.AddPushButton(b10Data);
+
                 PushButtonData b11Data = new PushButtonData("Tag Settings", "Tag Settings", AddInPath, "Intech.TagSettings");
                 b11Data.LargeImage = new BitmapImage(new Uri(IconPath));
-                PushButton pb3 = pulldownButton.AddPushButton(b11Data);
+                pulldownButton.AddPushButton(b11Data);
             }
         }
     }

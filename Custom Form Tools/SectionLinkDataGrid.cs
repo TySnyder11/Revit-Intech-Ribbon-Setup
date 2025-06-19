@@ -1,0 +1,252 @@
+﻿using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Data;
+using System.Drawing;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Windows.Forms;
+
+namespace Intech.Windows.Forms
+{
+
+    public partial class SectionEditorControl : UserControl
+    {
+        private SaveFileManager _manager;
+        private SaveFileSection _section;
+        private readonly RowComparer _comparer = new RowComparer();
+        private Dictionary<string, ColumnType> _columnTypes = new Dictionary<string, ColumnType>();
+        private Stack<List<string[]>> _undoStack = new Stack<List<string[]>>();
+        private Stack<List<string[]>> _redoStack = new Stack<List<string[]>>();
+        private bool _hasChanges = false;
+
+        public bool HasChanges => _hasChanges;
+
+        public event EventHandler RowAdded;
+        public event EventHandler RowRemoved;
+        public event EventHandler CellEdited;
+        public event EventHandler Confirmed;
+
+        public SectionEditorControl()
+        {
+            InitializeComponent();
+            SetupEvents();
+        }
+
+        private void SetupEvents()
+        {
+            btnAdd.Click += (s, e) => AddRow();
+            btnRemove.Click += (s, e) => RemoveSelectedRows();
+            dataGridView1.CellValueChanged += (s, e) => { UpdateSectionFromGrid(); CellEdited?.Invoke(this, EventArgs.Empty); };
+            dataGridView1.RowsRemoved += (s, e) => { UpdateSectionFromGrid(); RowRemoved?.Invoke(this, EventArgs.Empty); };
+            dataGridView1.MouseDown += DataGridView1_MouseDown;
+            dataGridView1.MouseMove += DataGridView1_MouseMove;
+            dataGridView1.DragDrop += DataGridView1_DragDrop;
+            dataGridView1.DragOver += (s, e) => e.Effect = DragDropEffects.Move;
+        }
+
+        public void ConfigureColumnTypes(Dictionary<string, ColumnType> columnTypes)
+        {
+            _columnTypes = columnTypes;
+        }
+
+        public void Initialize(SaveFileManager manager, SaveFileSection section)
+        {
+            _manager = manager ?? throw new ArgumentNullException(nameof(manager));
+            _section = section ?? throw new ArgumentNullException(nameof(section));
+
+            SetupGridColumns();
+            LoadSectionToGrid();
+        }
+
+        private void SetupGridColumns()
+        {
+            dataGridView1.Columns.Clear();
+            var headers = _section.Header.Split('\t');
+
+            foreach (var header in headers)
+            {
+                var trimmed = header.Trim();
+                if (_columnTypes.TryGetValue(trimmed, out var type))
+                {
+                    switch (type)
+                    {
+                        case ColumnType.ComboBox:
+                            var combo = new DataGridViewComboBoxColumn { Name = trimmed, HeaderText = trimmed };
+                            combo.Items.AddRange("Option1", "Option2"); // Make configurable
+                            dataGridView1.Columns.Add(combo);
+                            break;
+                        case ColumnType.CheckBox:
+                            dataGridView1.Columns.Add(new DataGridViewCheckBoxColumn { Name = trimmed, HeaderText = trimmed });
+                            break;
+                        default:
+                            dataGridView1.Columns.Add(trimmed, trimmed);
+                            break;
+                    }
+                }
+                else
+                {
+                    dataGridView1.Columns.Add(trimmed, trimmed);
+                }
+            }
+        }
+
+        private void LoadSectionToGrid()
+        {
+            dataGridView1.Rows.Clear();
+            foreach (var row in _section.Rows)
+            {
+                dataGridView1.Rows.Add(row);
+            }
+        }
+
+        private void AddRow()
+        {
+            SaveUndoState();
+            dataGridView1.Rows.Add();
+            _hasChanges = true;
+            RowAdded?.Invoke(this, EventArgs.Empty);
+        }
+
+        private void RemoveSelectedRows()
+        {
+            SaveUndoState();
+            foreach (DataGridViewRow row in dataGridView1.SelectedRows)
+            {
+                if (!row.IsNewRow)
+                {
+                    string[] values = GetRowValues(row);
+                    _section.Rows.RemoveAll(r => _comparer.Equals(r, values));
+                    dataGridView1.Rows.Remove(row);
+                }
+            }
+            _hasChanges = true;
+            RowRemoved?.Invoke(this, EventArgs.Empty);
+        }
+
+        private void UpdateSectionFromGrid()
+        {
+            SaveUndoState();
+            var updatedRows = new List<string[]>();
+
+            foreach (DataGridViewRow row in dataGridView1.Rows)
+            {
+                if (!row.IsNewRow)
+                {
+                    string[] values = GetRowValues(row);
+                    if (values.All(cell => !string.IsNullOrWhiteSpace(cell)))
+                    {
+                        updatedRows.Add(values);
+                    }
+                }
+            }
+
+            _section.Rows = new SaveFileSection.NoEmptyList();
+            foreach (var row in updatedRows.Distinct(_comparer))
+            {
+                _section.Rows.Add(row);
+            }
+
+            _hasChanges = true;
+        }
+
+        private string[] GetRowValues(DataGridViewRow row)
+        {
+            return row.Cells.Cast<DataGridViewCell>()
+            .Select(c => c.Value?.ToString() ?? string.Empty)
+            .ToArray();
+        }
+
+        public void Confirm()
+        {
+            _manager.AddOrUpdateSection(_section);
+            _hasChanges = false;
+            Confirmed?.Invoke(this, EventArgs.Empty);
+        }
+
+        public void Undo()
+        {
+            if (_undoStack.Count > 0)
+            {
+                _redoStack.Push(CloneRows(_section.Rows));
+                var previous = _undoStack.Pop();
+                _section.Rows = new SaveFileSection.NoEmptyList();
+                _section.Rows.AddRange(previous);
+                LoadSectionToGrid();
+                _hasChanges = true;
+            }
+        }
+
+        public void Redo()
+        {
+            if (_redoStack.Count > 0)
+            {
+                _undoStack.Push(CloneRows(_section.Rows));
+                var next = _redoStack.Pop();
+                _section.Rows = new SaveFileSection.NoEmptyList();
+                _section.Rows.AddRange(next);
+                LoadSectionToGrid();
+                _hasChanges = true;
+            }
+        }
+
+        private void SaveUndoState()
+        {
+            _undoStack.Push(CloneRows(_section.Rows));
+            _redoStack.Clear();
+        }
+
+        private List<string[]> CloneRows(IEnumerable<string[]> rows)
+        {
+            return rows.Select(r => r.ToArray()).ToList();
+        }
+
+        private class RowComparer : IEqualityComparer<string[]>
+        {
+            public bool Equals(string[] x, string[] y) => x.SequenceEqual(y);
+            public int GetHashCode(string[] obj) => string.Join("|", obj).GetHashCode();
+        }
+
+        // Drag-and-drop row reordering
+        private int _dragRowIndex = -1;
+
+        private void DataGridView1_MouseDown(object sender, MouseEventArgs e)
+        {
+            _dragRowIndex = dataGridView1.HitTest(e.X, e.Y).RowIndex;
+        }
+
+        private void DataGridView1_MouseMove(object sender, MouseEventArgs e)
+        {
+            if ((e.Button & MouseButtons.Left) == MouseButtons.Left && _dragRowIndex >= 0)
+            {
+                dataGridView1.DoDragDrop(dataGridView1.Rows[_dragRowIndex], DragDropEffects.Move);
+            }
+        }
+
+        private void DataGridView1_DragDrop(object sender, DragEventArgs e)
+        {
+            Point clientPoint = dataGridView1.PointToClient(new Point(e.X, e.Y));
+            int dropIndex = dataGridView1.HitTest(clientPoint.X, clientPoint.Y).RowIndex;
+
+            if (dropIndex >= 0 && _dragRowIndex >= 0 && dropIndex != _dragRowIndex)
+            {
+                SaveUndoState();
+
+                var row = _section.Rows[_dragRowIndex];
+                _section.Rows.RemoveAt(_dragRowIndex);
+                _section.Rows.Insert(dropIndex, row);
+
+                LoadSectionToGrid();
+                _hasChanges = true;
+            }
+        }
+    }
+
+    public enum ColumnType
+    {
+        Text,
+        ComboBox,
+        CheckBox
+    }
+}

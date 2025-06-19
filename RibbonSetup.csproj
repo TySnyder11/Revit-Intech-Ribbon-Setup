@@ -128,7 +128,13 @@
     <Compile Include="Connector Tools\Connect.cs" />
     <Compile Include="Connector Tools\RotateConnector.cs" />
     <Compile Include="Connector Tools\RotateWith.cs" />
-    <Compile Include="CustomWindowsForms.cs" />
+    <Compile Include="Custom Form Tools\CustomWindowsForms.cs" />
+    <Compile Include="Custom Form Tools\SectionLinkDataGrid.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Custom Form Tools\SectionLinkDataGrid.Designer.cs">
+      <DependentUpon>SectionLinkDataGrid.cs</DependentUpon>
+    </Compile>
     <Compile Include="Excel Link\EditLink.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -199,7 +205,14 @@
       <DependentUpon>SharedParameterAdd.cs</DependentUpon>
     </Compile>
     <Compile Include="startup.cs" />
+    <Compile Include="Tagging\RenumberSettings.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Tagging\RenumberSettings.Designer.cs">
+      <DependentUpon>RenumberSettings.cs</DependentUpon>
+    </Compile>
     <Compile Include="Tagging\Renumbering.cs" />
+    <Compile Include="Tagging\SettingsMain.cs" />
     <Compile Include="TigerStopANDBomExport\BOMExport.cs" />
     <Compile Include="Sheet Creator\SettingsRead.cs" />
     <Compile Include="DependentView\Dependent View.cs" />
@@ -251,6 +264,9 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <EmbeddedResource Include="Custom Form Tools\SectionLinkDataGrid.resx">
+      <DependentUpon>SectionLinkDataGrid.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="DependentView\DependentViewForm.resx">
       <DependentUpon>DependentViewForm.cs</DependentUpon>
     </EmbeddedResource>
@@ -284,6 +300,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="SharedParameter\SharedParameterAdd.resx">
       <DependentUpon>SharedParameterAdd.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Tagging\RenumberSettings.resx">
+      <DependentUpon>RenumberSettings.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="TigerStopANDBomExport\SelectionForm.resx">
       <DependentUpon>SelectionForm.cs</DependentUpon>

@@ -813,5 +813,9 @@ namespace Intech.Revit
             }
         }
 
+        public static string projectName()
+        {
+            return doc.Title; 
+        }
     }
 }
