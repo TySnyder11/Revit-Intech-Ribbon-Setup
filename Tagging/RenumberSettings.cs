@@ -42,6 +42,11 @@ namespace TitleBlockSetup.Tagging
 
         private void InitSectionGrid()
         {
+            renumberMenu.CellEdited += RenumberMenu_CellEdited;
+            renumberMenu.RowAdded += RenumberMenu_RowAdded;
+
+            categories = Intech.Revit.RevitUtils.GetAllCategories();
+
             string filePath = Path.Combine(App.BasePath, "ReNumber.txt");
             SaveFileManager saveFileManager = new SaveFileManager(filePath, new TxtFormat());
 
@@ -54,17 +59,16 @@ namespace TitleBlockSetup.Tagging
                 {"Parameter", Intech.Windows.Forms.ColumnType.ComboBox },
                 { "Tag" , Intech.Windows.Forms.ColumnType.CheckBox }
             };
-            renumberMenu.ConfigureColumnTypes(columnDictionary);
-            renumberMenu.Initialize(saveFileManager, sec);
 
-            categories = Intech.Revit.RevitUtils.GetAllCategories();
             List<string> catData = new List<string>();
-            foreach(Category cat in categories)
+            foreach (Category cat in categories)
             {
                 catData.Add(cat.Name);
             }
-
             renumberMenu.SetComboBoxItems("Category", catData);
+
+            renumberMenu.ConfigureColumnTypes(columnDictionary);
+            renumberMenu.Initialize(saveFileManager, sec);
 
             renumberMenu.SetDefaultColumnValue("Tag", true);
             renumberMenu.SetDefaultColumnValue("Current Number", "1");
@@ -73,7 +77,16 @@ namespace TitleBlockSetup.Tagging
             renumberMenu.SetColumnWidth("Category", 200);
 
             renumberMenu.SetColumnWidth("Parameter", 150);
-            renumberMenu.CellEdited += RenumberMenu_CellEdited;
+        }
+
+        private void RenumberMenu_RowAdded(object sender, EventArgs e)
+        {
+            DataGridViewRowsAddedEventArgs rowEvent = e as DataGridViewRowsAddedEventArgs;
+            if (renumberMenu.GetCellValue(0, rowEvent.RowIndex) is string categoryName)
+            {
+                Category categrory = categories.get_Item(categoryName);
+                renumberMenu.SetComboBoxItems("Parameter", rowEvent.RowIndex, Intech.Revit.RevitUtils.GetParameters(categrory));
+            }
         }
 
         private void RenumberMenu_CellEdited(object sender, EventArgs e)
@@ -82,7 +95,7 @@ namespace TitleBlockSetup.Tagging
 
             if (cellEvent.ColumnIndex == 0)
             {
-                string categoryName = (string)renumberMenu.GetCellValue(cellEvent.ColumnIndex, cellEvent.RowIndex);
+                string categoryName = (string)renumberMenu.GetCellValue(0, cellEvent.RowIndex);
                 Category categrory = categories.get_Item(categoryName);
                 renumberMenu.SetComboBoxItems("Parameter", cellEvent.RowIndex, Intech.Revit.RevitUtils.GetParameters(categrory));
             } 

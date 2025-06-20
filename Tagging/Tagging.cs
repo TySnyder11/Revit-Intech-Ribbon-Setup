@@ -60,7 +60,6 @@ namespace Intech
     {
         public Result Execute(ExternalCommandData commandData, ref string message, ElementSet elements)
         {
-
             //Revit pre setup stuff
             UIApplication uiapp = commandData.Application;
             Document doc = uiapp.ActiveUIDocument.Document;
@@ -90,7 +89,6 @@ namespace Intech
             //Loop until tagging is esc is pressed
             while (true)
             {
-
                 //List of size tags
                 var TagFam = tagtools.SaveInformation(this.GetType().Name);
 
@@ -108,7 +106,6 @@ namespace Intech
                     TagFam.Leader,
                     element.Item1)
                     == 0) break;
-
             }
             return Result.Succeeded;
         }

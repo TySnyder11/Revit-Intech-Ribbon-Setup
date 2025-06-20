@@ -2,12 +2,14 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
+using System.Data.Common;
 using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using static Intech.Windows.CustomWindowsForms;
+using static OfficeOpenXml.ExcelErrorValue;
 
 namespace Intech.Windows.Forms
 {
@@ -43,7 +45,8 @@ namespace Intech.Windows.Forms
         {
             btnAdd.Click += (s, e) => AddRow();
             btnRemove.Click += (s, e) => RemoveSelectedRows();
-            dataGridView1.CellValueChanged += (s, e) => { UpdateSectionFromGrid(); CellEdited?.Invoke(this, e); };
+            dataGridView1.CellValueChanged += dataGridView1_CellValueChanged;
+            dataGridView1.RowsAdded += (s, e) => RowAdded?.Invoke(this, e);
             dataGridView1.RowsRemoved += (s, e) => { UpdateSectionFromGrid(); RowRemoved?.Invoke(this, e); };
             dataGridView1.MouseDown += DataGridView1_MouseDown;
             dataGridView1.MouseMove += DataGridView1_MouseMove;
@@ -55,9 +58,24 @@ namespace Intech.Windows.Forms
 
         }
 
+        private void dataGridView1_CellValueChanged(object sender, DataGridViewCellEventArgs e)
+        {
+            UpdateSectionFromGrid();
+            CellEdited?.Invoke(this, e);
+        }
+
+
         private void DataGridView1_DataError(object sender, DataGridViewDataErrorEventArgs e)
         {
-            dataGridView1.Rows[e.RowIndex].Cells[e.RowIndex].Value = string.Empty;
+            string val = (string)dataGridView1.Rows[e.RowIndex].Cells[e.ColumnIndex].Value;
+            List<string> options = (List<string>)((DataGridViewComboBoxCell)dataGridView1.Rows[e.RowIndex].Cells[e.ColumnIndex]).DataSource;
+            if (options != null && options.Contains(val))
+            {
+                var cell = (DataGridViewComboBoxCell)dataGridView1.Rows[e.RowIndex].Cells[e.ColumnIndex];
+                cell.Value = val;
+                return;
+            }
+            dataGridView1.Rows[e.RowIndex].Cells[e.ColumnIndex].Value = val;
         }
 
         public void ConfigureColumnTypes(Dictionary<string, ColumnType> columnTypes)
@@ -65,14 +83,17 @@ namespace Intech.Windows.Forms
             _columnTypes = columnTypes;
         }
 
+
         public void Initialize(SaveFileManager manager, SaveFileSection section)
         {
+
             _manager = manager ?? throw new ArgumentNullException(nameof(manager));
             _section = section ?? throw new ArgumentNullException(nameof(section));
 
             SetupGridColumns();
             LoadSectionToGrid();
         }
+
 
 
         private void dataGridView1_EditingControlShowing(object sender, DataGridViewEditingControlShowingEventArgs e)
@@ -110,6 +131,10 @@ namespace Intech.Windows.Forms
                                 Name = trimmed,
                                 HeaderText = trimmed,
                             };
+                            if (_defaultColumnValues.ContainsKey(trimmed))
+                            {
+                                SetComboBoxItems(trimmed, (List<string>)_defaultColumnValues[trimmed]);
+                            }
                             dataGridView1.Columns.Add(comboColumn);
                             break;
                         case ColumnType.CheckBox:
@@ -147,6 +172,8 @@ namespace Intech.Windows.Forms
 
         private void AddRow()
         {
+            //DataGridViewRowsAddedEventArgs rowEvent = 
+            dataGridView1.RowsAdded -= (s, e) => RowAdded?.Invoke(this, e);
             SaveUndoState();
             int rowIndex = dataGridView1.Rows.Add();
             var row = dataGridView1.Rows[rowIndex];
@@ -157,6 +184,7 @@ namespace Intech.Windows.Forms
                     row.Cells[kvp.Key].Value = kvp.Value;
                 }
             }
+            dataGridView1.RowsAdded += (s, e) => RowAdded?.Invoke(this, e);
 
             _hasChanges = true;
             RowAdded?.Invoke(this, EventArgs.Empty);
@@ -321,6 +349,15 @@ namespace Intech.Windows.Forms
         public object GetCellValue(int column, int row)
         {
             return dataGridView1.Rows[row].Cells[column].Value;
+        }
+
+        public void SetCellValue(string columnName, int row, string Value)
+        {
+            dataGridView1.Rows[row].Cells[columnName].Value = Value;
+        }
+        public void SetCellValue(int column, int row, string Value)
+        {
+            dataGridView1.Rows[row].Cells[column].Value = Value;
         }
 
     }
