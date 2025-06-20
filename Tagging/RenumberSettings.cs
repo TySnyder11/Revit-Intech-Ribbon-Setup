@@ -1,4 +1,5 @@
-﻿using Intech;
+﻿using Autodesk.Revit.DB;
+using Intech;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -12,12 +13,31 @@ using System.Windows.Forms;
 
 namespace TitleBlockSetup.Tagging
 {
-    public partial class RenumberSettings : Form
+    public partial class RenumberSettings : System.Windows.Forms.Form
     {
+        CategoryNameMap categories;
         public RenumberSettings()
         {
             InitializeComponent();
+            CenterToParent();
             InitSectionGrid();
+
+            Confirm.Click += Confirm_Click;
+            Cancel.Click += Cancel_Click;
+        }
+
+        private void Cancel_Click(object sender, EventArgs e)
+        {
+            if (renumberMenu.HasChanges)
+            {
+
+            }
+        }
+
+        private void Confirm_Click(object sender, EventArgs e)
+        {
+            renumberMenu.Confirm();
+            this.Close();
         }
 
         private void InitSectionGrid()
@@ -26,15 +46,46 @@ namespace TitleBlockSetup.Tagging
             SaveFileManager saveFileManager = new SaveFileManager(filePath, new TxtFormat());
 
             SaveFileSection sec =  saveFileManager.GetSectionsByProject("__General__").FirstOrDefault()?? 
-                new SaveFileSection("__General__", "", "Category\tTag\tprefix\tCurrent Number\tSuffix\tSeperator");
+                new SaveFileSection("__General__", "", "Category\tParameter\tTag\tPrefix\tCurrent Number\tSuffix\tSeperator");
 
-            Dictionary<string, Intech.Windows.Forms.ColumnType> columDictionary = new Dictionary<string, Intech.Windows.Forms.ColumnType> 
+            Dictionary<string, Intech.Windows.Forms.ColumnType> columnDictionary = new Dictionary<string, Intech.Windows.Forms.ColumnType> 
             {
                 {"Category", Intech.Windows.Forms.ColumnType.ComboBox },
+                {"Parameter", Intech.Windows.Forms.ColumnType.ComboBox },
                 { "Tag" , Intech.Windows.Forms.ColumnType.CheckBox }
             };
-            renumberMenu.ConfigureColumnTypes(columDictionary);
+            renumberMenu.ConfigureColumnTypes(columnDictionary);
             renumberMenu.Initialize(saveFileManager, sec);
+
+            categories = Intech.Revit.RevitUtils.GetAllCategories();
+            List<string> catData = new List<string>();
+            foreach(Category cat in categories)
+            {
+                catData.Add(cat.Name);
+            }
+
+            renumberMenu.SetComboBoxItems("Category", catData);
+
+            renumberMenu.SetDefaultColumnValue("Tag", true);
+            renumberMenu.SetDefaultColumnValue("Current Number", "1");
+            renumberMenu.SetDefaultColumnValue("Seperator", "-");
+
+            renumberMenu.SetColumnWidth("Category", 200);
+
+            renumberMenu.SetColumnWidth("Parameter", 150);
+            renumberMenu.CellEdited += RenumberMenu_CellEdited;
+        }
+
+        private void RenumberMenu_CellEdited(object sender, EventArgs e)
+        {
+            DataGridViewCellEventArgs cellEvent = e as DataGridViewCellEventArgs;
+
+            if (cellEvent.ColumnIndex == 0)
+            {
+                string categoryName = (string)renumberMenu.GetCellValue(cellEvent.ColumnIndex, cellEvent.RowIndex);
+                Category categrory = categories.get_Item(categoryName);
+                renumberMenu.SetComboBoxItems("Parameter", cellEvent.RowIndex, Intech.Revit.RevitUtils.GetParameters(categrory));
+            } 
         }
     }
 }

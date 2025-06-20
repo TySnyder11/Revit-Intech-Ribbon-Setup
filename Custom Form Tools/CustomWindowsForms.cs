@@ -418,5 +418,102 @@ namespace Intech.Windows
                 _selectedItem = this.SelectedItem as ItemWrapper;
             }
         }
+        public class FilterableComboBoxEditingControl : FilteredComboBox, IDataGridViewEditingControl
+        {
+
+            private DataGridView _dataGridView;
+            private bool _valueChanged = false;
+            private int _rowIndex;
+
+            public object EditingControlFormattedValue
+            {
+                get => this.Text;
+                set => this.Text = value?.ToString() ?? string.Empty;
+            }
+
+
+            public object GetEditingControlFormattedValue(DataGridViewDataErrorContexts context) => this.Text;
+
+            public void ApplyCellStyleToEditingControl(DataGridViewCellStyle dataGridViewCellStyle)
+            {
+                this.Font = dataGridViewCellStyle.Font;
+                this.ForeColor = dataGridViewCellStyle.ForeColor;
+                this.BackColor = dataGridViewCellStyle.BackColor;
+            }
+
+            public int EditingControlRowIndex { get => _rowIndex; set => _rowIndex = value; }
+
+            public bool EditingControlValueChanged { get => _valueChanged; set => _valueChanged = value; }
+
+            public Cursor EditingPanelCursor => Cursors.IBeam;
+
+            public DataGridView EditingControlDataGridView { get => _dataGridView; set => _dataGridView = value; }
+
+            public bool RepositionEditingControlOnValueChange => false;
+
+            public void PrepareEditingControlForEdit(bool selectAll) { }
+
+            protected override void OnTextChanged(EventArgs e)
+            {
+                base.OnTextChanged(e);
+                _valueChanged = true;
+                _dataGridView?.NotifyCurrentCellDirty(true);
+            }
+
+            public bool EditingControlWantsInputKey(Keys keyData, bool dataGridViewWantsInputKey)
+            {
+                // Let the ComboBox handle navigation keys
+                switch (keyData & Keys.KeyCode)
+                {
+                    case Keys.Left:
+                    case Keys.Right:
+                    case Keys.Up:
+                    case Keys.Down:
+                    case Keys.Home:
+                    case Keys.End:
+                    case Keys.PageDown:
+                    case Keys.PageUp:
+                        return true;
+                    default:
+                        return !dataGridViewWantsInputKey;
+                }
+            }
+
+            protected override void OnSelectedIndexChanged(EventArgs e)
+            {
+                base.OnSelectedIndexChanged(e);
+
+                _valueChanged = true;
+                EditingControlDataGridView?.NotifyCurrentCellDirty(true);
+            }
+
+        }
+
+
+        public class FilterableComboBoxCell : DataGridViewTextBoxCell
+        {
+            public override Type EditType => typeof(FilterableComboBoxEditingControl);
+
+            public override object DefaultNewRowValue => "";
+        }
+
+
+        public class FilterableComboBoxColumn : DataGridViewColumn
+        {
+            public List<string> ItemsSource { get; set; } = new List<string>();
+
+            public FilterableComboBoxColumn() : base(new FilterableComboBoxCell()) { }
+
+            public override DataGridViewCell CellTemplate
+            {
+                get => base.CellTemplate;
+                set
+                {
+                    if (value != null && !value.GetType().IsAssignableFrom(typeof(FilterableComboBoxCell)))
+                        throw new InvalidCastException("Must be a FilterableComboBoxCell");
+                    base.CellTemplate = value;
+                }
+            }
+        }
     }
 }

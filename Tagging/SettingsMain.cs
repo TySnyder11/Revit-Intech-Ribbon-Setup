@@ -17,6 +17,8 @@ namespace Intech.Tagging
     {
         public Result Execute(ExternalCommandData commandData, ref string message, ElementSet elements)
         {
+            Document doc = commandData.Application.ActiveUIDocument.Document;
+            Revit.RevitUtils.init(doc);
             RenumberSettings settings = new RenumberSettings();
             settings.ShowDialog();
 
