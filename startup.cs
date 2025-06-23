@@ -235,7 +235,6 @@ public class App : IExternalApplication
             buttons.Add(GetButton(tabName, TaggingPanel.Name, "Length"));
             buttons.Add(GetButton(tabName, TaggingPanel.Name, "Hanger"));
 
-
             foreach (Autodesk.Windows.RibbonItem i in buttons)
             {
                 i.Size = AW.RibbonItemSize.Large;
@@ -253,11 +252,16 @@ public class App : IExternalApplication
                 sb1.AddPushButton(newb);
             }
 
+            PushButtonData b3Data = new PushButtonData("numTool", "Number Tool", AddInPath, "Intech.Tagging.NumberTool");
+            b3Data.ToolTip = "Select a item (Filters based of categories in settings) and it will push an incrimented number into a category";
+            b3Data.LargeImage = new BitmapImage(new Uri(IconPath));
+            PushButton pb3 = TaggingPanel.AddItem(b3Data) as PushButton;
+
             PulldownButtonData settingspulldown = new PulldownButtonData("settings", "Settings");
             settingspulldown.LargeImage = new BitmapImage(new Uri(IconPath));
             PulldownButton pulldownButton = TaggingPanel.AddItem(settingspulldown) as PulldownButton;
             {
-                PushButtonData b10Data = new PushButtonData("NumSet", "NumberSettings", AddInPath, "Intech.Tagging.RenumberMain");
+                PushButtonData b10Data = new PushButtonData("NumSet", "Number Settings", AddInPath, "Intech.Tagging.RenumberMain");
                 b10Data.LargeImage = new BitmapImage(new Uri(IconPath));
                 pulldownButton.AddPushButton(b10Data);
 

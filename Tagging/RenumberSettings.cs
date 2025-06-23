@@ -26,13 +26,27 @@ namespace TitleBlockSetup.Tagging
             Cancel.Click += Cancel_Click;
         }
 
+
         private void Cancel_Click(object sender, EventArgs e)
         {
             if (renumberMenu.HasChanges)
             {
+                DialogResult result = MessageBox.Show(
+                "You have unsaved changes. Are you sure you want to close?",
+                "Confirm Close",
+                MessageBoxButtons.YesNo,
+                MessageBoxIcon.Warning
+                );
 
+                if (result == DialogResult.No)
+                {
+                    return;
+                }
             }
+
+            this.Close();
         }
+
 
         private void Confirm_Click(object sender, EventArgs e)
         {
@@ -53,22 +67,22 @@ namespace TitleBlockSetup.Tagging
             SaveFileSection sec =  saveFileManager.GetSectionsByProject("__General__").FirstOrDefault()?? 
                 new SaveFileSection("__General__", "", "Category\tParameter\tTag\tPrefix\tCurrent Number\tSuffix\tSeperator");
 
-            Dictionary<string, Intech.Windows.Forms.ColumnType> columnDictionary = new Dictionary<string, Intech.Windows.Forms.ColumnType> 
+            Dictionary<string, Intech.Windows.Forms.ColumnType > columnDictionary = new Dictionary<string, Intech.Windows.Forms.ColumnType> 
             {
                 {"Category", Intech.Windows.Forms.ColumnType.ComboBox },
                 {"Parameter", Intech.Windows.Forms.ColumnType.ComboBox },
                 { "Tag" , Intech.Windows.Forms.ColumnType.CheckBox }
             };
 
+
+            renumberMenu.ConfigureColumnTypes(columnDictionary);
+            renumberMenu.Initialize(saveFileManager, sec);
             List<string> catData = new List<string>();
             foreach (Category cat in categories)
             {
                 catData.Add(cat.Name);
             }
             renumberMenu.SetComboBoxItems("Category", catData);
-
-            renumberMenu.ConfigureColumnTypes(columnDictionary);
-            renumberMenu.Initialize(saveFileManager, sec);
 
             renumberMenu.SetDefaultColumnValue("Tag", true);
             renumberMenu.SetDefaultColumnValue("Current Number", "1");
@@ -100,5 +114,7 @@ namespace TitleBlockSetup.Tagging
                 renumberMenu.SetComboBoxItems("Parameter", cellEvent.RowIndex, Intech.Revit.RevitUtils.GetParameters(categrory));
             } 
         }
+
+
     }
 }

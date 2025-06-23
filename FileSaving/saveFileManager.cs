@@ -130,12 +130,47 @@ namespace Intech
                 base.Add(item);
             }
         }
-
         public string ProjectName { get; set; }
         public string SecondaryName { get; set; }
         public string Header { get; set; }
         public NoEmptyList Rows { get; set; } = new NoEmptyList();
+        public List<string> GetColumn(int columnIndex)
+        {
+            var column = new List<string>();
 
+            foreach (var row in Rows)
+            {
+                if (row != null && columnIndex >= 0 && columnIndex < row.Length)
+                {
+                    column.Add(row[columnIndex]);
+                }
+                else
+                {
+                    column.Add(string.Empty);
+                }
+            }
+
+            return column;
+        }
+
+        public string[] lookUp(int columnIndex, string lookup)
+        {
+            List<string> values = GetColumn(columnIndex);
+            int t = -1;
+            for (int i = 0; i < values.Count(); i++)
+            {
+                if (string.Equals(values[i], lookup))
+                {
+                    t = i;
+                    break;
+                }
+            }
+            if(t == -1)
+            {
+                return new string[0];
+            }
+            return Rows[0];
+        }
         public SaveFileSection(string projectName, string secondaryName, string header)
         {
             ProjectName = projectName;

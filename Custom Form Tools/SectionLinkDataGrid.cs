@@ -187,7 +187,8 @@ namespace Intech.Windows.Forms
             dataGridView1.RowsAdded += (s, e) => RowAdded?.Invoke(this, e);
 
             _hasChanges = true;
-            RowAdded?.Invoke(this, EventArgs.Empty);
+            DataGridViewRowsAddedEventArgs eventArg = new DataGridViewRowsAddedEventArgs(rowIndex, 1);
+            RowAdded?.Invoke(this, eventArg);
         }
 
 
@@ -217,7 +218,7 @@ namespace Intech.Windows.Forms
                 if (!row.IsNewRow)
                 {
                     string[] values = GetRowValues(row);
-                    if (values.All(cell => !string.IsNullOrWhiteSpace(cell)))
+                    if (values.All(cell => cell != null))
                     {
                         updatedRows.Add(values);
                     }
