@@ -404,7 +404,7 @@ namespace Intech
             Document doc = Intech.ParameterSyncMenu.doc;
             SaveFileManager manager = new SaveFileManager(Path.Combine(Path.Combine(App.BasePath, "SaveFileManager"), "temp.txt"), new TxtFormat());
             SaveFileSection section = new SaveFileSection(doc.Title, "ParameterSyncMenu", "Name\tCategory\tInput\tOutput");
-            foreach (SaveFileSection sec in manager.GetSectionsByProject(doc.Title))
+            foreach (SaveFileSection sec in manager.GetSectionsByName(doc.Title))
             {
                 if (sec.SecondaryName == "ParameterSyncMenu")
                 {

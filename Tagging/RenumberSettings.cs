@@ -64,7 +64,7 @@ namespace TitleBlockSetup.Tagging
             string filePath = Path.Combine(App.BasePath, "ReNumber.txt");
             SaveFileManager saveFileManager = new SaveFileManager(filePath, new TxtFormat());
 
-            SaveFileSection sec =  saveFileManager.GetSectionsByProject("__General__").FirstOrDefault()?? 
+            SaveFileSection sec =  saveFileManager.GetSectionsByName("__General__").FirstOrDefault()?? 
                 new SaveFileSection("__General__", "", "Category\tParameter\tTag\tPrefix\tCurrent Number\tSuffix\tSeperator");
 
             Dictionary<string, Intech.Windows.Forms.ColumnType > columnDictionary = new Dictionary<string, Intech.Windows.Forms.ColumnType> 
@@ -115,6 +115,29 @@ namespace TitleBlockSetup.Tagging
             } 
         }
 
+        private void RenumberSettings_Load(object sender, EventArgs e)
+        {
 
+        }
+
+        private void AdvancedSettings_Click(object sender, EventArgs e)
+        {
+            DataGridViewSelectedCellCollection cells = renumberMenu.GetSelectedCell();
+            foreach (DataGridViewCell cell in cells)
+            {
+                string catName = renumberMenu.GetCellValue(0, cell.RowIndex) as String;
+                Category category = categories.get_Item(catName);
+                if (category != null)
+                {
+                    NumAdvancedSettings numAdvancedSettings = new NumAdvancedSettings(category);
+                    numAdvancedSettings.ShowDialog();
+                    renumberMenu.SetComboBoxItems("Parameter", cell.RowIndex, Intech.Revit.RevitUtils.GetParameters(category));
+                }
+                else
+                {
+                    MessageBox.Show($"Category '{catName}' not found.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+            }
+        }
     }
 }

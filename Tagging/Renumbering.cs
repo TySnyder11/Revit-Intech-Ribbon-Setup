@@ -31,7 +31,7 @@ namespace Intech.Tagging
                 string filePath = Path.Combine(App.BasePath, "ReNumber.txt");
                 SaveFileManager saveFileManager = new SaveFileManager(filePath, new TxtFormat());
 
-                SaveFileSection sec = saveFileManager.GetSectionsByProject("__General__").FirstOrDefault();
+                SaveFileSection sec = saveFileManager.GetSectionsByName("__General__").FirstOrDefault();
                 if (sec == null)
                 {
                     throw new InvalidOperationException("No section found for '__General__' in the save file. Please go to Numbering settings and make sure to add a row and click Confirm.");
@@ -56,7 +56,11 @@ namespace Intech.Tagging
                 string num = row.Length > 4 ? row[4] : "1";
                 string suffix = row.Length > 5 ? row[5] : string.Empty;
                 string sep = row.Length > 6 ? row[6] : string.Empty;
-                string whole = prefix + sep + num + sep + suffix;
+                string whole = prefix + sep + num;
+                if (!string.IsNullOrEmpty(suffix))
+                {
+                    whole += sep + suffix;
+                }
                 using (Transaction tran = new Transaction(doc))
                 {
                     tran.Start("Number Parameter");

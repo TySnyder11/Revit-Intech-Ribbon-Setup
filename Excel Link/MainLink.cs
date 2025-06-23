@@ -101,7 +101,7 @@ namespace Intech
         public static String[][] readSave()
         {
             SaveFileManager saveFile = new SaveFileManager(Path.Combine(Path.Combine(App.BasePath, "SaveFileManager"), "temp.txt"), new TxtFormat());
-            List<SaveFileSection> sections = saveFile.GetSectionsByProject(doc.Title);
+            List<SaveFileSection> sections = saveFile.GetSectionsByName(doc.Title);
             foreach (SaveFileSection section in sections)
             {
                 if (section.SecondaryName == "ExcelLinkData")
@@ -117,7 +117,7 @@ namespace Intech
         public static void appendSave(string[] data)
         {
             SaveFileManager saveFile = new SaveFileManager(Path.Combine(Path.Combine(App.BasePath, "SaveFileManager") , "temp.txt"), new TxtFormat());
-            List<SaveFileSection> sections = saveFile.GetSectionsByProject(doc.Title);
+            List<SaveFileSection> sections = saveFile.GetSectionsByName(doc.Title);
             foreach (SaveFileSection section in sections)
             {
                 if (section.SecondaryName == "ExcelLinkData")
@@ -136,7 +136,7 @@ namespace Intech
         public static void removeLineFromSave(int lineVal)
         {
             SaveFileManager saveFile = new SaveFileManager(Path.Combine(Path.Combine(App.BasePath, "SaveFileManager"), "temp.txt"), new TxtFormat());
-            List<SaveFileSection> sections = saveFile.GetSectionsByProject(doc.Title);
+            List<SaveFileSection> sections = saveFile.GetSectionsByName(doc.Title);
             foreach (SaveFileSection section in sections)
             {
                 if (section.SecondaryName == "ExcelLinkData")
@@ -176,7 +176,7 @@ namespace Intech
         public static int findLineIndexFromDataRow(string[] dataRow)
         {
             SaveFileManager saveFile = new SaveFileManager(Path.Combine(Path.Combine(App.BasePath, "SaveFileManager"), "temp.txt"), new TxtFormat());
-            List<SaveFileSection> sections = saveFile.GetSectionsByProject(doc.Title);
+            List<SaveFileSection> sections = saveFile.GetSectionsByName(doc.Title);
 
             foreach (SaveFileSection section in sections)
             {

@@ -31,6 +31,7 @@ namespace Intech.Windows.Forms
 
         public event EventHandler RowAdded;
         public event EventHandler RowRemoved;
+        public event EventHandler SelectionChanged;
         public event EventHandler CellEdited;
         public event EventHandler Confirmed;
 
@@ -46,6 +47,7 @@ namespace Intech.Windows.Forms
             btnAdd.Click += (s, e) => AddRow();
             btnRemove.Click += (s, e) => RemoveSelectedRows();
             dataGridView1.CellValueChanged += dataGridView1_CellValueChanged;
+            dataGridView1.SelectionChanged += (s, e) => SelectionChanged?.Invoke(this, e);
             dataGridView1.RowsAdded += (s, e) => RowAdded?.Invoke(this, e);
             dataGridView1.RowsRemoved += (s, e) => { UpdateSectionFromGrid(); RowRemoved?.Invoke(this, e); };
             dataGridView1.MouseDown += DataGridView1_MouseDown;
@@ -63,7 +65,7 @@ namespace Intech.Windows.Forms
             UpdateSectionFromGrid();
             CellEdited?.Invoke(this, e);
         }
-
+        
 
         private void DataGridView1_DataError(object sender, DataGridViewDataErrorEventArgs e)
         {
@@ -350,6 +352,11 @@ namespace Intech.Windows.Forms
         public object GetCellValue(int column, int row)
         {
             return dataGridView1.Rows[row].Cells[column].Value;
+        }
+
+        public DataGridViewSelectedCellCollection GetSelectedCell()
+        {
+            return dataGridView1.SelectedCells;
         }
 
         public void SetCellValue(string columnName, int row, string Value)

@@ -43,7 +43,7 @@ namespace Intech
         {
             dataGridView1.Rows.Clear();
             SaveFileManager manager = new SaveFileManager(Path.Combine(Path.Combine(App.BasePath, "SaveFileManager"), "temp.txt"), new TxtFormat());
-            List<Intech.SaveFileSection> sections = manager.GetSectionsByProject(Intech.ParameterSyncMenu.doc.Title);
+            List<Intech.SaveFileSection> sections = manager.GetSectionsByName(Intech.ParameterSyncMenu.doc.Title);
             if (sections.Count > 0)
             {
                 SaveFileSection section = null;
@@ -78,7 +78,7 @@ namespace Intech
         private void Remove_Click(object sender, EventArgs e)
         {
             SaveFileManager manager = new SaveFileManager(Path.Combine(Path.Combine(App.BasePath, "SaveFileManager"), "temp.txt"), new TxtFormat());
-            List<Intech.SaveFileSection> sections = manager.GetSectionsByProject(Intech.ParameterSyncMenu.doc.Title);
+            List<Intech.SaveFileSection> sections = manager.GetSectionsByName(Intech.ParameterSyncMenu.doc.Title);
             SaveFileSection section = null;
             foreach (SaveFileSection sec in sections)
             {
@@ -147,7 +147,7 @@ namespace Intech
                 {
                     // Save changes to the file
                     SaveFileManager manager = new SaveFileManager(Path.Combine(Path.Combine(App.BasePath, "SaveFileManager"), "temp.txt"), new TxtFormat());
-                    List<Intech.SaveFileSection> sections = manager.GetSectionsByProject(Intech.ParameterSyncMenu.doc.Title);
+                    List<Intech.SaveFileSection> sections = manager.GetSectionsByName(Intech.ParameterSyncMenu.doc.Title);
                     SaveFileSection section = null;
                     foreach (SaveFileSection sec in sections)
                     {

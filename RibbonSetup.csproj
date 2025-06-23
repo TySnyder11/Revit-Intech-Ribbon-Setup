@@ -129,6 +129,12 @@
     <Compile Include="Connector Tools\RotateConnector.cs" />
     <Compile Include="Connector Tools\RotateWith.cs" />
     <Compile Include="Custom Form Tools\CustomWindowsForms.cs" />
+    <Compile Include="Custom Form Tools\FilteredCheckBox.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Custom Form Tools\FilteredCheckBox.Designer.cs">
+      <DependentUpon>FilteredCheckBox.cs</DependentUpon>
+    </Compile>
     <Compile Include="Custom Form Tools\SectionLinkDataGrid.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -205,6 +211,13 @@
       <DependentUpon>SharedParameterAdd.cs</DependentUpon>
     </Compile>
     <Compile Include="startup.cs" />
+    <Compile Include="Tagging\NumAdvancedSettings.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Tagging\NumAdvancedSettings.Designer.cs">
+      <DependentUpon>NumAdvancedSettings.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Tagging\NumberRun.cs" />
     <Compile Include="Tagging\RenumberSettings.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -264,6 +277,9 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <EmbeddedResource Include="Custom Form Tools\FilteredCheckBox.resx">
+      <DependentUpon>FilteredCheckBox.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Custom Form Tools\SectionLinkDataGrid.resx">
       <DependentUpon>SectionLinkDataGrid.cs</DependentUpon>
     </EmbeddedResource>
@@ -300,6 +316,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="SharedParameter\SharedParameterAdd.resx">
       <DependentUpon>SharedParameterAdd.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Tagging\NumAdvancedSettings.resx">
+      <DependentUpon>NumAdvancedSettings.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Tagging\RenumberSettings.resx">
       <DependentUpon>RenumberSettings.cs</DependentUpon>

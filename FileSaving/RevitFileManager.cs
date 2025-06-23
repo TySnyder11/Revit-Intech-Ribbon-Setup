@@ -42,7 +42,7 @@ namespace Intech.Revit
             var tempManager = GetManager(tempPath);
 
             var localSections = localManager.ReadAllSections();
-            var projectSections = localSections.Where(s => s.ProjectName == projectName).ToList();
+            var projectSections = localSections.Where(s => s.PrimaryName == projectName).ToList();
 
             tempManager.WriteAllSections(projectSections);
         }
@@ -52,10 +52,10 @@ namespace Intech.Revit
             var tempManager = GetManager(tempPath);
             var localManager = GetManager(localPath);
 
-            var tempSections = tempManager.ReadAllSections().Where(s => s.ProjectName == projectName).ToList();
+            var tempSections = tempManager.ReadAllSections().Where(s => s.PrimaryName == projectName).ToList();
             var localSections = localManager.ReadAllSections();
 
-            localSections.RemoveAll(s => s.ProjectName == projectName);
+            localSections.RemoveAll(s => s.PrimaryName == projectName);
             localSections.AddRange(tempSections);
 
             localManager.WriteAllSections(localSections);
@@ -67,8 +67,8 @@ namespace Intech.Revit
             var localSharedManager = GetManager(LocalSharedPath);
             var sharedManager = GetManager(SharedPath);
 
-            var tempSections = tempManager.ReadAllSections().Where(s => s.ProjectName == projectName).ToList();
-            var localSharedSections = localSharedManager.ReadAllSections().Where(s => s.ProjectName == projectName).ToList();
+            var tempSections = tempManager.ReadAllSections().Where(s => s.PrimaryName == projectName).ToList();
+            var localSharedSections = localSharedManager.ReadAllSections().Where(s => s.PrimaryName == projectName).ToList();
             var sharedSections = sharedManager.ReadAllSections();
 
             SaveToLocal();
@@ -78,7 +78,7 @@ namespace Intech.Revit
 
                 var localSaveSection = localSharedSections.FirstOrDefault(s => s.SecondaryName == tempSection.SecondaryName)
                                     ?? new SaveFileSection(projectName, tempSection.SecondaryName, tempSection.Header);
-                var sharedSection = sharedSections.FirstOrDefault(s => s.ProjectName == projectName && s.SecondaryName == tempSection.SecondaryName)
+                var sharedSection = sharedSections.FirstOrDefault(s => s.PrimaryName == projectName && s.SecondaryName == tempSection.SecondaryName)
                                     ?? new SaveFileSection(projectName, tempSection.SecondaryName, tempSection.Header);
 
                 var deletedRows = localSaveSection?.Rows.Except(tempSection.Rows, comparer).ToList() ?? new List<string[]>();
@@ -111,12 +111,12 @@ namespace Intech.Revit
 
             var localManager = GetManager(localPath);
 
-            var importantSharedSections = sharedManager.ReadAllSections().Where(s => s.ProjectName == projectName).ToList();
+            var importantSharedSections = sharedManager.ReadAllSections().Where(s => s.PrimaryName == projectName).ToList();
             var localSections = localManager.ReadAllSections();
 
-            tempSections.RemoveAll(s => s.ProjectName == projectName);
-            localSharedSections.RemoveAll(s => s.ProjectName == projectName);
-            localSections.RemoveAll(s => s.ProjectName == projectName);
+            tempSections.RemoveAll(s => s.PrimaryName == projectName);
+            localSharedSections.RemoveAll(s => s.PrimaryName == projectName);
+            localSections.RemoveAll(s => s.PrimaryName == projectName);
             tempSections.AddRange(importantSharedSections);
             localSharedSections.AddRange(importantSharedSections);
             localSections.AddRange(importantSharedSections);

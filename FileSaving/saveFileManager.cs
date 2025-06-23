@@ -65,7 +65,7 @@ namespace Intech
                 for (int i = 0; i < sections.Count; i++)
                 {
                     var section = sections[i];
-                    string fullName = section.ProjectName +
+                    string fullName = section.PrimaryName +
                     (string.IsNullOrEmpty(section.SecondaryName) ? "" : $"::{section.SecondaryName}");
 
                     sw.WriteLine($"# {fullName}");
@@ -88,7 +88,7 @@ namespace Intech
         {
             var sections = ReadAllSections();
             var existing = sections.FirstOrDefault(s =>
-                s.ProjectName == newSection.ProjectName &&
+                s.PrimaryName == newSection.PrimaryName &&
                 s.SecondaryName == newSection.SecondaryName);
 
             if (existing != null)
@@ -107,14 +107,18 @@ namespace Intech
         {
             var sections = ReadAllSections();
             sections.RemoveAll(s =>
-                s.ProjectName == projectName &&
+                s.PrimaryName == projectName &&
                 s.SecondaryName == secondaryName);
             WriteAllSections(sections);
         }
 
-        public List<SaveFileSection> GetSectionsByProject(string projectName)
+        public List<SaveFileSection> GetSectionsByName(string Name)
         {
-            return ReadAllSections().Where(s => s.ProjectName == projectName).ToList();
+            return ReadAllSections().Where(s => s.PrimaryName == Name).ToList();
+        }
+        public List<SaveFileSection> GetSectionsByName(string PrimaryName, string SecondaryName)
+        {
+            return ReadAllSections().Where(s => s.PrimaryName == PrimaryName && s.SecondaryName == SecondaryName).ToList();
         }
     }
 
@@ -130,7 +134,7 @@ namespace Intech
                 base.Add(item);
             }
         }
-        public string ProjectName { get; set; }
+        public string PrimaryName { get; set; }
         public string SecondaryName { get; set; }
         public string Header { get; set; }
         public NoEmptyList Rows { get; set; } = new NoEmptyList();
@@ -173,7 +177,7 @@ namespace Intech
         }
         public SaveFileSection(string projectName, string secondaryName, string header)
         {
-            ProjectName = projectName;
+            PrimaryName = projectName;
             SecondaryName = secondaryName;
             Header = header;
         }
