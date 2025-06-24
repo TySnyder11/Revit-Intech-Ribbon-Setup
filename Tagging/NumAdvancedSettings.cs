@@ -18,9 +18,18 @@ namespace TitleBlockSetup.Tagging
         public NumAdvancedSettings(Category category)
         {
             InitializeComponent();
+            CenterToParent();
             this.category = category;
             List<string> p = Intech.Revit.RevitUtils.GetParameters(category);
+            string filePath = Path.Combine(App.BasePath, "ReNumber.txt");
+            Intech.SaveFileManager saveFileManager = new Intech.SaveFileManager(filePath, new Intech.TxtFormat());
+            Intech.SaveFileSection sec = saveFileManager.GetSectionsByName(category.Name).FirstOrDefault();
             SmartCheckBox.Init(category.Name, p);
+            if(sec != null)
+            {
+                List<string> parameters = sec.GetColumn(0);
+                SmartCheckBox.SetCheckedItems(parameters);
+            }
         }
 
         private void save_Click(object sender, EventArgs e)

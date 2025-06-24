@@ -6,208 +6,158 @@ using Autodesk.Revit.UI;
 using Autodesk.Revit.UI.Selection;
 using System;
 using System.Collections.Generic;
-[Transaction(TransactionMode.Manual)]
-public class NumberRun : IExternalCommand
+using System.Linq;
+namespace Intech.Tagging
 {
-    public Result Execute(ExternalCommandData commandData, ref string message, ElementSet elements)
+    [Transaction(TransactionMode.Manual)]
+    public class NumberRun : IExternalCommand
     {
-        UIDocument uidoc = commandData.Application.ActiveUIDocument;
-        Document doc = uidoc.Document;
 
-        try
+
+        public Result Execute(ExternalCommandData commandData, ref string message, ElementSet elements)
         {
-            Reference startRef = uidoc.Selection.PickObject(ObjectType.Element, "Select start element");
-            Element startElem = doc.GetElement(startRef);
-            MEPSystem startSystem = GetSystem(startElem);
+            UIDocument uidoc = commandData.Application.ActiveUIDocument;
+            Document doc = uidoc.Document;
 
-            if (startSystem == null)
+            try
             {
-                TaskDialog.Show("Error", "Start element is not part of an MEP system.");
-                return Result.Cancelled;
-            }
+                Reference startRef = uidoc.Selection.PickObject(ObjectType.Element, "Select start element");
+                Element startElem = doc.GetElement(startRef);
 
-            Reference endRef = uidoc.Selection.PickObject(ObjectType.Element, new ConnectedElementFilter(startSystem), "Select connected end element");
-            Element endElem = doc.GetElement(endRef);
+                Reference endRef = uidoc.Selection.PickObject(ObjectType.Element, "Select end element");
+                Element endElem = doc.GetElement(endRef);
 
-            Connector startConnector = GetPrimaryConnector(startElem);
-            Connector endConnector = GetPrimaryConnector(endElem);
+                List<Element> path = FindElementPathWithHeuristic(doc, startElem, endElem);
 
-            if (startConnector == null || endConnector == null)
-            {
-                TaskDialog.Show("Error", "Could not find connectors.");
-                return Result.Failed;
-            }
-
-            List<Connector> path = FindPathWithHeuristic(startConnector, endConnector);
-
-            using (Transaction tx = new Transaction(doc, "Apply Dummy Numbering"))
-            {
-                tx.Start();
-
-                int index = 1;
-                foreach (Connector conn in path)
+                if (path.Count == 0)
                 {
-                    Element owner = conn.Owner as Element;
-                    if (owner != null)
+                    TaskDialog.Show("Path Not Found", "No path could be found between the selected elements.");
+                    return Result.Failed;
+                }
+
+                using (Transaction tx = new Transaction(doc, "Apply Dummy Numbering"))
+                {
+                    tx.Start();
+
+                    int index = 1;
+                    foreach (Element elem in path)
                     {
-                        Parameter param = owner.LookupParameter("DummyNumberingCode");
+                        Parameter param = elem.LookupParameter("Mark");
                         if (param != null && !param.IsReadOnly)
                         {
-                            param.Set(string.Format("P-{0:D3}", index));
+                            param.Set($"P-{index:D3}");
                             index++;
                         }
                     }
+
+                    tx.Commit();
                 }
 
-                tx.Commit();
+                TaskDialog.Show("Success", $"Numbering applied to {path.Count} elements.");
+                return Result.Succeeded;
             }
-            TaskDialog.Show("Success", string.Format("Numbering applied to {0} elements.", path.Count));
-            Execute(commandData, ref message, elements);
-            return Result.Succeeded;
-        }
-        catch (Autodesk.Revit.Exceptions.OperationCanceledException)
-        {
-            return Result.Succeeded;
-        }
-        catch (Exception ex)
-        {
-            message = ex.Message;
-            return Result.Failed;
-        }
-    }
-
-    private static MEPSystem GetSystem(Element element)
-    {
-        if (element is Pipe)
-            return ((Pipe)element).MEPSystem;
-        if (element is Duct)
-            return ((Duct)element).MEPSystem;
-        if (element is FlexDuct)
-            return ((FlexDuct)element).MEPSystem;
-        if (element is FlexPipe)
-            return ((FlexPipe)element).MEPSystem;
-        if (element is FamilyInstance fi && fi.MEPModel != null)
-        {
-            foreach (Connector c in fi.MEPModel.ConnectorManager.Connectors)
+            catch (Autodesk.Revit.Exceptions.OperationCanceledException)
             {
-                return c.MEPSystem;
+                return Result.Cancelled;
+            }
+            catch (Exception ex)
+            {
+                message = ex.Message;
+                return Result.Failed;
             }
         }
 
-        return null;
-    }
-
-    private Connector GetPrimaryConnector(Element element)
-    {
-        ConnectorSet connectors = null;
-
-        if (element is Pipe)
-            connectors = ((Pipe)element).ConnectorManager != null ? ((Pipe)element).ConnectorManager.Connectors : null;
-        else if (element is Duct)
-            connectors = ((Duct)element).ConnectorManager != null ? ((Duct)element).ConnectorManager.Connectors : null;
-        else if (element is FlexDuct)
-            connectors = ((FlexDuct)element).ConnectorManager != null ? ((FlexDuct)element).ConnectorManager.Connectors : null;
-        else if (element is FlexPipe)
-            connectors = ((FlexPipe)element).ConnectorManager != null ? ((FlexPipe)element).ConnectorManager.Connectors : null;
-        else if (element is FamilyInstance)
+        private List<Element> FindElementPathWithHeuristic(Document doc, Element startElem, Element goalElem)
         {
-            FamilyInstance fi = (FamilyInstance)element;
-            if (fi.MEPModel != null && fi.MEPModel.ConnectorManager != null)
-                connectors = fi.MEPModel.ConnectorManager.Connectors;
-        }
+            var openSet = new SortedList<double, Element>();
+            var cameFrom = new Dictionary<ElementId, ElementId>();
+            var costSoFar = new Dictionary<ElementId, double>();
+            var visited = new HashSet<ElementId>();
 
-        if (connectors != null)
-        {
-            foreach (Connector c in connectors)
-                return c;
-        }
+            XYZ goalPos = GetAverageConnectorPosition(goalElem);
+            XYZ startPos = GetAverageConnectorPosition(startElem);
 
-        return null;
-    }
+            openSet.Add(0, startElem);
+            costSoFar[startElem.Id] = 0;
 
-    private List<Connector> FindPathWithHeuristic(Connector start, Connector goal)
-    {
-        var openSet = new SortedList<double, Connector>();
-        var cameFrom = new Dictionary<Connector, Connector>();
-        var costSoFar = new Dictionary<Connector, double>();
-
-        openSet.Add(0, start);
-        costSoFar[start] = 0;
-
-        while (openSet.Count > 0)
-        {
-            Connector current = openSet.Values[0];
-            openSet.RemoveAt(0);
-
-            if (current.Origin.IsAlmostEqualTo(goal.Origin))
-                return ReconstructPath(cameFrom, current);
-
-            foreach (Connector neighbor in GetConnectedConnectors(current))
+            while (openSet.Count > 0)
             {
-                double newCost = costSoFar[current] + current.Origin.DistanceTo(neighbor.Origin);
-                if (!costSoFar.ContainsKey(neighbor) || newCost < costSoFar[neighbor])
+                Element current = openSet.Values[0];
+                openSet.RemoveAt(0);
+
+                if (current.Id == goalElem.Id)
+                    return ReconstructElementPath(cameFrom, current.Id, startElem.Id, doc);
+
+                visited.Add(current.Id);
+
+                foreach (Connector conn in GetConnectors(current))
                 {
-                    costSoFar[neighbor] = newCost;
-                    double priority = newCost + EuclideanDistance(neighbor.Origin, goal.Origin);
-                    openSet.Add(priority, neighbor);
-                    cameFrom[neighbor] = current;
+                    foreach (Connector refConn in conn.AllRefs)
+                    {
+                        if (!refConn.IsConnected) continue;
+
+                        Element neighbor = refConn.Owner as Element;
+                        if (neighbor == null || visited.Contains(neighbor.Id)) continue;
+
+                        double newCost = costSoFar[current.Id] + conn.Origin.DistanceTo(refConn.Origin);
+
+                        if (!costSoFar.ContainsKey(neighbor.Id) || newCost < costSoFar[neighbor.Id])
+                        {
+                            costSoFar[neighbor.Id] = newCost;
+
+                            XYZ neighborPos = GetAverageConnectorPosition(neighbor);
+                            double heuristic = neighborPos.DistanceTo(goalPos);
+                            double priority = newCost + heuristic;
+
+                            while (openSet.ContainsKey(priority)) priority += 0.0001;
+
+                            openSet.Add(priority, neighbor);
+                            cameFrom[neighbor.Id] = current.Id;
+                        }
+                    }
                 }
             }
+
+            return new List<Element>(); // No path found
         }
 
-        return new List<Connector>(); // No path found
-    }
-
-    private List<Connector> ReconstructPath(Dictionary<Connector, Connector> cameFrom, Connector current)
-    {
-        var path = new List<Connector> { current };
-        while (cameFrom.ContainsKey(current))
+        private List<Element> ReconstructElementPath(Dictionary<ElementId, ElementId> cameFrom, ElementId currentId, ElementId startId, Document doc)
         {
-            current = cameFrom[current];
-            path.Insert(0, current);
+            var path = new List<Element>();
+            while (currentId != startId)
+            {
+                path.Insert(0, doc.GetElement(currentId));
+                currentId = cameFrom[currentId];
+            }
+            path.Insert(0, doc.GetElement(startId));
+            return path;
         }
-        return path;
-    }
 
-    private IEnumerable<Connector> GetConnectedConnectors(Connector connector)
-    {
-        var connected = new List<Connector>();
-        foreach (Connector refConn in connector.AllRefs)
+        private IEnumerable<Connector> GetConnectors(Element element)
         {
-            if (!refConn.IsConnected) continue;
-            if (refConn.Owner.Id != connector.Owner.Id)
-                connected.Add(refConn);
+            ConnectorSet connectors = null;
+
+            if (element is MEPCurve mEP)
+                connectors = mEP.ConnectorManager?.Connectors;
+            else if (element is FamilyInstance fi)
+                connectors = fi.MEPModel?.ConnectorManager?.Connectors;
+            else if (element is FabricationPart fab)
+                connectors = fab.ConnectorManager?.Connectors;
+
+            return connectors?.Cast<Connector>() ?? Enumerable.Empty<Connector>();
         }
-        return connected;
-    }
 
-    private double EuclideanDistance(XYZ a, XYZ b)
-    {
-        return Math.Sqrt(
-            Math.Pow(a.X - b.X, 2) +
-            Math.Pow(a.Y - b.Y, 2) +
-            Math.Pow(a.Z - b.Z, 2));
-    }
-
-    private class ConnectedElementFilter : ISelectionFilter
-    {
-        private readonly MEPSystem _system;
-
-        public ConnectedElementFilter(MEPSystem system)
+        private XYZ GetAverageConnectorPosition(Element element)
         {
-            _system = system;
+            var connectors = GetConnectors(element).ToList();
+            if (!connectors.Any()) return XYZ.Zero;
+
+            XYZ sum = XYZ.Zero;
+            foreach (var c in connectors)
+                sum += c.Origin;
+
+            return sum.Divide(connectors.Count);
         }
 
-        public bool AllowElement(Element elem)
-        {
-            MEPSystem other = GetSystem(elem);
-            return other != null && other.Id == _system.Id;
-        }
-
-        public bool AllowReference(Reference reference, XYZ position)
-        {
-            return true;
-        }
     }
 }
-

@@ -96,7 +96,7 @@ namespace TitleBlockSetup.Tagging
         private void RenumberMenu_RowAdded(object sender, EventArgs e)
         {
             DataGridViewRowsAddedEventArgs rowEvent = e as DataGridViewRowsAddedEventArgs;
-            if (renumberMenu.GetCellValue(0, rowEvent.RowIndex) is string categoryName)
+            if (renumberMenu.GetCellValue(0, rowEvent.RowIndex) is string categoryName && !string.IsNullOrWhiteSpace(categoryName))
             {
                 Category categrory = categories.get_Item(categoryName);
                 renumberMenu.SetComboBoxItems("Parameter", rowEvent.RowIndex, Intech.Revit.RevitUtils.GetParameters(categrory));
@@ -123,15 +123,20 @@ namespace TitleBlockSetup.Tagging
         private void AdvancedSettings_Click(object sender, EventArgs e)
         {
             DataGridViewSelectedCellCollection cells = renumberMenu.GetSelectedCell();
+            HashSet<int> rows = new HashSet<int>();
             foreach (DataGridViewCell cell in cells)
             {
-                string catName = renumberMenu.GetCellValue(0, cell.RowIndex) as String;
+                rows.Add(cell.RowIndex);
+            }
+            foreach(int row in rows)
+            {
+                string catName = renumberMenu.GetCellValue(0, row) as String;
                 Category category = categories.get_Item(catName);
                 if (category != null)
                 {
                     NumAdvancedSettings numAdvancedSettings = new NumAdvancedSettings(category);
                     numAdvancedSettings.ShowDialog();
-                    renumberMenu.SetComboBoxItems("Parameter", cell.RowIndex, Intech.Revit.RevitUtils.GetParameters(category));
+                    renumberMenu.SetComboBoxItems("Parameter", row, Intech.Revit.RevitUtils.GetParameters(category));
                 }
                 else
                 {

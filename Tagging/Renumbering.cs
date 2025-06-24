@@ -7,8 +7,12 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Security.Cryptography;
+using System.Security.Policy;
+using System.Text;
 using System.Windows;
 using System.Xml.Linq;
+
 namespace Intech.Tagging
 
 
@@ -19,6 +23,7 @@ namespace Intech.Tagging
     //Settings
     public class NumberTool : IExternalCommand
     {
+        Dictionary<string, string> NumberMap = new Dictionary<string, string>();
         public Result Execute(ExternalCommandData commandData, ref string message, ElementSet elements)
         {
             UIApplication app = commandData.Application;
@@ -49,26 +54,59 @@ namespace Intech.Tagging
                 Reference selectedRef = uidoc.Selection.PickObject(ObjectType.Element, filter, "Select elements to number");
                 Element selectedElement = uidoc.Document.GetElement(selectedRef);
                 Category category = selectedElement.Category;
+
+                Intech.SaveFileSection matchParamsSec = saveFileManager.GetSectionsByName(category.Name).FirstOrDefault();
+                string hash = string.Empty;
+                if (matchParamsSec != null )
+                {
+                    List<string> match = matchParamsSec.GetColumn(0);
+                    List<string> values = new List<string>();
+                    foreach (string param in match)
+                    {
+                        Parameter p = selectedElement.LookupParameter(param);
+                        if (p != null && p.HasValue)
+                        {
+                            values.Add(p.AsValueString());
+                        }
+                    }
+                    hash = GetParameterIdentity(values);
+                }
+
                 string[] row = sec.lookUp(0, category.Name);
                 string paramName = row[1];
-                bool tag = string.Equals(row[2], "True");
-                string prefix = row.Length > 3 ? row[3] : string.Empty;
-                string num = row.Length > 4 ? row[4] : "1";
-                string suffix = row.Length > 5 ? row[5] : string.Empty;
-                string sep = row.Length > 6 ? row[6] : string.Empty;
-                string whole = prefix + sep + num;
-                if (!string.IsNullOrEmpty(suffix))
+
+                String paramVal = string.Empty;
+                if (NumberMap.ContainsKey(hash))
                 {
-                    whole += sep + suffix;
+                    paramVal = NumberMap[hash];
                 }
+                else
+                {
+                    bool tag = string.Equals(row[2], "True");
+                    string prefix = row.Length > 3 ? row[3] : string.Empty;
+                    string num = row.Length > 4 ? row[4] : "1";
+                    string suffix = row.Length > 5 ? row[5] : string.Empty;
+                    string sep = row.Length > 6 ? row[6] : string.Empty;
+                    paramVal = num;
+                    row[4] = (int.Parse(num) + 1).ToString();
+                    if (!string.IsNullOrEmpty(prefix))
+                    {
+                        paramVal = prefix + sep + num;
+                    }
+                    if (!string.IsNullOrEmpty(suffix))
+                    {
+                        paramVal += sep + suffix;
+                    }
+                    if (!string.IsNullOrEmpty(hash))
+                        NumberMap.Add(hash, paramVal);
+                }
+                
                 using (Transaction tran = new Transaction(doc))
                 {
                     tran.Start("Number Parameter");
-                    selectedElement.LookupParameter(paramName).Set(whole);
+                    selectedElement.LookupParameter(paramName).Set(paramVal);
                     tran.Commit();
                 }
-
-                row[4] = (int.Parse(num) + 1).ToString();
                 saveFileManager.AddOrUpdateSection(sec);
                 var TagFam = tagtools.SaveInformation("Number");
                 Intech.tagtools.tag
@@ -113,6 +151,20 @@ namespace Intech.Tagging
             public bool AllowReference(Reference reference, XYZ position)
             {
                 return true;
+            }
+        }
+
+        public static string GetParameterIdentity(List<string> values)
+        {
+            var normalized = values
+                 .Select(v => v?.Trim().ToLowerInvariant() ?? "")
+                 .OrderBy(v => v)
+                 .ToList();
+            string combined = string.Join("|", normalized);
+            using (SHA256 sha = SHA256.Create())
+            {
+                byte[] hash = sha.ComputeHash(Encoding.UTF8.GetBytes(combined));
+                return BitConverter.ToString(hash).Replace("-", "").ToLowerInvariant();
             }
         }
 

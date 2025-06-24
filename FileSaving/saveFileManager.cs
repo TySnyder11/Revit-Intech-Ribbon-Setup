@@ -77,12 +77,20 @@ namespace Intech
                     }
 
                     if (i < sections.Count - 1)
-                        sw.WriteLine(); // Only between sections
+                        sw.WriteLine();
                 }
             }
+            CleanFile();
         }
 
+        private void CleanFile()
+        {
+            var lines = File.ReadAllLines(filePath)
+            .Where(line => !string.IsNullOrWhiteSpace(line))
+            .ToList();
 
+            File.WriteAllLines(filePath, lines);
+        }
 
         public void AddOrUpdateSection(SaveFileSection newSection)
         {
