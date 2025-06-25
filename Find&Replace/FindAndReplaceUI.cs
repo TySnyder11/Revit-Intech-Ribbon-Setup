@@ -13,23 +13,21 @@ namespace TitleBlockSetup.Find_Replace
 {
     public partial class FindAndReplaceUI : System.Windows.Forms.Form
     {
+        private bool _shouldRunChangeSelection = false;
+        private string _findText;
+        private string _replaceText;
+
         public FindAndReplaceUI()
         {
             InitializeComponent();
             CenterToParent();
             Cancel.Click += Cancel_Click;
             Confirm.Click += Confirm_Click;
-            SelectionButton.Click += SelectionButton_Click;
 
             List<Element> elems  = Intech.MainFindandReplace.GetSelectedElements();
             List<string> parameters = Intech.MainFindandReplace.GetCommonTextParameters(elems);
             parameterBox.Sorted = true;
             parameterBox.SetItems(parameters);
-        }
-
-        private void SelectionButton_Click(object sender, EventArgs e)
-        {
-            
         }
 
         private void Confirm_Click(object sender, EventArgs e)
