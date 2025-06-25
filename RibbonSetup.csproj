@@ -168,6 +168,13 @@
     </Compile>
     <Compile Include="Excel Link\MainLink.cs" />
     <Compile Include="FileSaving\ISaveFileFormat.cs" />
+    <Compile Include="Find&amp;Replace\FindAndReplaceUI.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Find&amp;Replace\FindAndReplaceUI.Designer.cs">
+      <DependentUpon>FindAndReplaceUI.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Find&amp;Replace\MainF&amp;R.cs" />
     <Compile Include="Parameter Sync\EditParameterSync.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -226,6 +233,7 @@
     </Compile>
     <Compile Include="Tagging\Renumbering.cs" />
     <Compile Include="Tagging\SettingsMain.cs" />
+    <Compile Include="TemplateCS.cs" />
     <Compile Include="TigerStopANDBomExport\BOMExport.cs" />
     <Compile Include="Sheet Creator\SettingsRead.cs" />
     <Compile Include="DependentView\Dependent View.cs" />
@@ -297,6 +305,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Excel Link\linkSettings.resx">
       <DependentUpon>linkSettings.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Find&amp;Replace\FindAndReplaceUI.resx">
+      <DependentUpon>FindAndReplaceUI.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Parameter Sync\EditParameterSync.resx">
       <DependentUpon>EditParameterSync.cs</DependentUpon>
