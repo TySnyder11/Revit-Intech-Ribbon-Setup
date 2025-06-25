@@ -1,11 +1,9 @@
 ﻿using Autodesk.Revit.Attributes;
 using Autodesk.Revit.DB;
 using Autodesk.Revit.UI;
-using Autodesk.Revit.UI.Selection;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Xml.Linq;
 using TitleBlockSetup.Find_Replace;
 
 namespace Intech
@@ -25,19 +23,6 @@ namespace Intech
             findAndReplaceUI.ShowDialog();
 
             return Result.Succeeded;
-        }
-
-        public class AllowAllSelectionFilter : ISelectionFilter
-        {
-            public bool AllowElement(Element elem)
-            {
-                return true; // Allow all elements
-            }
-
-            public bool AllowReference(Reference reference, XYZ position)
-            {
-                return true; // Allow all references
-            }
         }
 
         public static List<Element> GetSelectedElements()
