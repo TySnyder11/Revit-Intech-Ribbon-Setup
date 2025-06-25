@@ -28,7 +28,6 @@ namespace Intech
         public static List<Element> GetSelectedElements()
         {
             List<Reference> s = uidoc.Selection.GetReferences().ToList();
-
             List<Element> elems = new List<Element>();
             foreach (Reference r in s)
             {

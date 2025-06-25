@@ -37,19 +37,17 @@ namespace Intech
             this.Export = new System.Windows.Forms.Button();
             this.Import = new System.Windows.Forms.Button();
             this.Icon = new System.Windows.Forms.PictureBox();
-            this.ExportDialog1 = new System.Windows.Forms.SaveFileDialog();
-            this.openFileDialog1 = new System.Windows.Forms.OpenFileDialog();
-            this.dataGridView1 = new System.Windows.Forms.DataGridView();
+            this.TagSettings = new Intech.Windows.Forms.SectionEditorControl();
             ((System.ComponentModel.ISupportInitialize)(this.Icon)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).BeginInit();
             this.SuspendLayout();
             // 
             // Save
             // 
             this.Save.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.Save.Location = new System.Drawing.Point(595, 446);
+            this.Save.Location = new System.Drawing.Point(461, 381);
+            this.Save.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
             this.Save.Name = "Save";
-            this.Save.Size = new System.Drawing.Size(75, 23);
+            this.Save.Size = new System.Drawing.Size(56, 19);
             this.Save.TabIndex = 0;
             this.Save.Text = "Save";
             this.Save.UseVisualStyleBackColor = true;
@@ -58,9 +56,10 @@ namespace Intech
             // Cancel
             // 
             this.Cancel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.Cancel.Location = new System.Drawing.Point(687, 446);
+            this.Cancel.Location = new System.Drawing.Point(530, 381);
+            this.Cancel.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
             this.Cancel.Name = "Cancel";
-            this.Cancel.Size = new System.Drawing.Size(75, 23);
+            this.Cancel.Size = new System.Drawing.Size(56, 19);
             this.Cancel.TabIndex = 1;
             this.Cancel.Text = "Cancel";
             this.Cancel.UseVisualStyleBackColor = true;
@@ -69,9 +68,10 @@ namespace Intech
             // Export
             // 
             this.Export.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.Export.Location = new System.Drawing.Point(93, 439);
+            this.Export.Location = new System.Drawing.Point(91, 374);
+            this.Export.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
             this.Export.Name = "Export";
-            this.Export.Size = new System.Drawing.Size(75, 32);
+            this.Export.Size = new System.Drawing.Size(56, 26);
             this.Export.TabIndex = 2;
             this.Export.Text = "Export";
             this.Export.UseVisualStyleBackColor = true;
@@ -80,9 +80,10 @@ namespace Intech
             // Import
             // 
             this.Import.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.Import.Location = new System.Drawing.Point(184, 439);
+            this.Import.Location = new System.Drawing.Point(151, 373);
+            this.Import.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
             this.Import.Name = "Import";
-            this.Import.Size = new System.Drawing.Size(75, 35);
+            this.Import.Size = new System.Drawing.Size(56, 28);
             this.Import.TabIndex = 3;
             this.Import.Text = "Import";
             this.Import.UseVisualStyleBackColor = true;
@@ -93,52 +94,35 @@ namespace Intech
             this.Icon.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.Icon.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Center;
             this.Icon.Image = ((System.Drawing.Image)(resources.GetObject("Icon.Image")));
-            this.Icon.Location = new System.Drawing.Point(5, 408);
+            this.Icon.Location = new System.Drawing.Point(11, 337);
+            this.Icon.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
             this.Icon.Name = "Icon";
-            this.Icon.Size = new System.Drawing.Size(82, 66);
+            this.Icon.Size = new System.Drawing.Size(76, 67);
             this.Icon.TabIndex = 4;
             this.Icon.TabStop = false;
-            this.Icon.Click += new System.EventHandler(this.Icon_Click);
             // 
-            // ExportDialog1
+            // TagSettings
             // 
-            this.ExportDialog1.FileOk += new System.ComponentModel.CancelEventHandler(this.ExportDialog1_FileOk);
-            // 
-            // openFileDialog1
-            // 
-            this.openFileDialog1.FileName = "openFileDialog1";
-            this.openFileDialog1.FileOk += new System.ComponentModel.CancelEventHandler(this.openFileDialog1_FileOk);
-            // 
-            // dataGridView1
-            // 
-            this.dataGridView1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.dataGridView1.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this.dataGridView1.Location = new System.Drawing.Point(5, 5);
-            this.dataGridView1.Name = "dataGridView1";
-            this.dataGridView1.RowHeadersWidth = 51;
-            this.dataGridView1.RowTemplate.Height = 24;
-            this.dataGridView1.Size = new System.Drawing.Size(764, 397);
-            this.dataGridView1.TabIndex = 6;
-            this.dataGridView1.CellContentClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dataGridView1_CellContentClick);
+            this.TagSettings.Location = new System.Drawing.Point(23, 2);
+            this.TagSettings.Name = "TagSettings";
+            this.TagSettings.Size = new System.Drawing.Size(560, 330);
+            this.TagSettings.TabIndex = 7;
             // 
             // TagSetting
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(774, 481);
-            this.Controls.Add(this.dataGridView1);
+            this.ClientSize = new System.Drawing.Size(595, 410);
+            this.Controls.Add(this.TagSettings);
             this.Controls.Add(this.Icon);
             this.Controls.Add(this.Import);
             this.Controls.Add(this.Export);
             this.Controls.Add(this.Cancel);
             this.Controls.Add(this.Save);
+            this.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
             this.Name = "TagSetting";
             this.Text = "Tag Settings";
-            this.Load += new System.EventHandler(this.TagSetting_Load);
             ((System.ComponentModel.ISupportInitialize)(this.Icon)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).EndInit();
             this.ResumeLayout(false);
 
         }
@@ -150,8 +134,6 @@ namespace Intech
         private System.Windows.Forms.Button Export;
         private System.Windows.Forms.Button Import;
         private System.Windows.Forms.PictureBox Icon;
-        private System.Windows.Forms.SaveFileDialog ExportDialog1;
-        private System.Windows.Forms.OpenFileDialog openFileDialog1;
-        private System.Windows.Forms.DataGridView dataGridView1;
+        private Windows.Forms.SectionEditorControl TagSettings;
     }
 }

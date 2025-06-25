@@ -106,17 +106,7 @@ public class App : IExternalApplication
         RibbonPanel SheetPanel = application.CreateRibbonPanel(tabName, "Sheets");
         RibbonPanel ExportPanel = application.CreateRibbonPanel(tabName, "Exports");
         RibbonPanel ImportPanel = application.CreateRibbonPanel(tabName, "Import");
-        //add a new panel
-        RibbonPanel videoshow = application.CreateRibbonPanel(tabName, "Video Show");
 
-        //video show (// makes a comment)
-        {
-            PushButtonData b1Data = new PushButtonData("F&R", "Find and Replace", AddInPath, "Intech.MainFindandReplace");
-            b1Data.ToolTip = "Collects selected items and lets you find and replace values in the parameters.";
-            b1Data.Image = new BitmapImage(new Uri(IconPath));
-            b1Data.LargeImage = new BitmapImage(new Uri(IconPath));
-            PushButton pb1 = videoshow.AddItem(b1Data) as PushButton;
-        }
         //Sheets Ribbon
         {
             PushButtonData b1Data = new PushButtonData("TB Select", "TitleBlock Select", AddInPath, "Intech.TitleBlockSelector");
@@ -160,6 +150,12 @@ public class App : IExternalApplication
             b3Data.Image = new BitmapImage(new Uri(IconPath));
             b3Data.LargeImage = new BitmapImage(new Uri(IconPath));
             PushButton pb03 = ConnectTools.AddItem(b3Data) as PushButton;
+
+            PushButtonData b8Data = new PushButtonData("F&R", "Find and Replace", AddInPath, "Intech.MainFindandReplace");
+            b8Data.ToolTip = "Collects selected items and lets you find and replace values in the parameters.";
+            b8Data.Image = new BitmapImage(new Uri(IconPath));
+            b8Data.LargeImage = new BitmapImage(new Uri(IconPath));
+            PushButton pb8 = ConnectTools.AddItem(b8Data) as PushButton;
 
             PulldownButtonData pulldownData = new PulldownButtonData("ParameterTools", "Parameter Tools");
             pulldownData.LargeImage = new BitmapImage(new Uri(IconPath));
