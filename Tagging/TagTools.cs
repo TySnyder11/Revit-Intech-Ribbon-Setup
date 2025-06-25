@@ -1,14 +1,16 @@
 ﻿using Autodesk.Revit.DB;
-using Autodesk.Revit.UI.Selection;
+using Autodesk.Revit.DB.Mechanical;
+using Autodesk.Revit.DB.Plumbing;
 using Autodesk.Revit.UI;
+using Autodesk.Revit.UI.Selection;
 using Intech;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using System.IO;
 
 namespace Intech
 {
@@ -109,19 +111,9 @@ namespace Intech
 
             //get position of part
             XYZ xyz;
-            if (fab != null)
+            if (element != null)
             {
-                xyz = tagtools.getCenterByConnectors(fab);
-            }
-            else if (el != null)
-            {
-                Curve c = el.Curve;
-                Line l = c as Line;
-                double X = (l.GetEndPoint(0).X + l.GetEndPoint(1).X) / 2;
-                double Y = (l.GetEndPoint(0).Y + l.GetEndPoint(1).Y) / 2;
-                double Z = (l.GetEndPoint(0).Z + l.GetEndPoint(1).Z) / 2;
-
-                xyz = new XYZ(X, Y, Z);
+                xyz = tagtools.getCenterByConnectors(element);
             }
             else
             {
@@ -220,32 +212,38 @@ namespace Intech
         }
 
         //get center of fabricated part
-        protected static XYZ getCenterByConnectors(FabricationPart part)
+        protected static XYZ getCenterByConnectors(Element part)
         {
-            var connectors = part.ConnectorManager.Connectors.OfType<Connector>().ToList();
+            var connectors = GetConnectors(part).OfType<Connector>().ToList();
 
-            var end1 = connectors.FirstOrDefault(x => x.ConnectorType == ConnectorType.End);
-            var end2 = connectors.LastOrDefault(x => x.ConnectorType == ConnectorType.End);
+            XYZ average = XYZ.Zero;
+            foreach (Connector con in connectors)
+            {
+                average += con.Origin;
+            }
+            average = average / connectors.Count;
 
-            var connector1Direction = end1.CoordinateSystem.BasisZ;
-            var connector2Direction = end2.CoordinateSystem.BasisZ;
-
-            var areParallel = connector1Direction
-                .CrossProduct(connector2Direction)
-                .IsAlmostEqualTo(XYZ.Zero);
-
-            if (areParallel)
-                return (end1.Origin + end2.Origin) / 2.0; // midpoint formula
-
-            // for elbows, tees, crosses, etc., we want the intersection of the connectors
-            // since the midpoint might not be at the center
-            var line1 = Line.CreateUnbound(end1.Origin, end1.CoordinateSystem.BasisZ);
-            var line2 = Line.CreateUnbound(end2.Origin, end2.CoordinateSystem.BasisZ);
-            var intersection = line1.Intersect(line2, out var resultArray);
-
-            var elbowCenterByIntersection = resultArray.get_Item(0).XYZPoint;
-
-            return elbowCenterByIntersection;
+            return average;
+        }
+        private static ConnectorSet GetConnectors(Element element)
+        {
+            if (element is FabricationPart fabPart)
+            {
+                return fabPart.ConnectorManager.Connectors;
+            }
+            if (element is FamilyInstance fi && fi.MEPModel != null)
+            {
+                return fi.MEPModel.ConnectorManager.Connectors;
+            }
+            if (element is Pipe pipe)
+            {
+                return pipe.ConnectorManager.Connectors;
+            }
+            if (element is Duct duct)
+            {
+                return duct.ConnectorManager.Connectors;
+            }
+            return null;
         }
 
         //filter what you are allowed to select

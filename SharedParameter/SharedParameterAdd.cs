@@ -194,8 +194,6 @@ namespace Intech.SharedParameter
         {
             InstanceSelect.CheckedChanged -= InstanceSelect_CheckedChanged;
             InstanceSelect.Checked = !TypeSelect.Checked;
-            ReportingParameter.Checked = InstanceSelect.Checked;
-            ReportingParameter.Enabled = InstanceSelect.Checked;
             InstanceSelect.CheckedChanged += InstanceSelect_CheckedChanged;
         }
 
@@ -203,7 +201,6 @@ namespace Intech.SharedParameter
         {
             TypeSelect.CheckedChanged -= TypeSelect_CheckedChanged;
             TypeSelect.Checked = !InstanceSelect.Checked;
-
             TypeSelect.CheckedChanged += TypeSelect_CheckedChanged;
         }
     }

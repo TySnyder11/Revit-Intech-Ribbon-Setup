@@ -638,7 +638,8 @@ namespace Intech.Revit
             bool isDoubleBacked = param.StorageType == StorageType.Double && param.GetUnitTypeId() != null;
             bool isOtherUsableType =
             dataType == SpecTypeId.Boolean.YesNo ||
-            dataType == SpecTypeId.Int.Integer;
+            dataType == SpecTypeId.Int.Integer ||
+            dataType == SpecTypeId.String.Text;
 
             return isDoubleBacked || isOtherUsableType;
         }
@@ -755,7 +756,8 @@ namespace Intech.Revit
             bool isDoubleBacked = param.StorageType == StorageType.Double && param.GetUnitTypeId() != null;
             bool isOtherHostableType =
             dataType == SpecTypeId.Boolean.YesNo ||
-            dataType == SpecTypeId.Int.Integer;
+            dataType == SpecTypeId.Int.Integer ||
+            dataType == SpecTypeId.String.Text;
 
             return isDoubleBacked || isOtherHostableType;
         }
