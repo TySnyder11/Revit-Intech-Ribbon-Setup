@@ -106,17 +106,7 @@ public class App : IExternalApplication
         RibbonPanel SheetPanel = application.CreateRibbonPanel(tabName, "Sheets");
         RibbonPanel ExportPanel = application.CreateRibbonPanel(tabName, "Exports");
         RibbonPanel ImportPanel = application.CreateRibbonPanel(tabName, "Import");
-        //add a new panel
-        RibbonPanel videoshow = application.CreateRibbonPanel(tabName, "Video Show");
 
-        //video show (// makes a comment)
-        {
-            PushButtonData b1Data = new PushButtonData("F&R", "Find and Replace", AddInPath, "Intech.MainFindandReplace");
-            b1Data.ToolTip = "Collects selected items and lets you find and replace values in the parameters.";
-            b1Data.Image = new BitmapImage(new Uri(IconPath));
-            b1Data.LargeImage = new BitmapImage(new Uri(IconPath));
-            PushButton pb1 = videoshow.AddItem(b1Data) as PushButton;
-        }
         //Sheets Ribbon
         {
             PushButtonData b1Data = new PushButtonData("TB Select", "TitleBlock Select", AddInPath, "Intech.TitleBlockSelector");
