@@ -1,4 +1,6 @@
-﻿namespace Intech
+﻿using Autodesk.Revit.DB;
+
+namespace Intech
 {
     partial class SheetSettings
     {
@@ -30,10 +32,10 @@
         {
             this.SheetTabController = new System.Windows.Forms.TabControl();
             this.BaseControlTab = new System.Windows.Forms.TabPage();
-            this.TitleBlockType = new System.Windows.Forms.ComboBox();
+            this.TitleBlockType = new Intech.Windows.CustomWindowsForms.FilteredComboBox();
             this.label7 = new System.Windows.Forms.Label();
             this.label6 = new System.Windows.Forms.Label();
-            this.TitleBlockFamily = new System.Windows.Forms.ComboBox();
+            this.TitleBlockFamily = new Intech.Windows.CustomWindowsForms.FilteredComboBox();
             this.label5 = new System.Windows.Forms.Label();
             this.label4 = new System.Windows.Forms.Label();
             this.label3 = new System.Windows.Forms.Label();
@@ -114,11 +116,12 @@
             // 
             // TitleBlockType
             // 
+            this.TitleBlockType.DefaultValue = null;
             this.TitleBlockType.FormattingEnabled = true;
             this.TitleBlockType.Location = new System.Drawing.Point(8, 98);
             this.TitleBlockType.Margin = new System.Windows.Forms.Padding(2);
             this.TitleBlockType.Name = "TitleBlockType";
-            this.TitleBlockType.Size = new System.Drawing.Size(92, 21);
+            this.TitleBlockType.Size = new System.Drawing.Size(114, 21);
             this.TitleBlockType.TabIndex = 25;
             this.TitleBlockType.SelectedIndexChanged += new System.EventHandler(this.TitleBlockType_SelectedIndexChanged);
             // 
@@ -144,11 +147,12 @@
             // 
             // TitleBlockFamily
             // 
+            this.TitleBlockFamily.DefaultValue = null;
             this.TitleBlockFamily.FormattingEnabled = true;
             this.TitleBlockFamily.Location = new System.Drawing.Point(8, 61);
             this.TitleBlockFamily.Margin = new System.Windows.Forms.Padding(2);
             this.TitleBlockFamily.Name = "TitleBlockFamily";
-            this.TitleBlockFamily.Size = new System.Drawing.Size(92, 21);
+            this.TitleBlockFamily.Size = new System.Drawing.Size(114, 21);
             this.TitleBlockFamily.TabIndex = 22;
             this.TitleBlockFamily.SelectedIndexChanged += new System.EventHandler(this.TitleBlockFamily_SelectedIndexChanged);
             // 
@@ -412,10 +416,10 @@
             // Cancel
             // 
             this.Cancel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.Cancel.Location = new System.Drawing.Point(511, 308);
+            this.Cancel.Location = new System.Drawing.Point(511, 304);
             this.Cancel.Margin = new System.Windows.Forms.Padding(2);
             this.Cancel.Name = "Cancel";
-            this.Cancel.Size = new System.Drawing.Size(56, 19);
+            this.Cancel.Size = new System.Drawing.Size(56, 23);
             this.Cancel.TabIndex = 1;
             this.Cancel.Text = "Cancel";
             this.Cancel.UseVisualStyleBackColor = true;
@@ -424,10 +428,10 @@
             // Confirm
             // 
             this.Confirm.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.Confirm.Location = new System.Drawing.Point(450, 308);
+            this.Confirm.Location = new System.Drawing.Point(450, 304);
             this.Confirm.Margin = new System.Windows.Forms.Padding(2);
             this.Confirm.Name = "Confirm";
-            this.Confirm.Size = new System.Drawing.Size(56, 19);
+            this.Confirm.Size = new System.Drawing.Size(56, 23);
             this.Confirm.TabIndex = 3;
             this.Confirm.Text = "Confirm";
             this.Confirm.UseVisualStyleBackColor = true;
@@ -436,10 +440,10 @@
             // Export
             // 
             this.Export.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.Export.Location = new System.Drawing.Point(9, 308);
+            this.Export.Location = new System.Drawing.Point(9, 304);
             this.Export.Margin = new System.Windows.Forms.Padding(2);
             this.Export.Name = "Export";
-            this.Export.Size = new System.Drawing.Size(56, 19);
+            this.Export.Size = new System.Drawing.Size(56, 23);
             this.Export.TabIndex = 4;
             this.Export.Text = "Export";
             this.Export.UseVisualStyleBackColor = true;
@@ -448,10 +452,10 @@
             // Import
             // 
             this.Import.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.Import.Location = new System.Drawing.Point(70, 308);
+            this.Import.Location = new System.Drawing.Point(70, 304);
             this.Import.Margin = new System.Windows.Forms.Padding(2);
             this.Import.Name = "Import";
-            this.Import.Size = new System.Drawing.Size(56, 19);
+            this.Import.Size = new System.Drawing.Size(56, 23);
             this.Import.TabIndex = 5;
             this.Import.Text = "Import";
             this.Import.UseVisualStyleBackColor = true;
@@ -503,8 +507,8 @@
         private System.Windows.Forms.Label label4;
         private System.Windows.Forms.Label label5;
         private System.Windows.Forms.Label label6;
-        private System.Windows.Forms.ComboBox TitleBlockFamily;
-        private System.Windows.Forms.ComboBox TitleBlockType;
+        private Intech.Windows.CustomWindowsForms.FilteredComboBox TitleBlockFamily;
+        private Intech.Windows.CustomWindowsForms.FilteredComboBox TitleBlockType;
         private System.Windows.Forms.Label label7;
         private System.Windows.Forms.TabPage DisciplineTab;
         private System.Windows.Forms.TabPage LevelTab;

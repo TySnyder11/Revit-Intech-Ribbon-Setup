@@ -17,17 +17,17 @@ namespace Intech.Revit
 {
     internal class RevitUtils
     {
-        static Document doc;
+        static Document _doc;
         static public void init(Document document)
         {
             // Constructor logic if needed
-            doc = document;
+            _doc = document;
         }
 
         static public CategoryNameMap GetAllCategories()
         {
             // Access all categories in the document
-            CategoryNameMap categories = doc.Settings.Categories;
+            CategoryNameMap categories = _doc.Settings.Categories;
             return categories;
         }
 
@@ -40,7 +40,7 @@ namespace Intech.Revit
         static public List<string> GetParameters(Category category)
         {
 
-            var instances = new FilteredElementCollector(doc)
+            var instances = new FilteredElementCollector(_doc)
              .OfCategoryId(category.Id)
              .WhereElementIsNotElementType()
              .ToElements();
@@ -80,7 +80,7 @@ namespace Intech.Revit
         static public Parameter GetParameter(Category category, string paramName)
         {
             ElementCategoryFilter filter = new ElementCategoryFilter(category.Id);
-            FilteredElementCollector collector = new FilteredElementCollector(doc)
+            FilteredElementCollector collector = new FilteredElementCollector(_doc)
                 .WhereElementIsNotElementType()
                 .WherePasses(filter);
             if (collector.Count() == 0)
@@ -146,7 +146,7 @@ namespace Intech.Revit
         static public List<Element> GetElementsOfCategory(Category category)
         {
             ElementCategoryFilter filter = new ElementCategoryFilter(category.Id);
-            FilteredElementCollector collector = new FilteredElementCollector(doc)
+            FilteredElementCollector collector = new FilteredElementCollector(_doc)
             .WhereElementIsNotElementType()
             .WherePasses(filter);
             return collector.ToList();
@@ -155,7 +155,7 @@ namespace Intech.Revit
         static public List<Element> GetElementTypesOfCategory(Category category)
         {
             ElementCategoryFilter filter = new ElementCategoryFilter(category.Id);
-            FilteredElementCollector collector = new FilteredElementCollector(doc)
+            FilteredElementCollector collector = new FilteredElementCollector(_doc)
             .WhereElementIsElementType()
             .WherePasses(filter);
             return collector.ToList();
@@ -176,7 +176,7 @@ namespace Intech.Revit
                     return param.AsInteger().ToString();
                 case StorageType.ElementId:
                     ElementId id = param.AsElementId();
-                    Element e = doc.GetElement(id);
+                    Element e = _doc.GetElement(id);
                     return e?.Name ?? id.ToString();
                 default:
                     return null;
@@ -185,7 +185,7 @@ namespace Intech.Revit
 
         public static List<Family> GetFamilies()
         {
-            return new FilteredElementCollector(doc)
+            return new FilteredElementCollector(_doc)
             .OfClass(typeof(Family))
             .Cast<Family>()
             .ToList();
@@ -198,7 +198,7 @@ namespace Intech.Revit
             List<FamilySymbol> symbols = new List<FamilySymbol>();
             foreach (ElementId familySymbolId in fSd)
             {
-                FamilySymbol familySymbol = doc.GetElement(familySymbolId) as FamilySymbol;
+                FamilySymbol familySymbol = _doc.GetElement(familySymbolId) as FamilySymbol;
                 symbols.Add(familySymbol);
             }
             return symbols;
@@ -221,7 +221,7 @@ namespace Intech.Revit
 
         public static DefinitionGroups GetDefinitionGroups()
         {
-            Autodesk.Revit.ApplicationServices.Application app = doc.Application;
+            Autodesk.Revit.ApplicationServices.Application app = _doc.Application;
             // Ensure the shared parameter file is set
             string sharedParamFile = app.SharedParametersFilename;
             if (string.IsNullOrEmpty(sharedParamFile))
@@ -260,7 +260,7 @@ namespace Intech.Revit
 
         public void AddSharedParameterToFamily(Family family, Definition definition, ForgeTypeId group, bool isInstance)
         {
-            Document famDoc = doc.EditFamily(family);
+            Document famDoc = _doc.EditFamily(family);
             FamilyManager famMgr = famDoc.FamilyManager;
 
             using (Transaction t = new Transaction(famDoc, "Add Shared Parameter"))
@@ -279,10 +279,10 @@ namespace Intech.Revit
                 t.Commit();
             }
 
-            using (Transaction t = new Transaction(doc, "Save family changes to project"))
+            using (Transaction t = new Transaction(_doc, "Save family changes to project"))
             {
                 t.Start();
-                famDoc.LoadFamily(doc);
+                famDoc.LoadFamily(_doc);
                 t.Commit();
             }
         }
@@ -350,7 +350,7 @@ namespace Intech.Revit
 
             foreach (Family fam in families)
             {
-                Document famDoc = doc.EditFamily(fam);
+                Document famDoc = _doc.EditFamily(fam);
                 FamilyManager famMgr = famDoc.FamilyManager;
 
                 using (Transaction t = new Transaction(famDoc, "Add Shared Parameter"))
@@ -415,7 +415,7 @@ namespace Intech.Revit
 
             foreach (Document famDoc in familyDocs)
             {
-                famDoc.LoadFamily(doc, loadOptions);
+                famDoc.LoadFamily(_doc, loadOptions);
                 famDoc.Close(false);
             }
         }
@@ -427,7 +427,7 @@ namespace Intech.Revit
 
             foreach (Family fam in families)
             {
-                Document famDoc = doc.EditFamily(fam);
+                Document famDoc = _doc.EditFamily(fam);
                 FamilyManager famMgr = famDoc.FamilyManager;
 
                 using (Transaction t = new Transaction(famDoc, "Add Shared Parameter"))
@@ -459,7 +459,7 @@ namespace Intech.Revit
 
             foreach (Document famDoc in familyDocs)
             {
-                famDoc.LoadFamily(doc, loadOptions);
+                famDoc.LoadFamily(_doc, loadOptions);
                 famDoc.Close(false);
             }
         }
@@ -548,7 +548,7 @@ namespace Intech.Revit
             // Get all symbols (types) of the family
             foreach (ElementId symbolId in family.GetFamilySymbolIds())
             {
-                FamilySymbol symbol = doc.GetElement(symbolId) as FamilySymbol;
+                FamilySymbol symbol = _doc.GetElement(symbolId) as FamilySymbol;
                 if (symbol == null) continue;
 
                 foreach (Parameter param in symbol.Parameters)
@@ -599,7 +599,7 @@ namespace Intech.Revit
 
             foreach (Family family in families)
             {
-                using (Document famDoc = doc.EditFamily(family))
+                using (Document famDoc = _doc.EditFamily(family))
                 {
                     FamilyManager famMgr = famDoc.FamilyManager;
                     var usableParams = new HashSet<string>();
@@ -648,7 +648,7 @@ namespace Intech.Revit
         {
             errorMessage = null;
 
-            Document familyDoc = doc.EditFamily(family);
+            Document familyDoc = _doc.EditFamily(family);
             if (familyDoc == null || !familyDoc.IsFamilyDocument)
             {
                 errorMessage = "Unable to open family document.";
@@ -714,7 +714,7 @@ namespace Intech.Revit
 
             foreach (Family family in families)
             {
-                using (Document famDoc = doc.EditFamily(family))
+                using (Document famDoc = _doc.EditFamily(family))
                 {
                     FamilyManager famMgr = famDoc.FamilyManager;
                     var hostableParams = new HashSet<string>();
@@ -769,7 +769,7 @@ namespace Intech.Revit
         {
             foreach (Family family in families)
             {
-                using (Document famDoc = doc.EditFamily(family))
+                using (Document famDoc = _doc.EditFamily(family))
                 {
                     FamilyManager famMgr = famDoc.FamilyManager;
                     FamilyParameter param = famMgr.get_Parameter(parameterName);
@@ -793,7 +793,7 @@ namespace Intech.Revit
                         tx.Commit();
                     }
 
-                    famDoc.LoadFamily(doc, new FamilyLoadOptions());
+                    famDoc.LoadFamily(_doc, new FamilyLoadOptions());
                     famDoc.Close(false); // Don't save to disk
                 }
             }
@@ -817,7 +817,67 @@ namespace Intech.Revit
 
         public static string projectName()
         {
-            return doc.Title; 
+            return _doc.Title; 
         }
+
+
+        public static List<Family> GetAllTitleBlockFamilies()
+        {
+            var collector = new FilteredElementCollector(_doc)
+                .OfClass(typeof(Family));
+
+            var titleBlockFamilies = new List<Family>();
+
+            foreach (Family family in collector)
+            {
+                foreach (ElementId symbolId in family.GetFamilySymbolIds())
+                {
+                    FamilySymbol symbol = _doc.GetElement(symbolId) as FamilySymbol;
+                    if (symbol != null && symbol.Category != null &&
+                        symbol.Category.BuiltInCategory == BuiltInCategory.OST_TitleBlocks)
+                    {
+                        titleBlockFamilies.Add(family);
+                        break; // No need to check more symbols in this family
+                    }
+                }
+            }
+
+            return titleBlockFamilies;
+        }
+
+        public static List<FamilySymbol> GetTitleBlockTypesFromFamily(Family family)
+        {
+            var titleBlockTypes = new List<FamilySymbol>();
+
+            foreach (ElementId symbolId in family.GetFamilySymbolIds())
+            {
+                FamilySymbol symbol = _doc.GetElement(symbolId) as FamilySymbol;
+                if (symbol != null && symbol.Category != null &&
+                    symbol.Category.BuiltInCategory == BuiltInCategory.OST_TitleBlocks)
+                {
+                    titleBlockTypes.Add(symbol);
+                }
+            }
+
+            return titleBlockTypes;
+        }
+
+        public static List<FamilySymbol> GetTitleBlockTypesFromFamily(string familyName)
+        {
+            // Find the Family by name
+            Family family = new FilteredElementCollector(_doc)
+         .OfClass(typeof(Family))
+         .Cast<Family>()
+         .FirstOrDefault(fam => fam.Name.Equals(familyName, StringComparison.OrdinalIgnoreCase));
+
+            if (family == null)
+            {
+                // Optionally log or throw an exception
+                return new List<FamilySymbol>();
+            }
+
+            return GetTitleBlockTypesFromFamily(family);
+        }
+
     }
 }

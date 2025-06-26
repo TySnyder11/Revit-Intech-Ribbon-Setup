@@ -116,8 +116,8 @@ namespace Intech
             string BasePath = Path.Combine(App.BasePath, "Settings.txt");
 
             SaveFileManager saveFileManager = new SaveFileManager(BasePath);
-            SaveFileSection DisSection = saveFileManager.GetSectionsByName("Sheet Settings", "Sheet Discipline").FirstOrDefault();
-            SaveFileSection ChecSection = saveFileManager.GetSectionsByName("Sheet Settings", "Sheet Discipline").FirstOrDefault();
+            SaveFileSection DisSection = saveFileManager.GetSectionsByName("Sheet Settings", "Sheet Sub Discipline").FirstOrDefault();
+            SaveFileSection ChecSection = saveFileManager.GetSectionsByName("Sheet Settings", "Sub Discipline check").FirstOrDefault();
 
             check = ChecSection.Rows[0].FirstOrDefault() == "True";
 

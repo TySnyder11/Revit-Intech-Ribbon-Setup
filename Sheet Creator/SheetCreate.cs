@@ -27,7 +27,8 @@ namespace Intech
         //Open settings
         public Result Execute(ExternalCommandData commandData, ref string message, ElementSet elements)
         {
-            SheetSettings sheetSettings = new SheetSettings(commandData);
+            Intech.Revit.RevitUtils.init(commandData.Application.ActiveUIDocument.Document);
+            SheetSettings sheetSettings = new SheetSettings();
             sheetSettings.ShowDialog();
             return Result.Succeeded;
         }
