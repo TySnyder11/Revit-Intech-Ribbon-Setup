@@ -65,6 +65,7 @@ namespace Intech
             Document doc = uiapp.ActiveUIDocument.Document;
             Transaction trans = new Transaction(doc);
             UIDocument uidoc = commandData.Application.ActiveUIDocument;
+            Intech.Revit.RevitUtils.init(doc);
 
             //start settings form
             DialogResult form = System.Windows.Forms.DialogResult.None;
@@ -100,7 +101,6 @@ namespace Intech
                 if (tagtools.tag
                     (commandData,
                     TagFam.Category,
-                    TagFam.Family,
                     TagFam.Path,
                     TagFam.TagFamily,
                     TagFam.Leader,
@@ -131,7 +131,6 @@ namespace Intech
                 if (tagtools.tag
                     (commandData,
                     TagFam.Category,
-                    TagFam.Family,
                     TagFam.Path,
                     TagFam.TagFamily,
                     TagFam.Leader,
@@ -163,7 +162,6 @@ namespace Intech
                 if (tagtools.tag
                     (commandData,
                     TagFam.Category,
-                    TagFam.Family,
                     TagFam.Path,
                     TagFam.TagFamily,
                     TagFam.Leader,
@@ -196,7 +194,6 @@ namespace Intech
                 if (tagtools.tag
                     (commandData,
                     TagFam.Category,
-                    TagFam.Family,
                     TagFam.Path,
                     TagFam.TagFamily,
                     TagFam.Leader,
@@ -229,7 +226,6 @@ namespace Intech
                 if (tagtools.tag
                     (commandData,
                     TagFam.Category,
-                    TagFam.Family,
                     TagFam.Path,
                     TagFam.TagFamily,
                     TagFam.Leader,
@@ -262,7 +258,6 @@ namespace Intech
                 if (tagtools.tag
                     (commandData,
                     TagFam.Category,
-                    TagFam.Family,
                     TagFam.Path,
                     TagFam.TagFamily,
                     TagFam.Leader,
@@ -295,7 +290,6 @@ namespace Intech
                 if (tagtools.tag
                     (commandData,
                     TagFam.Category,
-                    TagFam.Family,
                     TagFam.Path,
                     TagFam.TagFamily,
                     TagFam.Leader,
@@ -328,7 +322,6 @@ namespace Intech
                 if (tagtools.tag
                     (commandData,
                     TagFam.Category,
-                    TagFam.Family,
                     TagFam.Path,
                     TagFam.TagFamily,
                     TagFam.Leader,
@@ -361,7 +354,6 @@ namespace Intech
                 if (tagtools.tag
                     (commandData,
                     TagFam.Category,
-                    TagFam.Family,
                     TagFam.Path,
                     TagFam.TagFamily,
                     TagFam.Leader,
@@ -394,7 +386,6 @@ namespace Intech
                 if (tagtools.tag
                     (commandData,
                     TagFam.Category,
-                    TagFam.Family,
                     TagFam.Path,
                     TagFam.TagFamily,
                     TagFam.Leader,
@@ -427,7 +418,6 @@ namespace Intech
                 if (tagtools.tag
                     (commandData,
                     TagFam.Category,
-                    TagFam.Family,
                     TagFam.Path,
                     TagFam.TagFamily,
                     TagFam.Leader,
@@ -460,7 +450,6 @@ namespace Intech
                 if (tagtools.tag
                     (commandData,
                     TagFam.Category,
-                    TagFam.Family,
                     TagFam.Path,
                     TagFam.TagFamily,
                     TagFam.Leader,
@@ -493,7 +482,6 @@ namespace Intech
                 if (tagtools.tag
                     (commandData,
                     TagFam.Category,
-                    TagFam.Family,
                     TagFam.Path,
                     TagFam.TagFamily,
                     TagFam.Leader,
@@ -526,7 +514,6 @@ namespace Intech
                 if (tagtools.tag
                     (commandData,
                     TagFam.Category,
-                    TagFam.Family,
                     TagFam.Path,
                     TagFam.TagFamily,
                     TagFam.Leader,
@@ -558,7 +545,6 @@ namespace Intech
                 if (tagtools.tag
                     (commandData,
                     TagFam.Category,
-                    TagFam.Family,
                     TagFam.Path,
                     TagFam.TagFamily,
                     TagFam.Leader,
@@ -590,7 +576,6 @@ namespace Intech
                 if (tagtools.tag
                     (commandData,
                     TagFam.Category,
-                    TagFam.Family,
                     TagFam.Path,
                     TagFam.TagFamily,
                     TagFam.Leader,

@@ -1,21 +1,23 @@
-﻿using System;
+﻿using Autodesk.Revit.DB;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
+using System.Diagnostics;
 using System.Drawing;
+using System.IO;
 using System.Linq;
+using System.Net.Security;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using System.IO;
-using System.Diagnostics;
 using System.Xml;
-using System.Net.Security;
 
 namespace Intech
 {
-    public partial class TagSetting : Form
+    public partial class TagSetting : System.Windows.Forms.Form
     {
+        CategoryNameMap categories;
         public TagSetting()
         {
             InitializeComponent();
@@ -26,7 +28,41 @@ namespace Intech
             Intech.SaveFileManager saveFileManager = new Intech.SaveFileManager(path, new TxtFormat());
             List<SaveFileSection> sections = saveFileManager.ReadAllSections();
             SaveFileSection section = saveFileManager.GetSectionsByName("Tag Settings").FirstOrDefault();
+            TagSettings.ConfigureColumnTypes(new Dictionary<string, Intech.Windows.Forms.ColumnType> 
+            {
+                { "Tag Type", Intech.Windows.Forms.ColumnType.ComboBox },
+                { "Category", Intech.Windows.Forms.ColumnType.ComboBox },
+                { "Path", Intech.Windows.Forms.ColumnType.FilePicker },
+                { "Leader", Windows.Forms.ColumnType.CheckBox }
+            });
             TagSettings.Initialize(saveFileManager, section);
+
+            categories = Intech.Revit.RevitUtils.GetAllCategories();
+            List<string> catData = new List<string>();
+            foreach (Category cat in categories)
+            {
+                catData.Add(cat.Name);
+            }
+            TagSettings.SetComboBoxItems("Category", catData);
+            TagSettings.SetComboBoxItems("Tag Type", new List<string>
+            {
+                "Size",
+                "Length",
+                "Elevation",
+                "Offset",
+                "Number",
+                "Hanger",
+                "Tag1",
+                "Tag2",
+                "Tag3",
+                "Tag4",
+                "Tag5",
+                "Tag6",
+                "Tag7",
+                "Tag8",
+                "Tag9",
+                "Tag10"
+            });
         }
 
         private void dataGridView1_SelectionChange(object sender, EventArgs e)

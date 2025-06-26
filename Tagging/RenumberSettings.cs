@@ -61,11 +61,11 @@ namespace TitleBlockSetup.Tagging
 
             categories = Intech.Revit.RevitUtils.GetAllCategories();
 
-            string filePath = Path.Combine(App.BasePath, "ReNumber.txt");
+            string filePath = Path.Combine(App.BasePath, "Settings.txt");
             SaveFileManager saveFileManager = new SaveFileManager(filePath, new TxtFormat());
 
-            SaveFileSection sec =  saveFileManager.GetSectionsByName("__General__").FirstOrDefault()?? 
-                new SaveFileSection("__General__", "", "Category\tParameter\tTag\tPrefix\tCurrent Number\tSuffix\tSeperator");
+            SaveFileSection sec =  saveFileManager.GetSectionsByName("Number Settings", "Main").FirstOrDefault()?? 
+                new SaveFileSection("Number Settings", "Main", "Category\tParameter\tTag\tPrefix\tCurrent Number\tSuffix\tSeperator");
 
             Dictionary<string, Intech.Windows.Forms.ColumnType > columnDictionary = new Dictionary<string, Intech.Windows.Forms.ColumnType> 
             {

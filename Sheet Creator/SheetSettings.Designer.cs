@@ -45,30 +45,17 @@
             this.tabPage3 = new System.Windows.Forms.TabPage();
             this.tabPage4 = new System.Windows.Forms.TabPage();
             this.ScaleTab = new System.Windows.Forms.TabPage();
-            this.ScaleGrid = new System.Windows.Forms.DataGridView();
-            this.Scale = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.ViewportId = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.RevitScaleValue = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.ScaleGrid = new Intech.Windows.Forms.SectionEditorControl();
             this.DisciplineTab = new System.Windows.Forms.TabPage();
-            this.SubDisciplineGrid = new System.Windows.Forms.DataGridView();
-            this.dataGridViewTextBoxColumn4 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.SubDisciplineGrid = new Intech.Windows.Forms.SectionEditorControl();
             this.SubDisciplineCheck = new System.Windows.Forms.CheckBox();
-            this.DisciplineGrid = new System.Windows.Forms.DataGridView();
-            this.DisciplineName = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.DisciplineNumber = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.TitleBlockParameterDiscipline = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.DisciplineGrid = new Intech.Windows.Forms.SectionEditorControl();
             this.LevelTab = new System.Windows.Forms.TabPage();
-            this.LevelGrid = new System.Windows.Forms.DataGridView();
-            this.LevelName = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.dataGridViewTextBoxColumn2 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.dataGridViewTextBoxColumn3 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.LevelGrid = new Intech.Windows.Forms.SectionEditorControl();
             this.label9 = new System.Windows.Forms.Label();
             this.label8 = new System.Windows.Forms.Label();
             this.AreaTab = new System.Windows.Forms.TabPage();
-            this.AreaGrid = new System.Windows.Forms.DataGridView();
-            this.ScopeBoxName = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.TitleBlockParameterArea = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.SheetNumberNumberArea = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.AreaGrid = new Intech.Windows.Forms.SectionEditorControl();
             this.label11 = new System.Windows.Forms.Label();
             this.label10 = new System.Windows.Forms.Label();
             this.Cancel = new System.Windows.Forms.Button();
@@ -79,14 +66,9 @@
             this.BaseControlTab.SuspendLayout();
             this.tabControl2.SuspendLayout();
             this.ScaleTab.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.ScaleGrid)).BeginInit();
             this.DisciplineTab.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.SubDisciplineGrid)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.DisciplineGrid)).BeginInit();
             this.LevelTab.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.LevelGrid)).BeginInit();
             this.AreaTab.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.AreaGrid)).BeginInit();
             this.SuspendLayout();
             // 
             // SheetTabController
@@ -100,10 +82,10 @@
             this.SheetTabController.Controls.Add(this.LevelTab);
             this.SheetTabController.Controls.Add(this.AreaTab);
             this.SheetTabController.Location = new System.Drawing.Point(0, 2);
-            this.SheetTabController.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.SheetTabController.Margin = new System.Windows.Forms.Padding(2);
             this.SheetTabController.Name = "SheetTabController";
             this.SheetTabController.SelectedIndex = 0;
-            this.SheetTabController.Size = new System.Drawing.Size(524, 304);
+            this.SheetTabController.Size = new System.Drawing.Size(574, 298);
             this.SheetTabController.TabIndex = 0;
             // 
             // BaseControlTab
@@ -121,10 +103,10 @@
             this.BaseControlTab.Controls.Add(this.label1);
             this.BaseControlTab.Controls.Add(this.tabControl2);
             this.BaseControlTab.Location = new System.Drawing.Point(4, 22);
-            this.BaseControlTab.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.BaseControlTab.Margin = new System.Windows.Forms.Padding(2);
             this.BaseControlTab.Name = "BaseControlTab";
-            this.BaseControlTab.Padding = new System.Windows.Forms.Padding(2, 2, 2, 2);
-            this.BaseControlTab.Size = new System.Drawing.Size(516, 278);
+            this.BaseControlTab.Padding = new System.Windows.Forms.Padding(2);
+            this.BaseControlTab.Size = new System.Drawing.Size(566, 272);
             this.BaseControlTab.TabIndex = 0;
             this.BaseControlTab.Text = "Base Controls";
             this.BaseControlTab.UseVisualStyleBackColor = true;
@@ -134,7 +116,7 @@
             // 
             this.TitleBlockType.FormattingEnabled = true;
             this.TitleBlockType.Location = new System.Drawing.Point(8, 98);
-            this.TitleBlockType.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.TitleBlockType.Margin = new System.Windows.Forms.Padding(2);
             this.TitleBlockType.Name = "TitleBlockType";
             this.TitleBlockType.Size = new System.Drawing.Size(92, 21);
             this.TitleBlockType.TabIndex = 25;
@@ -164,7 +146,7 @@
             // 
             this.TitleBlockFamily.FormattingEnabled = true;
             this.TitleBlockFamily.Location = new System.Drawing.Point(8, 61);
-            this.TitleBlockFamily.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.TitleBlockFamily.Margin = new System.Windows.Forms.Padding(2);
             this.TitleBlockFamily.Name = "TitleBlockFamily";
             this.TitleBlockFamily.Size = new System.Drawing.Size(92, 21);
             this.TitleBlockFamily.TabIndex = 22;
@@ -205,7 +187,7 @@
             // MiddleSheetNumber
             // 
             this.MiddleSheetNumber.Location = new System.Drawing.Point(36, 24);
-            this.MiddleSheetNumber.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.MiddleSheetNumber.Margin = new System.Windows.Forms.Padding(2);
             this.MiddleSheetNumber.Name = "MiddleSheetNumber";
             this.MiddleSheetNumber.Size = new System.Drawing.Size(16, 20);
             this.MiddleSheetNumber.TabIndex = 4;
@@ -223,7 +205,7 @@
             // TradeAbriviation
             // 
             this.TradeAbriviation.Location = new System.Drawing.Point(9, 24);
-            this.TradeAbriviation.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.TradeAbriviation.Margin = new System.Windows.Forms.Padding(2);
             this.TradeAbriviation.Name = "TradeAbriviation";
             this.TradeAbriviation.Size = new System.Drawing.Size(16, 20);
             this.TradeAbriviation.TabIndex = 2;
@@ -243,7 +225,7 @@
             this.tabControl2.Controls.Add(this.tabPage3);
             this.tabControl2.Controls.Add(this.tabPage4);
             this.tabControl2.Location = new System.Drawing.Point(322, 300);
-            this.tabControl2.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.tabControl2.Margin = new System.Windows.Forms.Padding(2);
             this.tabControl2.Name = "tabControl2";
             this.tabControl2.SelectedIndex = 0;
             this.tabControl2.Size = new System.Drawing.Size(6, 6);
@@ -252,9 +234,9 @@
             // tabPage3
             // 
             this.tabPage3.Location = new System.Drawing.Point(4, 22);
-            this.tabPage3.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.tabPage3.Margin = new System.Windows.Forms.Padding(2);
             this.tabPage3.Name = "tabPage3";
-            this.tabPage3.Padding = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.tabPage3.Padding = new System.Windows.Forms.Padding(2);
             this.tabPage3.Size = new System.Drawing.Size(0, 0);
             this.tabPage3.TabIndex = 0;
             this.tabPage3.Text = "tabPage3";
@@ -263,9 +245,9 @@
             // tabPage4
             // 
             this.tabPage4.Location = new System.Drawing.Point(4, 22);
-            this.tabPage4.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.tabPage4.Margin = new System.Windows.Forms.Padding(2);
             this.tabPage4.Name = "tabPage4";
-            this.tabPage4.Padding = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.tabPage4.Padding = new System.Windows.Forms.Padding(2);
             this.tabPage4.Size = new System.Drawing.Size(0, 0);
             this.tabPage4.TabIndex = 1;
             this.tabPage4.Text = "tabPage4";
@@ -275,10 +257,10 @@
             // 
             this.ScaleTab.Controls.Add(this.ScaleGrid);
             this.ScaleTab.Location = new System.Drawing.Point(4, 22);
-            this.ScaleTab.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.ScaleTab.Margin = new System.Windows.Forms.Padding(2);
             this.ScaleTab.Name = "ScaleTab";
-            this.ScaleTab.Padding = new System.Windows.Forms.Padding(2, 2, 2, 2);
-            this.ScaleTab.Size = new System.Drawing.Size(516, 278);
+            this.ScaleTab.Padding = new System.Windows.Forms.Padding(2);
+            this.ScaleTab.Size = new System.Drawing.Size(566, 272);
             this.ScaleTab.TabIndex = 1;
             this.ScaleTab.Text = "Scale Tab";
             this.ScaleTab.UseVisualStyleBackColor = true;
@@ -288,40 +270,11 @@
             this.ScaleGrid.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.ScaleGrid.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this.ScaleGrid.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
-            this.Scale,
-            this.ViewportId,
-            this.RevitScaleValue});
             this.ScaleGrid.Location = new System.Drawing.Point(6, 3);
-            this.ScaleGrid.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.ScaleGrid.Margin = new System.Windows.Forms.Padding(2);
             this.ScaleGrid.Name = "ScaleGrid";
-            this.ScaleGrid.RowHeadersWidth = 51;
-            this.ScaleGrid.RowTemplate.Height = 24;
-            this.ScaleGrid.Size = new System.Drawing.Size(479, 280);
+            this.ScaleGrid.Size = new System.Drawing.Size(529, 274);
             this.ScaleGrid.TabIndex = 0;
-            this.ScaleGrid.CellContentClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.ScaleGrid_CellContentClick);
-            // 
-            // Scale
-            // 
-            this.Scale.HeaderText = "Scale";
-            this.Scale.MinimumWidth = 6;
-            this.Scale.Name = "Scale";
-            this.Scale.Width = 125;
-            // 
-            // ViewportId
-            // 
-            this.ViewportId.HeaderText = "ViewportId";
-            this.ViewportId.MinimumWidth = 6;
-            this.ViewportId.Name = "ViewportId";
-            this.ViewportId.Width = 125;
-            // 
-            // RevitScaleValue
-            // 
-            this.RevitScaleValue.HeaderText = "Revit Scale Value";
-            this.RevitScaleValue.MinimumWidth = 6;
-            this.RevitScaleValue.Name = "RevitScaleValue";
-            this.RevitScaleValue.Width = 125;
             // 
             // DisciplineTab
             // 
@@ -329,9 +282,9 @@
             this.DisciplineTab.Controls.Add(this.SubDisciplineCheck);
             this.DisciplineTab.Controls.Add(this.DisciplineGrid);
             this.DisciplineTab.Location = new System.Drawing.Point(4, 22);
-            this.DisciplineTab.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.DisciplineTab.Margin = new System.Windows.Forms.Padding(2);
             this.DisciplineTab.Name = "DisciplineTab";
-            this.DisciplineTab.Size = new System.Drawing.Size(516, 278);
+            this.DisciplineTab.Size = new System.Drawing.Size(566, 272);
             this.DisciplineTab.TabIndex = 2;
             this.DisciplineTab.Text = "Discipline Tab";
             this.DisciplineTab.UseVisualStyleBackColor = true;
@@ -340,23 +293,11 @@
             // 
             this.SubDisciplineGrid.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.SubDisciplineGrid.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this.SubDisciplineGrid.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
-            this.dataGridViewTextBoxColumn4});
-            this.SubDisciplineGrid.Location = new System.Drawing.Point(353, 27);
-            this.SubDisciplineGrid.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.SubDisciplineGrid.Location = new System.Drawing.Point(368, 25);
+            this.SubDisciplineGrid.Margin = new System.Windows.Forms.Padding(2);
             this.SubDisciplineGrid.Name = "SubDisciplineGrid";
-            this.SubDisciplineGrid.RowHeadersWidth = 51;
-            this.SubDisciplineGrid.RowTemplate.Height = 24;
-            this.SubDisciplineGrid.Size = new System.Drawing.Size(158, 249);
+            this.SubDisciplineGrid.Size = new System.Drawing.Size(191, 243);
             this.SubDisciplineGrid.TabIndex = 4;
-            // 
-            // dataGridViewTextBoxColumn4
-            // 
-            this.dataGridViewTextBoxColumn4.HeaderText = "Sub Discipline";
-            this.dataGridViewTextBoxColumn4.MinimumWidth = 6;
-            this.dataGridViewTextBoxColumn4.Name = "dataGridViewTextBoxColumn4";
-            this.dataGridViewTextBoxColumn4.Width = 125;
             // 
             // SubDisciplineCheck
             // 
@@ -364,8 +305,8 @@
             this.SubDisciplineCheck.AutoSize = true;
             this.SubDisciplineCheck.Checked = true;
             this.SubDisciplineCheck.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.SubDisciplineCheck.Location = new System.Drawing.Point(345, 6);
-            this.SubDisciplineCheck.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.SubDisciplineCheck.Location = new System.Drawing.Point(379, 4);
+            this.SubDisciplineCheck.Margin = new System.Windows.Forms.Padding(2);
             this.SubDisciplineCheck.Name = "SubDisciplineCheck";
             this.SubDisciplineCheck.Size = new System.Drawing.Size(110, 17);
             this.SubDisciplineCheck.TabIndex = 3;
@@ -377,39 +318,11 @@
             this.DisciplineGrid.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.DisciplineGrid.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this.DisciplineGrid.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
-            this.DisciplineName,
-            this.DisciplineNumber,
-            this.TitleBlockParameterDiscipline});
             this.DisciplineGrid.Location = new System.Drawing.Point(6, 4);
-            this.DisciplineGrid.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.DisciplineGrid.Margin = new System.Windows.Forms.Padding(2);
             this.DisciplineGrid.Name = "DisciplineGrid";
-            this.DisciplineGrid.RowHeadersWidth = 51;
-            this.DisciplineGrid.RowTemplate.Height = 24;
-            this.DisciplineGrid.Size = new System.Drawing.Size(343, 272);
+            this.DisciplineGrid.Size = new System.Drawing.Size(358, 266);
             this.DisciplineGrid.TabIndex = 0;
-            // 
-            // DisciplineName
-            // 
-            this.DisciplineName.HeaderText = "Discipline";
-            this.DisciplineName.MinimumWidth = 6;
-            this.DisciplineName.Name = "DisciplineName";
-            this.DisciplineName.Width = 125;
-            // 
-            // DisciplineNumber
-            // 
-            this.DisciplineNumber.HeaderText = "Discipline Number (M__11A1)";
-            this.DisciplineNumber.MinimumWidth = 6;
-            this.DisciplineNumber.Name = "DisciplineNumber";
-            this.DisciplineNumber.Width = 125;
-            // 
-            // TitleBlockParameterDiscipline
-            // 
-            this.TitleBlockParameterDiscipline.HeaderText = "Title Block Parameter";
-            this.TitleBlockParameterDiscipline.MinimumWidth = 6;
-            this.TitleBlockParameterDiscipline.Name = "TitleBlockParameterDiscipline";
-            this.TitleBlockParameterDiscipline.Width = 125;
             // 
             // LevelTab
             // 
@@ -417,9 +330,9 @@
             this.LevelTab.Controls.Add(this.label9);
             this.LevelTab.Controls.Add(this.label8);
             this.LevelTab.Location = new System.Drawing.Point(4, 22);
-            this.LevelTab.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.LevelTab.Margin = new System.Windows.Forms.Padding(2);
             this.LevelTab.Name = "LevelTab";
-            this.LevelTab.Size = new System.Drawing.Size(516, 278);
+            this.LevelTab.Size = new System.Drawing.Size(566, 272);
             this.LevelTab.TabIndex = 3;
             this.LevelTab.Text = "Nonstandard Level Tab";
             this.LevelTab.UseVisualStyleBackColor = true;
@@ -429,40 +342,11 @@
             this.LevelGrid.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.LevelGrid.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this.LevelGrid.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
-            this.LevelName,
-            this.dataGridViewTextBoxColumn2,
-            this.dataGridViewTextBoxColumn3});
             this.LevelGrid.Location = new System.Drawing.Point(8, 34);
-            this.LevelGrid.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.LevelGrid.Margin = new System.Windows.Forms.Padding(2);
             this.LevelGrid.Name = "LevelGrid";
-            this.LevelGrid.RowHeadersWidth = 51;
-            this.LevelGrid.RowTemplate.Height = 24;
-            this.LevelGrid.Size = new System.Drawing.Size(472, 249);
+            this.LevelGrid.Size = new System.Drawing.Size(522, 243);
             this.LevelGrid.TabIndex = 3;
-            // 
-            // LevelName
-            // 
-            this.LevelName.HeaderText = "Level Name";
-            this.LevelName.MinimumWidth = 6;
-            this.LevelName.Name = "LevelName";
-            this.LevelName.Resizable = System.Windows.Forms.DataGridViewTriState.True;
-            this.LevelName.Width = 125;
-            // 
-            // dataGridViewTextBoxColumn2
-            // 
-            this.dataGridViewTextBoxColumn2.HeaderText = "Title Block Parameter";
-            this.dataGridViewTextBoxColumn2.MinimumWidth = 6;
-            this.dataGridViewTextBoxColumn2.Name = "dataGridViewTextBoxColumn2";
-            this.dataGridViewTextBoxColumn2.Width = 125;
-            // 
-            // dataGridViewTextBoxColumn3
-            // 
-            this.dataGridViewTextBoxColumn3.HeaderText = "Sheet Number Value (M11__A1)";
-            this.dataGridViewTextBoxColumn3.MinimumWidth = 6;
-            this.dataGridViewTextBoxColumn3.Name = "dataGridViewTextBoxColumn3";
-            this.dataGridViewTextBoxColumn3.Width = 125;
             // 
             // label9
             // 
@@ -490,49 +374,20 @@
             this.AreaTab.Controls.Add(this.label11);
             this.AreaTab.Controls.Add(this.label10);
             this.AreaTab.Location = new System.Drawing.Point(4, 22);
-            this.AreaTab.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.AreaTab.Margin = new System.Windows.Forms.Padding(2);
             this.AreaTab.Name = "AreaTab";
-            this.AreaTab.Size = new System.Drawing.Size(516, 278);
+            this.AreaTab.Size = new System.Drawing.Size(566, 272);
             this.AreaTab.TabIndex = 4;
             this.AreaTab.Text = "Nonstandard Area Tag";
             this.AreaTab.UseVisualStyleBackColor = true;
             // 
             // AreaGrid
             // 
-            this.AreaGrid.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this.AreaGrid.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
-            this.ScopeBoxName,
-            this.TitleBlockParameterArea,
-            this.SheetNumberNumberArea});
             this.AreaGrid.Location = new System.Drawing.Point(3, 33);
-            this.AreaGrid.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.AreaGrid.Margin = new System.Windows.Forms.Padding(2);
             this.AreaGrid.Name = "AreaGrid";
-            this.AreaGrid.RowHeadersWidth = 51;
-            this.AreaGrid.RowTemplate.Height = 24;
             this.AreaGrid.Size = new System.Drawing.Size(512, 245);
             this.AreaGrid.TabIndex = 3;
-            // 
-            // ScopeBoxName
-            // 
-            this.ScopeBoxName.HeaderText = "Scope Box Name";
-            this.ScopeBoxName.MinimumWidth = 6;
-            this.ScopeBoxName.Name = "ScopeBoxName";
-            this.ScopeBoxName.Resizable = System.Windows.Forms.DataGridViewTriState.True;
-            this.ScopeBoxName.Width = 125;
-            // 
-            // TitleBlockParameterArea
-            // 
-            this.TitleBlockParameterArea.HeaderText = "Title Block Parameter";
-            this.TitleBlockParameterArea.MinimumWidth = 6;
-            this.TitleBlockParameterArea.Name = "TitleBlockParameterArea";
-            this.TitleBlockParameterArea.Width = 125;
-            // 
-            // SheetNumberNumberArea
-            // 
-            this.SheetNumberNumberArea.HeaderText = "Sheet Number Area Value (M111__)";
-            this.SheetNumberNumberArea.MinimumWidth = 6;
-            this.SheetNumberNumberArea.Name = "SheetNumberNumberArea";
-            this.SheetNumberNumberArea.Width = 125;
             // 
             // label11
             // 
@@ -557,8 +412,8 @@
             // Cancel
             // 
             this.Cancel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.Cancel.Location = new System.Drawing.Point(461, 314);
-            this.Cancel.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.Cancel.Location = new System.Drawing.Point(511, 308);
+            this.Cancel.Margin = new System.Windows.Forms.Padding(2);
             this.Cancel.Name = "Cancel";
             this.Cancel.Size = new System.Drawing.Size(56, 19);
             this.Cancel.TabIndex = 1;
@@ -569,8 +424,8 @@
             // Confirm
             // 
             this.Confirm.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.Confirm.Location = new System.Drawing.Point(400, 314);
-            this.Confirm.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.Confirm.Location = new System.Drawing.Point(450, 308);
+            this.Confirm.Margin = new System.Windows.Forms.Padding(2);
             this.Confirm.Name = "Confirm";
             this.Confirm.Size = new System.Drawing.Size(56, 19);
             this.Confirm.TabIndex = 3;
@@ -581,8 +436,8 @@
             // Export
             // 
             this.Export.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.Export.Location = new System.Drawing.Point(9, 314);
-            this.Export.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.Export.Location = new System.Drawing.Point(9, 308);
+            this.Export.Margin = new System.Windows.Forms.Padding(2);
             this.Export.Name = "Export";
             this.Export.Size = new System.Drawing.Size(56, 19);
             this.Export.TabIndex = 4;
@@ -593,8 +448,8 @@
             // Import
             // 
             this.Import.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.Import.Location = new System.Drawing.Point(70, 314);
-            this.Import.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.Import.Location = new System.Drawing.Point(70, 308);
+            this.Import.Margin = new System.Windows.Forms.Padding(2);
             this.Import.Name = "Import";
             this.Import.Size = new System.Drawing.Size(56, 19);
             this.Import.TabIndex = 5;
@@ -606,13 +461,13 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(524, 343);
+            this.ClientSize = new System.Drawing.Size(574, 337);
             this.Controls.Add(this.Export);
             this.Controls.Add(this.Import);
             this.Controls.Add(this.Confirm);
             this.Controls.Add(this.Cancel);
             this.Controls.Add(this.SheetTabController);
-            this.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.Margin = new System.Windows.Forms.Padding(2);
             this.Name = "SheetSettings";
             this.Text = "SheetSettings";
             this.SheetTabController.ResumeLayout(false);
@@ -620,17 +475,12 @@
             this.BaseControlTab.PerformLayout();
             this.tabControl2.ResumeLayout(false);
             this.ScaleTab.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)(this.ScaleGrid)).EndInit();
             this.DisciplineTab.ResumeLayout(false);
             this.DisciplineTab.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.SubDisciplineGrid)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.DisciplineGrid)).EndInit();
             this.LevelTab.ResumeLayout(false);
             this.LevelTab.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.LevelGrid)).EndInit();
             this.AreaTab.ResumeLayout(false);
             this.AreaTab.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.AreaGrid)).EndInit();
             this.ResumeLayout(false);
 
         }
@@ -658,31 +508,18 @@
         private System.Windows.Forms.Label label7;
         private System.Windows.Forms.TabPage DisciplineTab;
         private System.Windows.Forms.TabPage LevelTab;
-        private System.Windows.Forms.DataGridView DisciplineGrid;
+        private Intech.Windows.Forms.SectionEditorControl DisciplineGrid;
         private System.Windows.Forms.CheckBox SubDisciplineCheck;
         private System.Windows.Forms.TabPage AreaTab;
         private System.Windows.Forms.Label label9;
         private System.Windows.Forms.Label label8;
         private System.Windows.Forms.Label label10;
         private System.Windows.Forms.Label label11;
-        private System.Windows.Forms.DataGridView AreaGrid;
-        private System.Windows.Forms.DataGridView ScaleGrid;
-        private System.Windows.Forms.DataGridView LevelGrid;
-        private System.Windows.Forms.DataGridViewTextBoxColumn DisciplineName;
-        private System.Windows.Forms.DataGridViewTextBoxColumn DisciplineNumber;
-        private System.Windows.Forms.DataGridViewTextBoxColumn Scale;
-        private System.Windows.Forms.DataGridViewTextBoxColumn ViewportId;
-        private System.Windows.Forms.DataGridViewTextBoxColumn RevitScaleValue;
-        private System.Windows.Forms.DataGridView SubDisciplineGrid;
+        private Intech.Windows.Forms.SectionEditorControl AreaGrid;
+        private Intech.Windows.Forms.SectionEditorControl ScaleGrid;
+        private Intech.Windows.Forms.SectionEditorControl LevelGrid;
+        private Intech.Windows.Forms.SectionEditorControl SubDisciplineGrid;
         private System.Windows.Forms.Button Export;
         private System.Windows.Forms.Button Import;
-        private System.Windows.Forms.DataGridViewTextBoxColumn dataGridViewTextBoxColumn4;
-        private System.Windows.Forms.DataGridViewTextBoxColumn TitleBlockParameterDiscipline;
-        private System.Windows.Forms.DataGridViewTextBoxColumn LevelName;
-        private System.Windows.Forms.DataGridViewTextBoxColumn dataGridViewTextBoxColumn2;
-        private System.Windows.Forms.DataGridViewTextBoxColumn dataGridViewTextBoxColumn3;
-        private System.Windows.Forms.DataGridViewTextBoxColumn ScopeBoxName;
-        private System.Windows.Forms.DataGridViewTextBoxColumn TitleBlockParameterArea;
-        private System.Windows.Forms.DataGridViewTextBoxColumn SheetNumberNumberArea;
     }
 }

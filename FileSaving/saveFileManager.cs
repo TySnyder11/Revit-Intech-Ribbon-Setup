@@ -16,6 +16,11 @@ namespace Intech
             this.format = format ?? throw new ArgumentNullException(nameof(format));
         }
 
+        public SaveFileManager(string filePath)
+        {
+            this.filePath = Path.GetFullPath(filePath);
+            this.format = new Intech.TxtFormat() ?? throw new ArgumentNullException(nameof(format));
+        }
 
         public List<SaveFileSection> ReadAllSections()
         {
@@ -165,24 +170,25 @@ namespace Intech
             return column;
         }
 
-        public string[] lookUp(int columnIndex, string lookup)
+        public List<string[]> lookUp(int columnIndex, string lookup)
         {
             List<string> values = GetColumn(columnIndex);
-            int t = -1;
+            List<int> t = new List<int>() ;
             for (int i = 0; i < values.Count(); i++)
             {
                 if (string.Equals(values[i], lookup))
                 {
-                    t = i;
-                    break;
+                    t.Add(i);
                 }
             }
-            if(t == -1)
+            List<string[]> rows = new List<string[]>();
+            foreach (int i in t)
             {
-                return new string[0];
+                rows.Add(Rows[i]);
             }
-            return Rows[0];
+            return rows;
         }
+
         public SaveFileSection(string projectName, string secondaryName, string header)
         {
             PrimaryName = projectName;

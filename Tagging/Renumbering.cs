@@ -33,13 +33,13 @@ namespace Intech.Tagging
             Revit.RevitUtils.init(doc);
             try
             {
-                string filePath = Path.Combine(App.BasePath, "ReNumber.txt");
+                string filePath = Path.Combine(App.BasePath, "Settings.txt");
                 SaveFileManager saveFileManager = new SaveFileManager(filePath, new TxtFormat());
 
-                SaveFileSection sec = saveFileManager.GetSectionsByName("__General__").FirstOrDefault();
+                SaveFileSection sec = saveFileManager.GetSectionsByName("Number Settings","Main").FirstOrDefault();
                 if (sec == null)
                 {
-                    throw new InvalidOperationException("No section found for '__General__' in the save file. Please go to Numbering settings and make sure to add a row and click Confirm.");
+                    throw new InvalidOperationException("No section found for 'Number Settings::Main' in the save file. Please go to Numbering settings and make sure to add a row and click Confirm.");
                 }
                 List<Category> categories = new List<Category>();
                 CategoryNameMap categoryMap = Intech.Revit.RevitUtils.GetAllCategories();
@@ -72,7 +72,7 @@ namespace Intech.Tagging
                     hash = GetParameterIdentity(values);
                 }
 
-                string[] row = sec.lookUp(0, category.Name);
+                string[] row = sec.lookUp(0, category.Name).FirstOrDefault();
                 string paramName = row[1];
 
                 String paramVal = string.Empty;
@@ -113,7 +113,6 @@ namespace Intech.Tagging
                     (
                     commandData,
                     TagFam.Category,
-                    TagFam.Family,
                     TagFam.Path,
                     TagFam.TagFamily,
                     TagFam.Leader,

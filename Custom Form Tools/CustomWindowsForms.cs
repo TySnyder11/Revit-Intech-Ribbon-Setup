@@ -515,5 +515,36 @@ namespace Intech.Windows
                 }
             }
         }
+
+        public class DataGridViewFilePickerColumn : DataGridViewButtonColumn
+        {
+            public DataGridViewFilePickerColumn()
+            {
+                this.CellTemplate = new DataGridViewButtonCell();
+                this.UseColumnTextForButtonValue = false;
+            }
+
+            public static void AttachTo(DataGridView grid)
+            {
+                grid.CellContentClick += (sender, e) =>
+                {
+                    if (e.RowIndex < 0 || e.ColumnIndex < 0)
+                        return;
+
+                    var dgv = sender as DataGridView;
+                    if (dgv?.Columns[e.ColumnIndex] is DataGridViewFilePickerColumn)
+                    {
+                        using (var dialog = new OpenFileDialog())
+                        {
+                            if (dialog.ShowDialog() == DialogResult.OK)
+                            {
+                                dgv.Rows[e.RowIndex].Cells[e.ColumnIndex].Value = dialog.FileName;
+                            }
+                        }
+                    }
+                };
+            }
+        }
+
     }
 }

@@ -19,21 +19,19 @@ namespace Intech
         public static
             (
             List<String> Category,
-            List<String> Family,
             List<String> Path,
             List<String> TagFamily,
             List<bool> Leader
             )
         SaveInformation(string HangerType)
         {
-            string path = Path.Combine(App.BasePath, "Tag Settings.txt");
+            string path = Path.Combine(App.BasePath, "Settings.txt");
 
 
             //Get Txt information and take out header row
-            string fileContents = File.ReadAllText(path);
-            List<string> Columns = fileContents.Split('\n').ToList();
-            Columns.RemoveAt(0);
-            if (Columns[Columns.Count - 1] == "") Columns.RemoveAt(Columns.Count - 1);
+            Intech.SaveFileManager saveFileManager = new Intech.SaveFileManager(path, new TxtFormat());
+            List<SaveFileSection> sections = saveFileManager.ReadAllSections();
+            SaveFileSection section = saveFileManager.GetSectionsByName("Tag Settings").FirstOrDefault();
 
             //create lists
             List<string> Category = new List<string>();
@@ -41,24 +39,16 @@ namespace Intech
             List<string> Directory = new List<string>();
             List<string> TagFamily = new List<string>();
             List<bool> Leader = new List<bool>();
-
-            //break into columns
-            foreach (string i in Columns)
-            {
-                //break into cells
-                List<string> cells = i.Split('\t').ToList();
-                if (cells[1].Contains(HangerType))
-                {
-                    //Create a list of settings for tags that are the same tag type (example size tag)
-                    Category.Add(cells[2]);
-                    Family.Add(cells[3]);
-                    Directory.Add(cells[4]);
-                    TagFamily.Add(cells[5]);
-                    if (cells[6].Contains("False")) Leader.Add(false);
-                    else Leader.Add(true);
-                }
+            List<string[]> data = section.lookUp(1, HangerType);
+            foreach (var dataSection in data) {
+                Category.Add(dataSection[2]);
+                Directory.Add(dataSection[3]);
+                TagFamily.Add(dataSection[4]);
+                Leader.Add(bool.Parse(dataSection[5]));
             }
-            return (Category, Family, Directory, TagFamily, Leader);
+
+
+            return (Category, Directory, TagFamily, Leader);
         }
         public static (ElementId, int) Pickelement(ExternalCommandData commandData, List<string> Categories)
         {
@@ -90,7 +80,6 @@ namespace Intech
             (
             ExternalCommandData commandData,
             List<String> Category,
-            List<String> Family,
             List<String> Path,
             List<String> TagFamily,
             List<bool> Leader,

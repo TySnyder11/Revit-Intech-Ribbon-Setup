@@ -28,31 +28,14 @@ namespace Intech
             string titleBlockType = "";
 
             //Get txt Path
-            string BasePath = typeof(RibbonTab).Assembly.Location.Replace("RibbonSetup.dll", "SheetSettings.txt");
+            string BasePath = Path.Combine(App.BasePath, "Settings.txt");
 
-            //Get Rows
-            string fileContents = File.ReadAllText(BasePath);
-            foreach (string e in fileContents.Split('@').ToList())
-            {
-                e.Replace("@", "");
-                List<string> Columns = e.Split('\n').ToList();
-                if (Columns[0].Contains("Sheet Creator Base Settings"))
-                {
-                    Columns.RemoveAt(0);
-                    Columns.RemoveAt(0);
-                    Columns.RemoveAt(Columns.Count - 1);
-                    Columns.RemoveAt(Columns.Count - 1);
-                    foreach (string i in Columns)
-                    {
-                        i.Remove('\r');
-                        List<string> rows = i.Split('\t').ToList();
-                        tradeAbbreviation = rows[0];
-                        SheetNumber = rows[1];
-                        titleBlockFamily = rows[2];
-                        titleBlockType = rows[3];
-                    }
-                }
-            }
+            SaveFileManager saveFileManager = new SaveFileManager(BasePath);
+            SaveFileSection saveFileSection = saveFileManager.GetSectionsByName("Sheet Settings", "Sheet Creator Base Settings").FirstOrDefault();
+            tradeAbbreviation = saveFileSection.Rows[0][0];
+            SheetNumber = saveFileSection.Rows[0][1];
+            titleBlockFamily = saveFileSection.Rows[0][2];
+            titleBlockType = saveFileSection.Rows[0][3];
             return (tradeAbbreviation,SheetNumber, titleBlockFamily, titleBlockType);
         }
         public static Dictionary<string,(string, string)> Scale ()
@@ -61,29 +44,13 @@ namespace Intech
             Dictionary<string, (string, string)> scale = new Dictionary<string, (string, string)> ();
 
             //Get txt Path
-            string BasePath = Path.Combine(App.BasePath, "SheetSettings.txt");
+            string BasePath = Path.Combine(App.BasePath, "Settings.txt");
 
-            //Get Rows
-            string fileContents = File.ReadAllText(BasePath);
-            foreach (string e in fileContents.Split('@').ToList())
+            SaveFileManager saveFileManager = new SaveFileManager(BasePath);
+            SaveFileSection saveFileSection = saveFileManager.GetSectionsByName("Sheet Settings", "Scale").FirstOrDefault();
+            foreach (string[] row in saveFileSection.Rows)
             {
-                e.Replace("@", "");
-                List<string> Columns = e.Split('\n').ToList();
-                if (Columns[0].Contains("Scale"))
-                {
-                    Columns.RemoveAt(0);
-                    Columns.RemoveAt(0);
-                    Columns.RemoveAt(Columns.Count - 1);
-                    Columns.RemoveAt(Columns.Count - 1);
-                    int x = 0;
-                    foreach (string i in Columns)
-                    {
-                        i.Remove('\r');
-                        List<string> rows = i.Split('\t').ToList();
-                        scale.Add (rows[0],(rows[1] , rows[2]));
-                        x++;
-                    }
-                }
+                scale.Add(row[0], (row[1], row[2]));
             }
             return scale;
         }
@@ -94,29 +61,13 @@ namespace Intech
             Dictionary<string, (string, string)> nonstandardLevels = new Dictionary<string, (string, string)>();
 
             //Get txt Path
-            string BasePath = typeof(RibbonTab).Assembly.Location.Replace("RibbonSetup.dll", "SheetSettings.txt");
+            string BasePath = Path.Combine(App.BasePath, "Settings.txt");
 
-            //Get Rows
-            string fileContents = File.ReadAllText(BasePath);
-            foreach (string e in fileContents.Split('@').ToList())
+            SaveFileManager saveFileManager = new SaveFileManager(BasePath);
+            SaveFileSection saveFileSection = saveFileManager.GetSectionsByName("Sheet Settings", "Nonstandard Level Info").FirstOrDefault();
+            foreach (string[] row in saveFileSection.Rows)
             {
-                e.Replace("@", "");
-                List<string> Columns = e.Split('\n').ToList();
-                if (Columns[0].Contains("Nonstandard Level Info"))
-                {
-                    Columns.RemoveAt(0);
-                    Columns.RemoveAt(0);
-                    Columns.RemoveAt(Columns.Count - 1);
-                    Columns.RemoveAt(Columns.Count - 1);
-                    int x = 0;
-                    foreach (string i in Columns)
-                    {
-                        i.Remove('\r');
-                        List<string> rows = i.Split('\t').ToList();
-                        nonstandardLevels.Add(rows[0],( rows[1], rows[2]));
-                        x++;
-                    }
-                }
+                nonstandardLevels.Add(row[0], (row[1], row[2]));
             }
             return nonstandardLevels;
         }
@@ -127,28 +78,13 @@ namespace Intech
             Dictionary<string, (string, string)> nonstandardArea = new Dictionary<string, (string, string)>();
 
             //Get txt Path
-            string BasePath = typeof(RibbonTab).Assembly.Location.Replace("RibbonSetup.dll", "SheetSettings.txt");
+            string BasePath = Path.Combine(App.BasePath, "Settings.txt");
 
-            //Get Rows
-            string fileContents = File.ReadAllText(BasePath);
-            foreach (string e in fileContents.Split('@').ToList())
+            SaveFileManager saveFileManager = new SaveFileManager(BasePath);
+            SaveFileSection saveFileSection = saveFileManager.GetSectionsByName("Sheet Settings", "Nonstandard Scopebox Info").FirstOrDefault();
+            foreach (string[] row in saveFileSection.Rows)
             {
-                e.Replace("@", "");
-                List<string> Columns = e.Split('\n').ToList();
-                if (Columns[0].Contains("Nonstandard Scopebox Info"))
-                {
-                    Columns.RemoveAt(0);
-                    Columns.RemoveAt(0);
-                    Columns.RemoveAt(Columns.Count - 1);
-                    Columns.RemoveAt(Columns.Count - 1);
-                    int x = 0;
-                    foreach (string i in Columns)
-                    {
-                        List<string> rows = i.Split('\t').ToList();
-                        nonstandardArea.Add(rows[0], (rows[1], rows[2]));
-                        x++;
-                    }
-                }
+                nonstandardArea.Add(row[0], (row[1], row[2]));
             }
             return nonstandardArea;
         }
@@ -159,28 +95,13 @@ namespace Intech
             Dictionary<string, (string, string)> discipline = new Dictionary<string, (string, string)>();
 
             //Get txt Path
-            string BasePath = typeof(RibbonTab).Assembly.Location.Replace("RibbonSetup.dll", "SheetSettings.txt");
+            string BasePath = Path.Combine(App.BasePath, "Settings.txt");
 
-            //Get Rows
-            string fileContents = File.ReadAllText(BasePath);
-            foreach (string e in fileContents.Split('@').ToList())
+            SaveFileManager saveFileManager = new SaveFileManager(BasePath);
+            SaveFileSection saveFileSection = saveFileManager.GetSectionsByName("Sheet Settings", "Sheet Discipline").FirstOrDefault();
+            foreach (string[] row in saveFileSection.Rows)
             {
-                e.Replace("@", "");
-                List<string> Columns = e.Split('\n').ToList();
-                if (Columns[0].Contains("Sheet Discipline"))
-                {
-                    Columns.RemoveAt(0);
-                    Columns.RemoveAt(0);
-                    Columns.RemoveAt(Columns.Count - 1);
-                    Columns.RemoveAt(Columns.Count - 1);
-                    int x = 0;
-                    foreach (string i in Columns)
-                    {
-                        List<string> rows = i.Split('\t').ToList();
-                        discipline.Add(rows[0], (rows[1], rows[2]));
-                        x++;
-                    }
-                }
+                discipline.Add(row[0], (row[1], row[2]));
             }
             return discipline;
         }
@@ -192,41 +113,17 @@ namespace Intech
             bool check = false;
 
             //Get txt Path
-            string BasePath = typeof(RibbonTab).Assembly.Location.Replace("RibbonSetup.dll", "SheetSettings.txt");
+            string BasePath = Path.Combine(App.BasePath, "Settings.txt");
 
-            //Get Rows
-            string fileContents = File.ReadAllText(BasePath);
-            foreach (string e in fileContents.Split('@').ToList())
+            SaveFileManager saveFileManager = new SaveFileManager(BasePath);
+            SaveFileSection DisSection = saveFileManager.GetSectionsByName("Sheet Settings", "Sheet Discipline").FirstOrDefault();
+            SaveFileSection ChecSection = saveFileManager.GetSectionsByName("Sheet Settings", "Sheet Discipline").FirstOrDefault();
+
+            check = ChecSection.Rows[0].FirstOrDefault() == "True";
+
+            foreach (string[] row in DisSection.Rows)
             {
-                e.Replace("@", "");
-                List<string> Columns = e.Split('\n').ToList();
-                if (Columns[0].Contains("Sheet Sub Discipline"))
-                {
-                    Columns.RemoveAt(0);
-                    Columns.RemoveAt(0);
-                    Columns.RemoveAt(Columns.Count - 1);
-                    Columns.RemoveAt(Columns.Count - 1);
-                    int x = 0;
-                    foreach (string i in Columns)
-                    {
-                        List<string> rows = i.Split('\t').ToList();
-                        subDiscipline.Add(rows[0]);
-                        x++;
-                    }
-                }
-                if (Columns[0].Contains("Sub Discipline check"))
-                {
-                    Columns.RemoveAt(0);
-                    Columns.RemoveAt(Columns.Count - 1);
-                    Columns.RemoveAt(Columns.Count - 1);
-                    int x = 0;
-                    foreach (string i in Columns)
-                    {
-                        List<string> rows = i.Split('\t').ToList();
-                        if (rows[0].Replace("\r", "") == "True") check = true;
-                        x++;
-                    }
-                }
+                subDiscipline.Add(row[0]);
             }
             return (subDiscipline,check);
         }

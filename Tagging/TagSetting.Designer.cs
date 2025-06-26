@@ -103,6 +103,8 @@ namespace Intech
             // 
             // TagSettings
             // 
+            this.TagSettings.Anchor = (System.Windows.Forms.AnchorStyles)(System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left |
+                System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right);
             this.TagSettings.Location = new System.Drawing.Point(23, 2);
             this.TagSettings.Name = "TagSettings";
             this.TagSettings.Size = new System.Drawing.Size(560, 330);

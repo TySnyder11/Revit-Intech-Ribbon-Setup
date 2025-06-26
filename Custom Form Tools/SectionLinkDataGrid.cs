@@ -142,6 +142,18 @@ namespace Intech.Windows.Forms
                         case ColumnType.CheckBox:
                             dataGridView1.Columns.Add(new DataGridViewCheckBoxColumn { Name = trimmed, HeaderText = trimmed });
                             break;
+
+                        case ColumnType.FilePicker:
+                            var filePickerColumn = new DataGridViewFilePickerColumn
+                            {
+                                Name = "File",
+                                HeaderText = "Select File"
+                            };
+                            dataGridView1.Columns.Add(filePickerColumn);
+                            DataGridViewFilePickerColumn.AttachTo(dataGridView1);
+
+                            break;
+
                         default:
                             dataGridView1.Columns.Add(trimmed, trimmed);
                             break;
@@ -374,6 +386,7 @@ namespace Intech.Windows.Forms
     {
         Text,
         ComboBox,
-        CheckBox
+        CheckBox,
+        FilePicker
     }
 }
