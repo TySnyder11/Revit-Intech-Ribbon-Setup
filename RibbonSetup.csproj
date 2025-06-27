@@ -125,6 +125,10 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CollisionEngine\CollisionEngine.cs" />
+    <Compile Include="CollisionEngine\CollisionResult.cs" />
+    <Compile Include="CollisionEngine\GeometryData.cs" />
+    <Compile Include="CollisionEngine\RTree.cs" />
     <Compile Include="Connector Tools\Connect.cs" />
     <Compile Include="Connector Tools\RotateConnector.cs" />
     <Compile Include="Connector Tools\RotateWith.cs" />
@@ -217,6 +221,14 @@
     <Compile Include="SharedParameter\SharedParameterAdd.Designer.cs">
       <DependentUpon>SharedParameterAdd.cs</DependentUpon>
     </Compile>
+    <Compile Include="SleevePlace\SleeveSettingMain.cs" />
+    <Compile Include="SleevePlace\SleeveSettings.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="SleevePlace\SleeveSettings.Designer.cs">
+      <DependentUpon>SleeveSettings.cs</DependentUpon>
+    </Compile>
+    <Compile Include="SleevePlace\SleevePlacer.cs" />
     <Compile Include="startup.cs" />
     <Compile Include="Tagging\NumAdvancedSettings.cs">
       <SubType>Form</SubType>
@@ -327,6 +339,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="SharedParameter\SharedParameterAdd.resx">
       <DependentUpon>SharedParameterAdd.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="SleevePlace\SleeveSettings.resx">
+      <DependentUpon>SleeveSettings.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Tagging\NumAdvancedSettings.resx">
       <DependentUpon>NumAdvancedSettings.cs</DependentUpon>

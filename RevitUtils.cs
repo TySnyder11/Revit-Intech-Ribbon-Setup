@@ -879,5 +879,25 @@ namespace Intech.Revit
             return GetTitleBlockTypesFromFamily(family);
         }
 
+        public static List<RevitLinkInstance> GetLinkedModels()
+        {
+            FilteredElementCollector collector = new FilteredElementCollector(_doc);
+            ICollection<Element> linkInstances = collector
+            .OfClass(typeof(RevitLinkInstance))
+            .ToElements();
+
+            List<RevitLinkInstance> linkedModels = new List<RevitLinkInstance>();
+
+            foreach (Element e in linkInstances)
+            {
+                RevitLinkInstance linkInstance = e as RevitLinkInstance;
+                if (linkInstance != null)
+                {
+                    linkedModels.Add(linkInstance);
+                }
+            }
+
+            return linkedModels;
+        }
     }
 }

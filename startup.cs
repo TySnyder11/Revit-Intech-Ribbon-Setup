@@ -157,6 +157,12 @@ public class App : IExternalApplication
             b8Data.LargeImage = new BitmapImage(new Uri(IconPath));
             PushButton pb8 = ConnectTools.AddItem(b8Data) as PushButton;
 
+            PushButtonData b9Data = new PushButtonData("PlaceSleeve", "Sleeve Place", AddInPath, "Intech.SleevePlace");
+            b9Data.ToolTip = "Select elements then run to detect wall collision to put sleeves on collision";
+            b9Data.Image = new BitmapImage(new Uri(IconPath));
+            b9Data.LargeImage = new BitmapImage(new Uri(IconPath));
+            PushButton pb9 = ConnectTools.AddItem(b9Data) as PushButton;
+
             PulldownButtonData pulldownData = new PulldownButtonData("ParameterTools", "Parameter Tools");
             pulldownData.LargeImage = new BitmapImage(new Uri(IconPath));
             PulldownButton pulldownButton = ConnectTools.AddItem(pulldownData) as PulldownButton;
@@ -180,6 +186,16 @@ public class App : IExternalApplication
                 b6Data.Image = new BitmapImage(new Uri(IconPath));
                 b6Data.LargeImage = new BitmapImage(new Uri(IconPath));
                 PushButton pb06 = pulldownButton.AddPushButton(b6Data);
+            }
+            PulldownButtonData settings = new PulldownButtonData("settings", "Settings");
+            settings.LargeImage = new BitmapImage(new Uri(IconPath));
+            PulldownButton settingsPullDown = ConnectTools.AddItem(settings) as PulldownButton;
+            {
+                PushButtonData b6Data = new PushButtonData("SleSets", "Sleeve Setting", AddInPath, "Intech.Sleeve.SleeveSettingsMain");
+                b6Data.ToolTip = "Menu to change settings for sleeve auto place.";
+                b6Data.Image = new BitmapImage(new Uri(IconPath));
+                b6Data.LargeImage = new BitmapImage(new Uri(IconPath));
+                PushButton pb06 = settingsPullDown.AddPushButton(b6Data);
             }
         }
 
