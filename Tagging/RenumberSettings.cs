@@ -64,7 +64,7 @@ namespace TitleBlockSetup.Tagging
             string filePath = Path.Combine(App.BasePath, "Settings.txt");
             SaveFileManager saveFileManager = new SaveFileManager(filePath, new TxtFormat());
 
-            SaveFileSection sec =  saveFileManager.GetSectionsByName("Number Settings", "Main").FirstOrDefault()?? 
+            SaveFileSection sec =  saveFileManager.GetSectionsByName("Number Settings", "Main") ?? 
                 new SaveFileSection("Number Settings", "Main", "Category\tParameter\tTag\tPrefix\tCurrent Number\tSuffix\tSeperator");
 
             Dictionary<string, Intech.Windows.Forms.ColumnType > columnDictionary = new Dictionary<string, Intech.Windows.Forms.ColumnType> 

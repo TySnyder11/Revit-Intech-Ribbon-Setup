@@ -184,6 +184,11 @@ namespace Intech.Windows.Forms
             dataGridView1.Columns[columnName].Width = width;
         }
 
+        public SaveFileSection GetSaveFileSection()
+        {
+            return _section;
+        }
+
         private void AddRow()
         {
             //DataGridViewRowsAddedEventArgs rowEvent = 

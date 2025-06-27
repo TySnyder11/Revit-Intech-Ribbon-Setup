@@ -36,7 +36,7 @@ namespace Intech.Tagging
                 string filePath = Path.Combine(App.BasePath, "Settings.txt");
                 SaveFileManager saveFileManager = new SaveFileManager(filePath, new TxtFormat());
 
-                SaveFileSection sec = saveFileManager.GetSectionsByName("Number Settings","Main").FirstOrDefault();
+                SaveFileSection sec = saveFileManager.GetSectionsByName("Number Settings", "Main");
                 if (sec == null)
                 {
                     throw new InvalidOperationException("No section found for 'Number Settings::Main' in the save file. Please go to Numbering settings and make sure to add a row and click Confirm.");

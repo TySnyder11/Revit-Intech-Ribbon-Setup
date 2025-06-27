@@ -20,6 +20,8 @@ namespace Intech
     {
         private string projectName = string.Empty;
 
+        SaveFileManager saveFileManager = null;
+
         public SheetSettings()
         {
             InitializeComponent();
@@ -30,41 +32,63 @@ namespace Intech
             List<string> titleBlockNames = titleBlocks.ConvertAll(f => f.Name);
             TitleBlockFamily.SetItems(titleBlockNames);
 
-
-
             //Get txt Path
             string BasePath = Path.Combine(App.BasePath, "Settings.txt");
-            SaveFileManager saveFileManager = new SaveFileManager(BasePath);
+            saveFileManager = new SaveFileManager(BasePath);
             {
-                SaveFileSection saveFileSection = saveFileManager.GetSectionsByName("Sheet Settings", "Sheet Creator Base Settings").FirstOrDefault();
+                SaveFileSection saveFileSection = saveFileManager.GetSectionsByName("Sheet Settings", "Sheet Creator Base Settings");
 
                 TradeAbriviation.Text = saveFileSection.Rows[0][0];
                 MiddleSheetNumber.Text = saveFileSection.Rows[0][1];
-                TitleBlockFamily.SelectedItem = saveFileSection.Rows[0][2];
-                TitleBlockType.SelectedItem = saveFileSection.Rows[0][3];
+
+                List<string> TitleBlockTypes = new List<string>();
+
+                string titleBlockFamilyValue = string.Empty;
+                if (saveFileSection.Rows.Count > 0 && saveFileSection.Rows[0].Length > 2)
+                {
+                    titleBlockFamilyValue = saveFileSection.Rows[0][2] ?? string.Empty;
+                }
+                if (titleBlockNames.Contains(titleBlockFamilyValue))
+                {
+                    TitleBlockFamily.Text = titleBlockFamilyValue;
+                    if (TitleBlockFamily.SelectedItem != null)
+                    {
+                        TitleBlockType.SetItems(Intech.Revit.RevitUtils.GetTitleBlockTypesFromFamily(titleBlockFamilyValue).ConvertAll(f => f.Name));
+                    }
+                }
+
+                string titleBlockTypeValue = string.Empty;
+                if (saveFileSection.Rows.Count > 0 && saveFileSection.Rows[0].Length > 3)
+                {
+                    titleBlockTypeValue = saveFileSection.Rows[0][3] ?? string.Empty;
+                }
+                if (TitleBlockType.Items.Contains(titleBlockTypeValue))
+                {
+                    TitleBlockType.Text = titleBlockTypeValue;
+                }
             }
             {
-                SaveFileSection saveFileSection = saveFileManager.GetSectionsByName("Sheet Settings", "Nonstandard Level Info").FirstOrDefault();
+                SaveFileSection saveFileSection = saveFileManager.GetSectionsByName("Sheet Settings", "Nonstandard Level Info");
                 LevelGrid.Initialize(saveFileManager, saveFileSection);
             }
             {
-                SaveFileSection saveFileSection = saveFileManager.GetSectionsByName("Sheet Settings", "Nonstandard Scopebox Info").FirstOrDefault();
+                SaveFileSection saveFileSection = saveFileManager.GetSectionsByName("Sheet Settings", "Nonstandard Scopebox Info");
                 AreaGrid.Initialize(saveFileManager, saveFileSection);
             }
             {
-                SaveFileSection saveFileSection = saveFileManager.GetSectionsByName("Sheet Settings", "Sheet Sub Discipline").FirstOrDefault();
+                SaveFileSection saveFileSection = saveFileManager.GetSectionsByName("Sheet Settings", "Sheet Sub Discipline");
                 SubDisciplineGrid.Initialize(saveFileManager, saveFileSection);
             }
             {
-                SaveFileSection saveFileSection = saveFileManager.GetSectionsByName("Sheet Settings", "Sheet Discipline").FirstOrDefault();
+                SaveFileSection saveFileSection = saveFileManager.GetSectionsByName("Sheet Settings", "Sheet Discipline");
                 DisciplineGrid.Initialize(saveFileManager, saveFileSection);
             }
             {
-                SaveFileSection saveFileSection = saveFileManager.GetSectionsByName("Sheet Settings", "Scale").FirstOrDefault();
+                SaveFileSection saveFileSection = saveFileManager.GetSectionsByName("Sheet Settings", "Scale");
                 ScaleGrid.Initialize(saveFileManager, saveFileSection);
             }
             {
-                SaveFileSection saveFileSection = saveFileManager.GetSectionsByName("Sheet Settings", "Sub Discipline check").FirstOrDefault();
+                SaveFileSection saveFileSection = saveFileManager.GetSectionsByName("Sheet Settings", "Sub Discipline check");
                 SubDisciplineCheck.Checked = saveFileSection.Rows[0][0] == "True";
             }
 
@@ -72,13 +96,64 @@ namespace Intech
 
         private void Import_Click(object sender, EventArgs e)
         {
+
+            var result = MessageBox.Show(
+                 "Do you want to save your current settings before importing a new file?",
+                 "Save Current Settings",
+                 MessageBoxButtons.YesNoCancel,
+                 MessageBoxIcon.Question);
+
+
+            if (result == DialogResult.Cancel)
+            {
+                return;
+            }
+            else if (result == DialogResult.Yes)
+            {
+                Export_Click(sender, e);
+            }
+
+
             OpenFileDialog Browser = new OpenFileDialog();
             Browser.Filter = "Text files (*.txt)|*.txt|All files (*.*)|*.*";
-            Browser.FilterIndex = 1; // Set the default filter to txt files
-            Browser.DefaultExt = ".txt"; // Set the default extension
+            Browser.FilterIndex = 1;
+            Browser.DefaultExt = ".txt";
             if (Browser.ShowDialog(this) == DialogResult.OK)
             {
-                
+                SaveFileManager import = new SaveFileManager(Browser.FileName);
+                {
+                    SaveFileSection saveFileSection = import.GetSectionsByName("Sheet Settings", "Sheet Creator Base Settings");
+
+                    TradeAbriviation.Text = saveFileSection.Rows[0][0];
+                    MiddleSheetNumber.Text = saveFileSection.Rows[0][1];
+                    TitleBlockFamily.SelectedItem = saveFileSection.Rows[0][2];
+                    TitleBlockType.SelectedItem = saveFileSection.Rows[0][3];
+                }
+                {
+                    SaveFileSection saveFileSection = import.GetSectionsByName("Sheet Settings", "Nonstandard Level Info");
+                    LevelGrid.Initialize(saveFileManager, saveFileSection);
+                }
+                {
+                    SaveFileSection saveFileSection = import.GetSectionsByName("Sheet Settings", "Nonstandard Scopebox Info");
+                    AreaGrid.Initialize(saveFileManager, saveFileSection);
+                }
+                {
+                    SaveFileSection saveFileSection = import.GetSectionsByName("Sheet Settings", "Sheet Sub Discipline");
+                    SubDisciplineGrid.Initialize(saveFileManager, saveFileSection);
+                }
+                {
+                    SaveFileSection saveFileSection = import.GetSectionsByName("Sheet Settings", "Sheet Discipline");
+                    DisciplineGrid.Initialize(saveFileManager, saveFileSection);
+                }
+                {
+                    SaveFileSection saveFileSection = import.GetSectionsByName("Sheet Settings", "Scale");
+                    ScaleGrid.Initialize(saveFileManager, saveFileSection);
+                }
+                {
+                    SaveFileSection saveFileSection = import.GetSectionsByName("Sheet Settings", "Sub Discipline check");
+                    SubDisciplineCheck.Checked = saveFileSection.Rows[0][0] == "True";
+                }
+
             }
             this.Close();
         }
@@ -87,17 +162,46 @@ namespace Intech
         {
             SaveFileDialog Browser = new SaveFileDialog();
             Browser.Filter = "Text files (*.txt)|*.txt|All files (*.*)|*.*";
-            Browser.FilterIndex = 1; // Set the default filter to txt files
-            Browser.DefaultExt = ".txt"; // Set the default extension
+            Browser.FilterIndex = 1;
+            Browser.DefaultExt = ".txt";
             if (Browser.ShowDialog(this) == DialogResult.OK)
             {
-                
+                SaveFileManager export = new SaveFileManager(Browser.FileName);
+                export.AddOrUpdateSection(LevelGrid.GetSaveFileSection());
+                export.AddOrUpdateSection(AreaGrid.GetSaveFileSection());
+                export.AddOrUpdateSection(SubDisciplineGrid.GetSaveFileSection());
+                export.AddOrUpdateSection(DisciplineGrid.GetSaveFileSection());
+                export.AddOrUpdateSection(ScaleGrid.GetSaveFileSection());
+                SaveFileSection saveFileSection = new SaveFileSection("Sheet Settings", "Sheet Creator Base Settings",
+                    "Trade Abbreviation\tMiddle Sheet Number\tTitleBlockFamily\tTitleBlockType");
+                saveFileSection.Rows.Add(new string[] { TradeAbriviation.Text, MiddleSheetNumber.Text, 
+                    TitleBlockFamily.SelectedItem?.ToString() ?? string.Empty, TitleBlockType.SelectedItem?.ToString() ?? string.Empty });
+                SaveFileSection subDisciplineCheck = new SaveFileSection("Sheet Settings", "Sub Discipline check", "bool");
+                subDisciplineCheck.Rows.Add(new string[] { SubDisciplineCheck.Checked.ToString() });
+                export.AddOrUpdateSection(saveFileSection);
+                export.AddOrUpdateSection(subDisciplineCheck);
             }
         }
 
         private void Confirm_Click(object sender, EventArgs e)
         {
-            
+            {
+                SaveFileSection saveFileSection = new SaveFileSection("Sheet Settings", "Sheet Creator Base Settings", 
+                    "Trade Abbreviation\tMiddle Sheet Number\tTitleBlockFamily\tTitleBlockType");
+                saveFileSection.Rows.Add(new string[] { TradeAbriviation.Text, MiddleSheetNumber.Text,
+                    TitleBlockFamily.SelectedItem?.ToString() ?? string.Empty, TitleBlockType.SelectedItem?.ToString() ?? string.Empty });
+                saveFileManager.AddOrUpdateSection(saveFileSection);
+            }
+            LevelGrid.Confirm();
+            AreaGrid.Confirm();
+            SubDisciplineGrid.Confirm();
+            DisciplineGrid.Confirm();
+            ScaleGrid.Confirm();
+            {
+                SaveFileSection saveFileSection = new SaveFileSection("Sheet Settings", "Sub Discipline check", "bool");
+                saveFileSection.Rows.Add(new string[] { SubDisciplineCheck.Checked.ToString() });
+                saveFileManager.AddOrUpdateSection(saveFileSection);
+            }
             this.Close();
         }
 
@@ -118,11 +222,9 @@ namespace Intech
 
         private void TitleBlockFamily_SelectedIndexChanged(object sender, EventArgs e)
         {
-
             if (TitleBlockFamily.SelectedItem != null)
             {
                 TitleBlockType.SetItems(Intech.Revit.RevitUtils.GetTitleBlockTypesFromFamily(TitleBlockFamily.SelectedItem.ToString()).ConvertAll(f => f.Name));
-
             }
             else
             {

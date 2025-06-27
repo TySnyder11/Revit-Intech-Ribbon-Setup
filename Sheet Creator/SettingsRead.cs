@@ -31,7 +31,7 @@ namespace Intech
             string BasePath = Path.Combine(App.BasePath, "Settings.txt");
 
             SaveFileManager saveFileManager = new SaveFileManager(BasePath);
-            SaveFileSection saveFileSection = saveFileManager.GetSectionsByName("Sheet Settings", "Sheet Creator Base Settings").FirstOrDefault();
+            SaveFileSection saveFileSection = saveFileManager.GetSectionsByName("Sheet Settings", "Sheet Creator Base Settings");
             tradeAbbreviation = saveFileSection.Rows[0][0];
             SheetNumber = saveFileSection.Rows[0][1];
             titleBlockFamily = saveFileSection.Rows[0][2];
@@ -47,7 +47,7 @@ namespace Intech
             string BasePath = Path.Combine(App.BasePath, "Settings.txt");
 
             SaveFileManager saveFileManager = new SaveFileManager(BasePath);
-            SaveFileSection saveFileSection = saveFileManager.GetSectionsByName("Sheet Settings", "Scale").FirstOrDefault();
+            SaveFileSection saveFileSection = saveFileManager.GetSectionsByName("Sheet Settings", "Scale");
             foreach (string[] row in saveFileSection.Rows)
             {
                 scale.Add(row[0], (row[1], row[2]));
@@ -64,7 +64,7 @@ namespace Intech
             string BasePath = Path.Combine(App.BasePath, "Settings.txt");
 
             SaveFileManager saveFileManager = new SaveFileManager(BasePath);
-            SaveFileSection saveFileSection = saveFileManager.GetSectionsByName("Sheet Settings", "Nonstandard Level Info").FirstOrDefault();
+            SaveFileSection saveFileSection = saveFileManager.GetSectionsByName("Sheet Settings", "Nonstandard Level Info");
             foreach (string[] row in saveFileSection.Rows)
             {
                 nonstandardLevels.Add(row[0], (row[1], row[2]));
@@ -81,7 +81,7 @@ namespace Intech
             string BasePath = Path.Combine(App.BasePath, "Settings.txt");
 
             SaveFileManager saveFileManager = new SaveFileManager(BasePath);
-            SaveFileSection saveFileSection = saveFileManager.GetSectionsByName("Sheet Settings", "Nonstandard Scopebox Info").FirstOrDefault();
+            SaveFileSection saveFileSection = saveFileManager.GetSectionsByName("Sheet Settings", "Nonstandard Scopebox Info");
             foreach (string[] row in saveFileSection.Rows)
             {
                 nonstandardArea.Add(row[0], (row[1], row[2]));
@@ -98,7 +98,7 @@ namespace Intech
             string BasePath = Path.Combine(App.BasePath, "Settings.txt");
 
             SaveFileManager saveFileManager = new SaveFileManager(BasePath);
-            SaveFileSection saveFileSection = saveFileManager.GetSectionsByName("Sheet Settings", "Sheet Discipline").FirstOrDefault();
+            SaveFileSection saveFileSection = saveFileManager.GetSectionsByName("Sheet Settings", "Sheet Discipline");
             foreach (string[] row in saveFileSection.Rows)
             {
                 discipline.Add(row[0], (row[1], row[2]));
@@ -115,9 +115,9 @@ namespace Intech
             //Get txt Path
             string BasePath = Path.Combine(App.BasePath, "Settings.txt");
 
-            SaveFileManager saveFileManager = new SaveFileManager(BasePath);
-            SaveFileSection DisSection = saveFileManager.GetSectionsByName("Sheet Settings", "Sheet Sub Discipline").FirstOrDefault();
-            SaveFileSection ChecSection = saveFileManager.GetSectionsByName("Sheet Settings", "Sub Discipline check").FirstOrDefault();
+            SaveFileManager saveFileManager = new SaveFileManager(BasePath);    
+            SaveFileSection DisSection = saveFileManager.GetSectionsByName("Sheet Settings", "Sheet Sub Discipline");
+            SaveFileSection ChecSection = saveFileManager.GetSectionsByName("Sheet Settings", "Sub Discipline check");
 
             check = ChecSection.Rows[0].FirstOrDefault() == "True";
 

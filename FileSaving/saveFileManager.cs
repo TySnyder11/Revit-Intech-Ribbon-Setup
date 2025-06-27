@@ -129,9 +129,9 @@ namespace Intech
         {
             return ReadAllSections().Where(s => s.PrimaryName == Name).ToList();
         }
-        public List<SaveFileSection> GetSectionsByName(string PrimaryName, string SecondaryName)
+        public SaveFileSection GetSectionsByName(string PrimaryName, string SecondaryName)
         {
-            return ReadAllSections().Where(s => s.PrimaryName == PrimaryName && s.SecondaryName == SecondaryName).ToList();
+            return ReadAllSections().Where(s => s.PrimaryName == PrimaryName && s.SecondaryName == SecondaryName).FirstOrDefault();
         }
     }
 
