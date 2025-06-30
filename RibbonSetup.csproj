@@ -127,6 +127,7 @@
   <ItemGroup>
     <Compile Include="CollisionEngine\CollisionEngine.cs" />
     <Compile Include="CollisionEngine\CollisionResult.cs" />
+    <Compile Include="CollisionEngine\ElementToGeometryData.cs" />
     <Compile Include="CollisionEngine\GeometryData.cs" />
     <Compile Include="CollisionEngine\RTree.cs" />
     <Compile Include="Connector Tools\Connect.cs" />

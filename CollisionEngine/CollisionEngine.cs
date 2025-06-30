@@ -15,16 +15,18 @@ namespace Intech.Geometry.Collision
         {
             public delegate void CollisionHandler(CollisionResult result);
 
+
             public void Run(
-            IEnumerable<GeometryData> groupA,
-            IEnumerable<GeometryData> groupB,
-            double cellSize,
-            double overlap,
-            CollisionHandler onCollision)
+             IEnumerable<GeometryData> groupA,
+             IEnumerable<GeometryData> groupB,
+             double cellSize,
+             double overlap,
+             CollisionHandler onCollision)
             {
                 var partitions = new ConcurrentDictionary<(int x, int y, int z), Partition>();
+                var processedPairs = new ConcurrentDictionary<(ElementId, ElementId), byte>();
+                var results = new ConcurrentBag<CollisionResult>();
 
-                // Step 2: Assign geometry to partitions (multithreaded)
                 Parallel.ForEach(groupA.Concat(groupB), record =>
                 {
                     var inflated = InflateBoundingBox(record.BoundingBox, overlap);
@@ -37,34 +39,53 @@ namespace Intech.Geometry.Collision
                             {
                                 var key = (x, y, z);
                                 var partition = partitions.GetOrAdd(key, _ => new Partition());
-                                lock (partition) partition.Add(record);
+                                lock (partition)
+                                    partition.Add(record);
                             }
                 });
 
-                // Step 3–4: Process partitions (multithreaded)
                 Parallel.ForEach(partitions.Values, partition =>
                 {
                     if (!partition.ShouldProcess()) return;
 
                     foreach (var a in partition.GroupA)
+                    {
                         foreach (var b in partition.GroupB)
                         {
-                            if (!BoxesIntersect(a.BoundingBox,b.BoundingBox)) continue;
+                            if (!BoxesIntersect(a.BoundingBox, b.BoundingBox)) continue;
+
+                            var key = a.SourceElementId.Value < b.SourceElementId.Value
+                            ? (a.SourceElementId, b.SourceElementId)
+                            : (b.SourceElementId, a.SourceElementId);
+
+                            if (!processedPairs.TryAdd(key, 0)) continue;
 
                             Solid intersection = null;
-                            intersection = BooleanOperationsUtils.ExecuteBooleanOperation(
-                                 a.Solid,
-                                 b.Solid,
-                                 BooleanOperationsType.Intersect
-                                );
+                            try
+                            {
+                                intersection = BooleanOperationsUtils.ExecuteBooleanOperation(
+                                a.Solid,
+                                b.Solid,
+                                BooleanOperationsType.Intersect);
+                            }
+                            catch
+                            {
+                            }
+
                             if (intersection != null && intersection.Volume > 1e-6)
                             {
-                                var result = new CollisionResult { A = a, B = b, Intersection = intersection };
-                                onCollision(result);
+                                results.Add(new CollisionResult { A = a, B = b, Intersection = intersection });
                             }
                         }
+                    }
                 });
+
+                foreach (var result in results)
+                {
+                    onCollision(result);
+                }
             }
+
 
             bool BoxesIntersect(BoundingBoxXYZ a, BoundingBoxXYZ b)
             {
@@ -93,7 +114,6 @@ namespace Intech.Geometry.Collision
                     (int)Math.Floor(point.Z / cellSize)
                 );
             }
-
         }
     }
 }
