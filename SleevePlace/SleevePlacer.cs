@@ -210,7 +210,7 @@ namespace Intech
                 FamilyInstance sleeve = doc.Create.NewFamilyInstance(center, sleeveSymbol, level, StructuralType.NonStructural);
 
                 // Rotate sleeve to align Z-axis with wall normal
-                XYZ currentZ = sleeve.FacingOrientation;
+                XYZ currentZ = GetSleeveAxis(sleeve);
                 XYZ rotationAxis = currentZ.CrossProduct(wallNormal).Normalize();
                 double angle = currentZ.AngleTo(wallNormal);
 
@@ -222,7 +222,7 @@ namespace Intech
 
                 // Set sleeve depth to wall thickness
                 double thickness = GetWallThickness(wall);
-                Parameter depthParam = sleeve.LookupParameter("Sleeve_Depth");
+                Parameter depthParam = sleeve.LookupParameter("Sleeve_Length");
                 if (depthParam != null && !depthParam.IsReadOnly)
                 {
                     depthParam.Set(thickness);
@@ -353,9 +353,9 @@ namespace Intech
         {
             if (isRound)
             {
-                Parameter radiusParam = sleeve.LookupParameter("Radius");
+                Parameter radiusParam = sleeve.LookupParameter("Sleeve_Nominal_Diameter");
                 if (radiusParam != null && !radiusParam.IsReadOnly)
-                    radiusParam.Set(width / 2); // assuming width = diameter
+                    radiusParam.Set(Math.Max(width, height)); // assuming width = diameter
             }
             else
             {
@@ -368,6 +368,23 @@ namespace Intech
                 if (heightParam != null && !heightParam.IsReadOnly)
                     heightParam.Set(height);
             }
+        }
+
+        private XYZ GetSleeveAxis(FamilyInstance sleeve)
+        {
+            if (sleeve.MEPModel != null)
+            {
+                ConnectorSet connectors = sleeve.MEPModel.ConnectorManager.Connectors;
+                var ordered = connectors.Cast<Connector>().OrderBy(c => c.Origin.Z).ToList();
+
+                if (ordered.Count >= 2)
+                {
+                    XYZ dir = (ordered[1].Origin - ordered[0].Origin).Normalize();
+                    return dir;
+                }
+            }
+
+            return XYZ.BasisZ; // fallback
         }
 
     }
