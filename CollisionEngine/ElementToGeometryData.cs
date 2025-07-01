@@ -15,10 +15,8 @@ namespace Intech.Geometry
 {
     internal class ElementToGeometryData
     {
-        public static List<GeometryData> ConvertMEPToGeometryData(UIDocument uidoc)
+        public static List<GeometryData> ConvertMEPToGeometryData(List<Reference> references, Document doc)
         {
-            Document doc = uidoc.Document;
-            List<Reference> references = uidoc.Selection.GetReferences().ToList();
             List<GeometryData> geometryDataList = new List<GeometryData>();
 
             foreach (Reference reference in references)

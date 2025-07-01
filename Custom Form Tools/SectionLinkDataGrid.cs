@@ -260,6 +260,11 @@ namespace Intech.Windows.Forms
             .ToArray();
         }
 
+        public int GetRowCount()
+        {
+            return _section.Rows.Count();
+        }
+
         public void Confirm()
         {
             _manager.AddOrUpdateSection(_section);
@@ -381,6 +386,14 @@ namespace Intech.Windows.Forms
             dataGridView1.Rows[row].Cells[columnName].Value = Value;
         }
         public void SetCellValue(int column, int row, string Value)
+        {
+            dataGridView1.Rows[row].Cells[column].Value = Value;
+        }
+        public void SetCellValue(string columnName, int row, bool Value)
+        {
+            dataGridView1.Rows[row].Cells[columnName].Value = Value;
+        }
+        public void SetCellValue(int column, int row, bool Value)
         {
             dataGridView1.Rows[row].Cells[column].Value = Value;
         }

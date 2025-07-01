@@ -2,6 +2,7 @@
 using Autodesk.Revit.ApplicationServices;
 using Autodesk.Revit.DB;
 using Autodesk.Revit.DB.Analysis;
+using Autodesk.Revit.DB.Structure;
 using Autodesk.Revit.UI;
 using OfficeOpenXml.Export.ToDataTable;
 using System;
@@ -71,11 +72,51 @@ namespace Intech.Revit
             return paramNames.ToList();
 
         }
-
-        static public Parameter GetParameters(Family family)
+        public static List<string> GetParameters(FamilySymbol symbol)
         {
-            return null;
+            List<string> parameterNames = new List<string>();
+
+            // Get any valid level from the document
+            Level level = new FilteredElementCollector(_doc)
+                .OfClass(typeof(Level))
+                .Cast<Level>()
+                .FirstOrDefault();
+
+            if (level == null)
+                throw new InvalidOperationException("No levels found in the document.");
+
+            if (!symbol.IsActive)
+            {
+                using (Transaction activateTx = new Transaction(_doc, "Activate Symbol"))
+                {
+                    activateTx.Start();
+                    symbol.Activate();
+                    activateTx.Commit();
+                }
+            }
+
+            using (Transaction tx = new Transaction(_doc, "Temp Instance for Parameter Extraction"))
+            {
+                tx.Start();
+
+                // Place a temporary instance at origin
+                XYZ origin = XYZ.Zero;
+                FamilyInstance tempInstance = _doc.Create.NewFamilyInstance(origin, symbol, level, StructuralType.NonStructural);
+
+                foreach (Parameter parameter in tempInstance.Parameters)
+                {
+                    if (parameter?.Definition != null)
+                    {
+                        parameterNames.Add(parameter.Definition.Name);
+                    }
+                }
+
+                tx.RollBack(); // Clean up
+            }
+
+            return parameterNames;
         }
+
 
         static public Parameter GetParameter(Category category, string paramName)
         {

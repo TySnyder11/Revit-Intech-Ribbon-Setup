@@ -34,8 +34,6 @@ namespace Intech.Sleeve
             fams = Intech.Revit.RevitUtils.GetFamilies();
             List<string> famName = fams.Select(f => f.Name).ToList();
             famName.Sort();
-            RoundSleeveFamilySelect.SetItems(famName);
-            RectSleeveFamilySelect.SetItems(famName);
 
             string basePath = Path.Combine(App.BasePath, "Settings.txt");
             saveFileManager = new SaveFileManager(basePath);
@@ -45,34 +43,95 @@ namespace Intech.Sleeve
             {
                 structCombo.Text = section.Rows[0][0];
             }
+            else
+            {
+                structCombo.Text = "Current";
+            }
+            {
+                SaveFileSection saveFileSection = saveFileManager.GetSectionsByName("Sleeve Place", "Round Sleeve") ??
+                new SaveFileSection("Sleeve Place", "Round Sleeve", "Active\tName\tFamily\tFamily Type\tLength Parameter\t" +
+                    "Diameter Parameter\tLength Tolerance\tDiameter Tolerance\tLength Round\tDiameter Round ");
+                RoundPanel.CellEdited += RoundPanel_CellEdited;
+                RoundPanel.RowAdded += RoundPanel_RowAdded;
 
-            SaveFileSection saveFileSection = saveFileManager.GetSectionsByName("Sleeve Place", "Sleeve Family") ??
-                new SaveFileSection("Sleeve Place", "Sleeve Family", "Selected family name");
-            if (saveFileSection.Rows.Count() > 0 && saveFileSection.Rows[0].Count() > 0 && famName.Contains(saveFileSection.Rows[0][0]))
-            {
-                RoundSleeveFamilySelect.Text = saveFileSection.Rows[0][0];
-                Family selectedFamily = fams.FirstOrDefault(f => f.Name == saveFileSection.Rows[0][0]);
-                List<FamilySymbol> syms = Intech.Revit.RevitUtils.GetFamilySymbols(selectedFamily);
-                List<string> symNames = syms.Select(s => s.Name).ToList();
-                symNames.Sort();
-                RoundTypeFamilySelect.SetItems(symNames);
+                RoundPanel.ConfigureColumnTypes(new Dictionary<string, Intech.Windows.Forms.ColumnType>
+                {
+                    { "Active", Intech.Windows.Forms.ColumnType.CheckBox },
+                    { "Name", Intech.Windows.Forms.ColumnType.Text },
+                    { "Family", Intech.Windows.Forms.ColumnType.ComboBox },
+                    { "Family Type", Intech.Windows.Forms.ColumnType.ComboBox },
+                    { "Length Parameter", Intech.Windows.Forms.ColumnType.ComboBox },
+                    { "Diameter Parameter", Intech.Windows.Forms.ColumnType.ComboBox },
+                    { "Length Tolerance", Intech.Windows.Forms.ColumnType.Text },
+                    { "Diameter Tolerance", Intech.Windows.Forms.ColumnType.Text },
+                    { "Length Round", Intech.Windows.Forms.ColumnType.Text },
+                    { "Diameter Round", Intech.Windows.Forms.ColumnType.Text }
+                });
+                RoundPanel.SetDefaultColumnValue("Active", "False");
+                RoundPanel.SetDefaultColumnValue("Length Tolerance", "0");
+                RoundPanel.SetDefaultColumnValue("Diameter Tolerance", "0");
+                RoundPanel.SetDefaultColumnValue("Length Round", "0.5");
+                RoundPanel.SetDefaultColumnValue("Diameter Round", "0.5");
+
+                RoundPanel.Initialize(saveFileManager, saveFileSection);
+
+                RoundPanel.SetComboBoxItems("Family", famName);
+
             }
-            if (saveFileSection.Rows.Count() > 1 && saveFileSection.Rows[0].Count() > 0 && linkNames.Contains(saveFileSection.Rows[1][0]))
+        }
+
+        private void RoundPanel_RowAdded(object sender, EventArgs e)
+        {
+            DataGridViewRowsAddedEventArgs rowEvent = e as DataGridViewRowsAddedEventArgs;
+
+            if (RoundPanel.GetCellValue(2, rowEvent.RowIndex) is string family && !string.IsNullOrWhiteSpace(family))
             {
-                RoundSleeveFamilySelect.SelectedValue = saveFileSection.Rows[1][0];
+                Family fam = fams.FirstOrDefault(f => f.Name == family);
+                List<FamilySymbol> types = Intech.Revit.RevitUtils.GetFamilySymbols(fam);
+                RoundPanel.SetComboBoxItems("Family Type", rowEvent.RowIndex, types.Select(fs => fs.Name).ToList());
+
+                if (RoundPanel.GetCellValue(3, rowEvent.RowIndex) is string typeName && !string.IsNullOrWhiteSpace(typeName))
+                {
+                    FamilySymbol type = types.FirstOrDefault(t => t.Name == typeName);
+                    List<string> names = Intech.Revit.RevitUtils.GetParameters(type);
+                    RoundPanel.SetComboBoxItems("Length Parameter", names);
+                    RoundPanel.SetComboBoxItems("Diameter Parameter", names);
+                }
             }
-            if (saveFileSection.Rows.Count() > 0 && saveFileSection.Rows[0].Count() > 1 && famName.Contains(saveFileSection.Rows[0][1]))
+        }
+
+        private void RoundPanel_CellEdited(object sender, EventArgs e)
+        {
+            DataGridViewCellEventArgs cellEvent = e as DataGridViewCellEventArgs;
+            if (cellEvent.ColumnIndex == 0)
             {
-                RectSleeveFamilySelect.Text = saveFileSection.Rows[0][1];
-                Family selectedFamily = fams.FirstOrDefault(f => f.Name == saveFileSection.Rows[0][0]);
-                List<FamilySymbol> syms = Intech.Revit.RevitUtils.GetFamilySymbols(selectedFamily);
-                List<string> symNames = syms.Select(s => s.Name).ToList();
-                symNames.Sort();
-                RectTypeFamilySelect.SetItems(symNames);
+                if (RoundPanel.GetCellValue(0, cellEvent.RowIndex) is Boolean boolean && boolean)
+                {
+                    int rows = RoundPanel.GetRowCount();
+                    for (int i = 0; i < rows; i++)
+                    {
+                        if ( i != cellEvent.RowIndex)
+                            RoundPanel.SetCellValue(0, i, false);
+                    }
+                }
             }
-            if (saveFileSection.Rows.Count() > 1 && saveFileSection.Rows[0].Count() > 1 && linkNames.Contains(saveFileSection.Rows[1][1]))
+            if (cellEvent.ColumnIndex == 2)
             {
-                RectSleeveFamilySelect.SelectedValue = saveFileSection.Rows[1][1];
+                Family fam = fams.FirstOrDefault(f => f.Name == (string)RoundPanel.GetCellValue(2, cellEvent.RowIndex));
+                List<FamilySymbol> types = Intech.Revit.RevitUtils.GetFamilySymbols(fam);
+                List<string> typeNames = types.Select(t => t.Name).ToList();
+                typeNames.Sort();
+                RoundPanel.SetComboBoxItems("Family Type", cellEvent.RowIndex, typeNames);
+
+            }
+            if (cellEvent.ColumnIndex == 3)
+            {
+
+                Family fam = fams.FirstOrDefault(f => f.Name == (string)RoundPanel.GetCellValue(2, cellEvent.RowIndex));
+                FamilySymbol type = Intech.Revit.RevitUtils.GetFamilySymbols(fam).FirstOrDefault(t => t.Name == (string)RoundPanel.GetCellValue(3, cellEvent.RowIndex));
+                List<string> names = Intech.Revit.RevitUtils.GetParameters(type);
+                RoundPanel.SetComboBoxItems("Length Parameter", names);
+                RoundPanel.SetComboBoxItems("Diameter Parameter", names);
             }
         }
 
@@ -87,31 +146,8 @@ namespace Intech.Sleeve
             section.Rows.Add(new string[] { structCombo.Text });
             saveFileManager.AddOrUpdateSection(section);
 
-            SaveFileSection saveFileSection = new SaveFileSection("Sleeve Place", "Sleeve Family", "Selected family name");
-            saveFileSection.Rows.Add(new string[] { RoundSleeveFamilySelect.Text, RectSleeveFamilySelect.Text });
-            saveFileSection.Rows.Add(new string[] { RoundTypeFamilySelect.Text, RectTypeFamilySelect.Text });
-            saveFileManager.AddOrUpdateSection(saveFileSection);
+            RoundPanel.Confirm();
             this.Close();
-        }
-
-        private void SleeveFamilySelect_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            string famName = RoundSleeveFamilySelect.Text;
-            Family selectedFamily = fams.FirstOrDefault(f => f.Name == famName);
-            List<FamilySymbol> syms = Intech.Revit.RevitUtils.GetFamilySymbols(selectedFamily);
-            List<string> symNames = syms.Select(s => s.Name).ToList();
-            symNames.Sort();
-            RoundTypeFamilySelect.SetItems(symNames);
-        }
-
-        private void RectSleeveFamilySelect_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            string famName = RectSleeveFamilySelect.Text;
-            Family selectedFamily = fams.FirstOrDefault(f => f.Name == famName);
-            List<FamilySymbol> syms = Intech.Revit.RevitUtils.GetFamilySymbols(selectedFamily);
-            List<string> symNames = syms.Select(s => s.Name).ToList();
-            symNames.Sort();
-            RectTypeFamilySelect.SetItems(symNames);
         }
     }
 }

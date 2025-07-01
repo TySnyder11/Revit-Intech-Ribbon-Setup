@@ -4,6 +4,7 @@ using Autodesk.Revit.DB.Mechanical;
 using Autodesk.Revit.DB.Plumbing;
 using Autodesk.Revit.DB.Structure;
 using Autodesk.Revit.UI;
+using Autodesk.Revit.UI.Selection;
 using Intech.Geometry;
 using Intech.Geometry.Collision;
 using System;
@@ -26,8 +27,21 @@ namespace Intech
             UIDocument uidoc = app.ActiveUIDocument;
             Document doc = uidoc.Document;
             Intech.Revit.RevitUtils.init(doc);
+            List<Reference> references = null;
+            try
+            {
+                references = uidoc.Selection.PickObjects(
+                    ObjectType.Element,
+                    new DuctPipeSelectionFilter(),
+                    "Select ducts or pipes."
+                    , uidoc.Selection.GetReferences()).ToList();
+            }
+            catch (Autodesk.Revit.Exceptions.OperationCanceledException)
+            {
+                return Result.Cancelled;
+            }
 
-            List<GeometryData> mepGeometry = ElementToGeometryData.ConvertMEPToGeometryData(uidoc);
+            List<GeometryData> mepGeometry = ElementToGeometryData.ConvertMEPToGeometryData(references, doc);
             if (mepGeometry.Count == 0)
             {
                 return Result.Failed;
@@ -51,15 +65,26 @@ namespace Intech
             }
 
             var engine = new Intech.Geometry.Collision.Engine.CollisionEngine();
-            List<CollisionResult> test = new List<CollisionResult>();
             engine.Run(mepGeometry, wallGeometry, 15, 3, result =>
             {
-                test.Add(result);
                 PlaceSleeveAtCollision(result, doc);
             });
             return Result.Succeeded;
         }
 
+        public class DuctPipeSelectionFilter : ISelectionFilter
+        {
+            public bool AllowElement(Element elem)
+            {
+                return elem is Duct || elem is FabricationPart || (elem is FamilyInstance fi && fi.MEPModel != null) ||
+                       (elem is FabricationPart) || elem is Pipe;
+            }
+
+            public bool AllowReference(Reference r, XYZ p)
+            {
+                return true;
+            }
+        }
 
         public List<Wall> GetWallsFromLinkedModel(RevitLinkInstance structuralModel)
         {
@@ -132,6 +157,7 @@ namespace Intech
             return geometryDataList;
         }
 
+        string[] activeSettings = null;
         public void PlaceSleeveAtCollision(CollisionResult collision, Document doc)
         {
             Solid intersection = collision.Intersection;
@@ -167,11 +193,23 @@ namespace Intech
             // Determine if round or rectangular
             Element pipeElement = doc.GetElement(collision.A.SourceElementId);
             bool isRound = IsRound(pipeElement);
+            double insulationThickness = GetInsulationThickness(doc, pipeElement);
+
 
             // Get family and symbol names from settings
-            SaveFileSection sec = saveFileManager.GetSectionsByName("Sleeve Place", "Sleeve Family");
-            string familyName = isRound ? sec.Rows[0][0] : sec.Rows[0][1];
-            string symbolName = isRound ? sec.Rows[1][0] : sec.Rows[1][1];
+            SaveFileSection sec = null;
+            if (isRound)
+            {
+                sec = saveFileManager.GetSectionsByName("Sleeve Place", "Round Sleeve");
+            }
+            else
+            {
+                sec = saveFileManager.GetSectionsByName("Sleeve Place", "Rectangular Sleeve");
+            }
+            activeSettings = sec.lookUp(0, "true").FirstOrDefault() ?? sec.Rows[0];
+
+            string familyName = activeSettings[2];
+            string symbolName = activeSettings[3];
 
             // Find the correct FamilySymbol
             FamilySymbol sleeveSymbol = new FilteredElementCollector(doc)
@@ -220,18 +258,49 @@ namespace Intech
                     ElementTransformUtils.RotateElement(doc, sleeve.Id, axis, angle);
                 }
 
-                // Set sleeve depth to wall thickness
-                double thickness = GetWallThickness(wall);
-                Parameter depthParam = sleeve.LookupParameter("Sleeve_Length");
+                // Set sleeve lenght to wall thickness
+                double lengthTolerance = double.Parse(activeSettings[6]) / 12;
+
+                double rawThickness = GetWallThickness(wall);
+                Parameter depthParam = sleeve.LookupParameter(activeSettings[4]);
                 if (depthParam != null && !depthParam.IsReadOnly)
                 {
+                    double thickness = RoundUpToNearestIncrement(rawThickness, double.Parse(activeSettings[8]));
                     depthParam.Set(thickness);
                 }
 
                 // Analyze intersection solid
-                GetBoundingExtents(intersection, wallNormal, out double minZ, out double maxZ, out double minWall, out double maxWall);
-                double height = maxZ - minZ;
-                double width = maxWall - minWall;
+                double heightTolerance = 0;
+                double widthTolerance = 0;
+                if (isRound)
+                {
+
+                    heightTolerance = double.Parse(activeSettings[7])/12;
+                    widthTolerance = double.Parse(activeSettings[7])/12;
+                }
+                else
+                {
+                    heightTolerance = 0;
+                    widthTolerance = 0 / 12;
+                }
+
+
+                    GetBoundingExtents(intersection, wallNormal, out double minZ, out double maxZ, out double minWall, out double maxWall);
+                double rawHeight = maxZ - minZ + 2 * insulationThickness + heightTolerance;
+                double rawWidth = maxWall - minWall + 2 * insulationThickness + widthTolerance;
+
+                double height = 0;
+                double width = 0;
+                if (isRound)
+                {
+                    height = RoundUpToNearestIncrement(rawHeight, double.Parse(activeSettings[9]));
+                    width = RoundUpToNearestIncrement(rawWidth, double.Parse(activeSettings[9]));
+                }
+                else
+                {
+                    height = RoundUpToNearestIncrement(rawHeight, 0.5);
+                    width = RoundUpToNearestIncrement(rawWidth, 0.5);
+                }
 
                 // Set sleeve dimensions
                 SetSleeveDimensions(sleeve, isRound, width, height);
@@ -240,6 +309,30 @@ namespace Intech
             }
         }
 
+
+
+        private double GetInsulationThickness(Document doc, Element pipe)
+        {
+            if (pipe == null)
+                return 0;
+
+            ElementId pipeId = pipe.Id;
+
+            var insulation = new FilteredElementCollector(doc)
+            .OfClass(typeof(PipeInsulation))
+            .Cast<PipeInsulation>()
+            .FirstOrDefault(ins => ins.HostElementId == pipeId);
+
+            if (insulation != null)
+            {
+
+                Parameter thicknessParam = insulation.LookupParameter("Insulation Thickness");
+                if (thicknessParam != null && thicknessParam.HasValue)
+                    return thicknessParam.AsDouble(); // in feet
+            }
+
+            return 0;
+        }
 
 
         private XYZ ComputeCentroid(Solid solid)
@@ -259,6 +352,25 @@ namespace Intech
 
             return count > 0 ? sum / count : null;
         }
+
+
+        private double RoundUpToNearestIncrement(double valueInFeet, double incrementInInches)
+        {
+            double incrementInFeet = incrementInInches / 12.0;
+            double tolerance = 1e-6; // Arbitrarily small value in feet (~0.000012 inches)
+
+            double remainder = valueInFeet % incrementInFeet;
+
+            if (remainder < tolerance || Math.Abs(remainder - incrementInFeet) < tolerance)
+            {
+                // Already close enough to an increment — return the rounded value
+                return Math.Round(valueInFeet / incrementInFeet) * incrementInFeet;
+            }
+
+            // Otherwise, round up
+            return Math.Ceiling(valueInFeet / incrementInFeet) * incrementInFeet;
+        }
+
 
         private XYZ GetWallNormalFromElement(Wall wall)
         {
@@ -288,29 +400,47 @@ namespace Intech
             .FirstOrDefault();
         }
 
-        private bool SleeveExistsAt(XYZ center, Document doc, string familyName, double tolerance = 0.05)
+        private bool SleeveExistsAt(XYZ center, Document doc, string familyName, double tolerance = 0.1)
         {
-            var existingSleeves = new FilteredElementCollector(doc)
-            .OfClass(typeof(FamilyInstance))
-            .OfType<FamilyInstance>()
-            .Where(fi => fi.Symbol.Family.Name == familyName);
+            // Create an Outline (not BoundingBoxXYZ)
+            XYZ min = new XYZ(center.X - tolerance, center.Y - tolerance, center.Z - tolerance);
+            XYZ max = new XYZ(center.X + tolerance, center.Y + tolerance, center.Z + tolerance);
+            Outline outline = new Outline(min, max);
 
-            foreach (var sleeve in existingSleeves)
+            BoundingBoxIntersectsFilter bboxFilter = new BoundingBoxIntersectsFilter(outline);
+
+            var collector = new FilteredElementCollector(doc)
+            .OfClass(typeof(FamilyInstance))
+            .WherePasses(bboxFilter)
+            .Cast<FamilyInstance>()
+            .Where(fi => fi.Symbol.Family.Name.Equals(familyName, StringComparison.OrdinalIgnoreCase));
+
+            foreach (var sleeve in collector)
             {
-                LocationPoint loc = sleeve.Location as LocationPoint;
-                if (loc != null && loc.Point.DistanceTo(center) < tolerance)
-                    return true;
+                if (sleeve.Location is LocationPoint locPoint)
+                {
+                    if (locPoint.Point.DistanceTo(center) < tolerance)
+                        return true;
+                }
             }
 
             return false;
         }
 
-        private void GetBoundingExtents(Solid solid, XYZ wallNormal, out double minZ, out double maxZ, out double minWall, out double maxWall)
+        private void GetBoundingExtents(Solid solid, XYZ wallNormal, out double minZ, out double maxZ, out double minSection, out double maxSection)
         {
             minZ = double.MaxValue;
             maxZ = double.MinValue;
-            minWall = double.MaxValue;
-            maxWall = double.MinValue;
+
+            minSection = double.MaxValue;
+            maxSection = double.MinValue;
+
+
+            XYZ reference = XYZ.BasisZ;
+            if (wallNormal.IsAlmostEqualTo(XYZ.BasisZ))
+                reference = XYZ.BasisX;
+
+            XYZ sectionDirection = wallNormal.CrossProduct(reference).Normalize();
 
             foreach (Face face in solid.Faces)
             {
@@ -318,12 +448,12 @@ namespace Intech
                 foreach (XYZ vertex in mesh.Vertices)
                 {
                     double z = vertex.Z;
-                    double wallCoord = vertex.DotProduct(wallNormal);
+                    double sectionCoord = vertex.DotProduct(sectionDirection);
 
                     if (z < minZ) minZ = z;
                     if (z > maxZ) maxZ = z;
-                    if (wallCoord < minWall) minWall = wallCoord;
-                    if (wallCoord > maxWall) maxWall = wallCoord;
+                    if (sectionCoord < minSection) minSection = sectionCoord;
+                    if (sectionCoord > maxSection) maxSection = sectionCoord;
                 }
             }
         }
@@ -353,9 +483,9 @@ namespace Intech
         {
             if (isRound)
             {
-                Parameter radiusParam = sleeve.LookupParameter("Sleeve_Nominal_Diameter");
-                if (radiusParam != null && !radiusParam.IsReadOnly)
-                    radiusParam.Set(Math.Max(width, height)); // assuming width = diameter
+                Parameter diameterParam = sleeve.LookupParameter(activeSettings[5]);
+                if (diameterParam != null && !diameterParam.IsReadOnly)
+                    diameterParam.Set(Math.Max(width, height));
             }
             else
             {
