@@ -89,14 +89,9 @@ namespace Intech.Sleeve
                 Family fam = fams.FirstOrDefault(f => f.Name == family);
                 List<FamilySymbol> types = Intech.Revit.RevitUtils.GetFamilySymbols(fam);
                 RoundPanel.SetComboBoxItems("Family Type", rowEvent.RowIndex, types.Select(fs => fs.Name).ToList());
-                List<string> names = new List<string>();
-                ParameterMap parameter = Intech.Revit.RevitUtils.GetParameters(fam);
-                foreach (Parameter param in parameter)
-                {
-                    names.Add(param.Definition.Name);
-                }
-                RoundPanel.SetComboBoxItems("Length Parameter", names);
-                RoundPanel.SetComboBoxItems("Diameter Parameter", names);
+                List<string> parameter = Intech.Revit.RevitUtils.GetParameterNamesFromFamily(fam).ToList();
+                RoundPanel.SetComboBoxItems("Length Parameter", parameter);
+                RoundPanel.SetComboBoxItems("Diameter Parameter", parameter);
             }
         }
 
@@ -124,13 +119,9 @@ namespace Intech.Sleeve
                 RoundPanel.SetComboBoxItems("Family Type", cellEvent.RowIndex, typeNames);
 
                 List<string> names = new List<string>();
-                ParameterMap parameter = Intech.Revit.RevitUtils.GetParameters(fam);
-                foreach (Parameter param in parameter)
-                {
-                    names.Add(param.Definition.Name);
-                }
-                RoundPanel.SetComboBoxItems("Length Parameter", names);
-                RoundPanel.SetComboBoxItems("Diameter Parameter", names);
+                List<string> parameter = Intech.Revit.RevitUtils.GetParameterNamesFromFamily(fam).ToList();
+                RoundPanel.SetComboBoxItems("Length Parameter", parameter);
+                RoundPanel.SetComboBoxItems("Diameter Parameter", parameter);
             }
         }
 
