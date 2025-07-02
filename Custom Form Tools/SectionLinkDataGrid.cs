@@ -398,6 +398,23 @@ namespace Intech.Windows.Forms
             dataGridView1.Rows[row].Cells[column].Value = Value;
         }
 
+        private void Copy_Click(object sender, EventArgs e)
+        {
+            if (dataGridView1.CurrentRow == null) return;
+
+            var currentRow = dataGridView1.CurrentRow;
+            int columnCount = dataGridView1.ColumnCount;
+
+            string[] values = new string[columnCount];
+
+            for (int i = 0; i < columnCount; i++)
+            {
+                values[i] = currentRow.Cells[i].Value?.ToString();
+            }
+
+            dataGridView1.Rows.Add(values);
+        }
+
     }
 
     public enum ColumnType

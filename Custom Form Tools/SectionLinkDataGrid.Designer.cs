@@ -31,6 +31,7 @@
             this.dataGridView1 = new System.Windows.Forms.DataGridView();
             this.btnAdd = new System.Windows.Forms.Button();
             this.btnRemove = new System.Windows.Forms.Button();
+            this.Copy = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).BeginInit();
             this.SuspendLayout();
             // 
@@ -56,15 +57,26 @@
             // 
             // btnRemove
             // 
-            this.btnRemove.Location = new System.Drawing.Point(100, 14);
+            this.btnRemove.Location = new System.Drawing.Point(191, 14);
             this.btnRemove.Name = "btnRemove";
             this.btnRemove.Size = new System.Drawing.Size(75, 30);
             this.btnRemove.TabIndex = 2;
             this.btnRemove.Text = "Remove";
             this.btnRemove.UseVisualStyleBackColor = true;
             // 
+            // Copy
+            // 
+            this.Copy.Location = new System.Drawing.Point(100, 14);
+            this.Copy.Name = "Copy";
+            this.Copy.Size = new System.Drawing.Size(75, 30);
+            this.Copy.TabIndex = 3;
+            this.Copy.Text = "Copy";
+            this.Copy.UseVisualStyleBackColor = true;
+            this.Copy.Click += new System.EventHandler(this.Copy_Click);
+            // 
             // SectionEditorControl
             // 
+            this.Controls.Add(this.Copy);
             this.Controls.Add(this.dataGridView1);
             this.Controls.Add(this.btnAdd);
             this.Controls.Add(this.btnRemove);
@@ -81,5 +93,6 @@
         private System.Windows.Forms.Button btnRemove;
 
         private UIFramework.Widget.CustomControls.DPISupportWebBrowser dpiSupportWebBrowser1;
+        private System.Windows.Forms.Button Copy;
     }
 }
