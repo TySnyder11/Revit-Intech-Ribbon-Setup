@@ -120,22 +120,59 @@ namespace Intech
                 XYZ axisDirection = (pointB - pointA).Normalize();
                 // Use the midpoint of the two connectors as the base point of the axis.
                 XYZ basePoint = (pointA + pointB) * 0.5;
-
-                // STEP 6: Prompt the user for a rotation angle (in degrees).
-                string angleStr = MyInputBox.Show("Enter rotation angle in degrees:", "Rotation Angle", "");
-                if (string.IsNullOrEmpty(angleStr))
+                List<ElementId> tempBoxIds = new List<ElementId>();
+                double radAngle = 0;
+                using (Transaction tran = new Transaction(doc, "rotation visual"))
                 {
-                    message = "No rotation angle provided.";
-                    return Result.Cancelled;
-                }
-                if (!double.TryParse(angleStr, out double degrees))
-                {
-                    message = "Invalid rotation angle.";
-                    return Result.Failed;
-                }
-                double radAngle = degrees * Math.PI / 180.0; // Convert to radians
 
-                // STEP 7: Rotate the fitting and all selected ducts/pipes.
+                    tran.Start();
+                    double offset = 2.0;
+                    XYZ downPoint = basePoint + axisDirection.CrossProduct(XYZ.BasisZ).Normalize() * offset;
+                    XYZ upPoint = basePoint - axisDirection.CrossProduct(XYZ.BasisZ).Normalize() * offset;
+
+                    TextNoteType textType = new FilteredElementCollector(doc)
+                     .OfClass(typeof(TextNoteType))
+                     .Cast<TextNoteType>()
+                     .FirstOrDefault();
+
+                    if (textType == null)
+                    {
+                        message = "No TextNoteType found in the project.";
+                        return Result.Failed;
+                    }
+
+                    TextNote upNote = TextNote.Create(doc, doc.ActiveView.Id, upPoint, "UP", textType.Id);
+                    TextNote downNote = TextNote.Create(doc, doc.ActiveView.Id, downPoint, "DOWN", textType.Id);
+
+
+                    OverrideGraphicSettings upColor = new OverrideGraphicSettings();
+                    upColor.SetProjectionLineColor(new Color(0, 255, 0)); // Green
+                    doc.ActiveView.SetElementOverrides(upNote.Id, upColor);
+
+                    OverrideGraphicSettings downColor = new OverrideGraphicSettings();
+                    downColor.SetProjectionLineColor(new Color(255, 0, 0)); // Red
+                    doc.ActiveView.SetElementOverrides(downNote.Id, downColor);
+
+                    tran.Commit();
+                    // After creating each box:
+                    tempBoxIds.Add(upNote.Id);
+                    tempBoxIds.Add(downNote.Id);
+
+                    string angleStr = MyInputBox.Show("Enter rotation angle in degrees:", "Rotation Angle", "");
+                    DeleteTempBoxes(doc, tempBoxIds);
+                    if (string.IsNullOrEmpty(angleStr))
+                    {
+                        message = "No rotation angle provided.";
+                        return Result.Cancelled;
+                    }
+                    if (!double.TryParse(angleStr, out double degrees))
+                    {
+                        message = "Invalid rotation angle.";
+                        return Result.Failed;
+                    }
+                    radAngle = degrees * Math.PI / 180.0; // Convert to radians
+                }
+
                 using (Transaction t = new Transaction(doc, "Rotate Fitting and Connected Elements"))
                 {
                     t.Start();
@@ -147,7 +184,7 @@ namespace Intech
                     t.Commit();
                 }
 
-                TaskDialog.Show("Success", $"Rotated fitting and {ductPipeIds.Count} connected elements by {degrees}°.");
+                TaskDialog.Show("Success", $"Rotated fitting and {ductPipeIds.Count} connected elements by {radAngle * 180 / Math.PI}°.");
                 return Result.Succeeded;
             }
             catch (Autodesk.Revit.Exceptions.OperationCanceledException)
@@ -159,6 +196,24 @@ namespace Intech
                 message = ex.Message;
                 return Result.Failed;
             }
+        }
+        Solid CreateBoxSolid(XYZ center, double size)
+        {
+            double half = size / 2;
+
+            List<Curve> profile = new List<Curve>
+            {
+                Line.CreateBound(new XYZ(-half, -half, 0), new XYZ(half, -half, 0)),
+                Line.CreateBound(new XYZ(half, -half, 0), new XYZ(half, half, 0)),
+                Line.CreateBound(new XYZ(half, half, 0), new XYZ(-half, half, 0)),
+                Line.CreateBound(new XYZ(-half, half, 0), new XYZ(-half, -half, 0))
+            };
+
+            CurveLoop loop = CurveLoop.Create(profile);
+            Solid box = GeometryCreationUtilities.CreateExtrusionGeometry(new List<CurveLoop> { loop }, XYZ.BasisZ, size);
+
+            Transform move = Transform.CreateTranslation(center - new XYZ(0, 0, size / 2));
+            return SolidUtils.CreateTransformed(box, move);
         }
 
         /// <summary>
@@ -185,6 +240,20 @@ namespace Intech
             return null;
         }
 
+        private void DeleteTempBoxes(Document doc, List<ElementId> boxIds)
+        {
+            using (Transaction tx = new Transaction(doc, "Delete Temp Boxes"))
+            {
+                tx.Start();
+                foreach (ElementId id in boxIds)
+                {
+                    if (doc.GetElement(id) != null)
+                        doc.Delete(id);
+                }
+                tx.Commit();
+            }
+        }
+
         /// <summary>
         /// Finds the pair of connectors whose separation is closest to the given distance parameter.
         /// </summary>
@@ -206,7 +275,8 @@ namespace Intech
                     XYZ cross = delta.CrossProduct(basis1);
                     if (cross.GetLength() < 1e-9)
                     {
-                        if (xyz1.GetLength() >= xyz2.GetLength())
+                        if(conn1.Origin.X < conn2.Origin.X || (conn1.Origin.X == conn2.Origin.X && conn1.Origin.Y < conn2.Origin.Y) ||
+                         (conn1.Origin.X == conn2.Origin.X && conn1.Origin.Y == conn2.Origin.Y && conn1.Origin.Z < conn2.Origin.Z))
                         {
                             bestA = conn1;
                             bestB = conn2;
