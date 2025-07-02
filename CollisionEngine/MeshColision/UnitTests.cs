@@ -10,7 +10,7 @@ public class MeshIntersectionTests
 {
 
     [Test]
-    public void TriangleCutByTwoNonColinearTriangles_ShouldSplitIntoTwoPolygons()
+    public async Task TriangleCutByTwoNonColinearTriangles_ShouldSplitIntoTwoPolygons()
     {
         var baseTri = TestMeshFactory.CreateTriangle(
         new Vector3(0, 0, 0),
@@ -34,10 +34,11 @@ public class MeshIntersectionTests
         var cut2 = MeshManager.Intersect(cut1, cutter2);
 
         Assert.That(cut2.Polygons.Count, Is.GreaterThan(1), "Should split into multiple polygons.");
+        await Task.CompletedTask;
     }
 
     [Test]
-    public Task CoplanarOverlap_ShouldDetectIntersection()
+    public async Task CoplanarOverlap_ShouldDetectIntersection()
     {
         var triA = TestMeshFactory.CreateTriangle(
         new Vector3(0, 0, 0),
@@ -53,11 +54,11 @@ public class MeshIntersectionTests
 
         var result = MeshManager.Intersect(triA, triB);
         Assert.That(result.Polygons.Count, Is.GreaterThan(0), "Should detect coplanar overlap.");
-        return Task.CompletedTask;
+        await Task.CompletedTask;
     }
 
     [Test]
-    public void EdgeOnlyIntersection_ShouldNotFail()
+    public async Task EdgeOnlyIntersection_ShouldNotFail()
     {
         var triA = TestMeshFactory.CreateTriangle(
         new Vector3(0, 0, 0),
@@ -73,10 +74,11 @@ public class MeshIntersectionTests
 
         var result = MeshManager.Intersect(triA, triB);
         Assert.That(result.Polygons.Count, Is.GreaterThanOrEqualTo(0), "Should handle edge-only intersection gracefully.");
+        await Task.CompletedTask;
     }
 
     [Test]
-    public void NoIntersection_ShouldReturnEmptyMesh()
+    public async Task NoIntersection_ShouldReturnEmptyMesh()
     {
         var triA = TestMeshFactory.CreateTriangle(
         new Vector3(0, 0, 0),
@@ -92,10 +94,11 @@ public class MeshIntersectionTests
 
         var result = MeshManager.Intersect(triA, triB);
         Assert.That(result.Polygons.Count, Is.EqualTo(0), "Should return empty mesh for no intersection.");
+        await Task.CompletedTask;
     }
 
     [Test]
-    public void FullContainment_ShouldReturnInnerTriangle()
+    public async Task FullContainment_ShouldReturnInnerTriangle()
     {
         var outer = TestMeshFactory.CreateTriangle(
         new Vector3(0, 0, 0),
@@ -111,6 +114,7 @@ public class MeshIntersectionTests
 
         var result = MeshManager.Intersect(outer, inner);
         Assert.That(result.Polygons.Count, Is.EqualTo(1), "Should return the inner triangle as intersection.");
+        await Task.CompletedTask;
     }
 
 }
