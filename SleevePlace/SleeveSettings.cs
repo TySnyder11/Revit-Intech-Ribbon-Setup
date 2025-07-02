@@ -89,7 +89,7 @@ namespace Intech.Sleeve
                 Family fam = fams.FirstOrDefault(f => f.Name == family);
                 List<FamilySymbol> types = Intech.Revit.RevitUtils.GetFamilySymbols(fam);
                 RoundPanel.SetComboBoxItems("Family Type", rowEvent.RowIndex, types.Select(fs => fs.Name).ToList());
-                List<string> parameter = Intech.Revit.RevitUtils.GetParameterNamesFromFamily(fam).ToList();
+                List<string> parameter = Intech.Revit.RevitUtils.GetParameters(fam);
                 RoundPanel.SetComboBoxItems("Length Parameter", parameter);
                 RoundPanel.SetComboBoxItems("Diameter Parameter", parameter);
             }
@@ -119,7 +119,7 @@ namespace Intech.Sleeve
                 RoundPanel.SetComboBoxItems("Family Type", cellEvent.RowIndex, typeNames);
 
                 List<string> names = new List<string>();
-                List<string> parameter = Intech.Revit.RevitUtils.GetParameterNamesFromFamily(fam).ToList();
+                List<string> parameter = Intech.Revit.RevitUtils.GetParameters(fam);
                 RoundPanel.SetComboBoxItems("Length Parameter", parameter);
                 RoundPanel.SetComboBoxItems("Diameter Parameter", parameter);
             }

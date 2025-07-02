@@ -72,50 +72,34 @@ namespace Intech.Revit
             return paramNames.ToList();
 
         }
-        public static List<string> GetParameters(FamilySymbol symbol)
+
+        public static List<string> GetParameters(Family family)
         {
-            List<string> parameterNames = new List<string>();
+            // Find the first instance of the given family in the model
+            FilteredElementCollector collector = new FilteredElementCollector(_doc)
+                .OfClass(typeof(FamilyInstance));
 
-            // Get any valid level from the document
-            Level level = new FilteredElementCollector(_doc)
-                .OfClass(typeof(Level))
-                .Cast<Level>()
-                .FirstOrDefault();
-
-            if (level == null)
-                throw new InvalidOperationException("No levels found in the document.");
-
-            if (!symbol.IsActive)
+            foreach (FamilyInstance fi in collector)
             {
-                using (Transaction activateTx = new Transaction(_doc, "Activate Symbol"))
+                if (fi.Symbol.Family.Id == family.Id)
                 {
-                    activateTx.Start();
-                    symbol.Activate();
-                    activateTx.Commit();
-                }
-            }
+                    // Found an instance — collect its instance parameter names
+                    List<string> paramNames = new List<string>();
 
-            using (Transaction tx = new Transaction(_doc, "Temp Instance for Parameter Extraction"))
-            {
-                tx.Start();
-
-                // Place a temporary instance at origin
-                XYZ origin = XYZ.Zero;
-                FamilyInstance tempInstance = _doc.Create.NewFamilyInstance(origin, symbol, level, StructuralType.NonStructural);
-
-                foreach (Parameter parameter in tempInstance.Parameters)
-                {
-                    if (parameter?.Definition != null)
+                    foreach (Parameter param in fi.Parameters)
                     {
-                        parameterNames.Add(parameter.Definition.Name);
+                        paramNames.Add(param.Definition.Name);
                     }
-                }
 
-                tx.RollBack(); // Clean up
+                    return paramNames;
+                }
             }
 
-            return parameterNames;
+            // No instance found
+            return new List<string>();
         }
+
+
 
 
         static public Parameter GetParameter(Category category, string paramName)
