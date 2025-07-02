@@ -582,7 +582,7 @@ namespace Intech.Revit
             return commonParams.ToList();
         }
 
-        private static HashSet<string> GetParameterNamesFromFamily(Family family)
+        public static HashSet<string> GetParameterNamesFromFamily(Family family)
         {
             HashSet<string> paramNames = new HashSet<string>();
 
