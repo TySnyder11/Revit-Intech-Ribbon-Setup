@@ -34,8 +34,8 @@
             this.textBox1 = new System.Windows.Forms.TextBox();
             this.roundRectTabControl = new System.Windows.Forms.TabControl();
             this.tabPage1 = new System.Windows.Forms.TabPage();
-            this.RoundPanel = new Intech.Windows.Forms.SectionEditorControl();
             this.tabPage2 = new System.Windows.Forms.TabPage();
+            this.RoundPanel = new Intech.Windows.Forms.SectionEditorControl();
             this.sectionEditorControl2 = new Intech.Windows.Forms.SectionEditorControl();
             this.roundRectTabControl.SuspendLayout();
             this.tabPage1.SuspendLayout();
@@ -107,6 +107,17 @@
             this.tabPage1.Text = "Round Sleeve";
             this.tabPage1.UseVisualStyleBackColor = true;
             // 
+            // tabPage2
+            // 
+            this.tabPage2.Controls.Add(this.sectionEditorControl2);
+            this.tabPage2.Location = new System.Drawing.Point(4, 22);
+            this.tabPage2.Name = "tabPage2";
+            this.tabPage2.Padding = new System.Windows.Forms.Padding(3);
+            this.tabPage2.Size = new System.Drawing.Size(921, 355);
+            this.tabPage2.TabIndex = 1;
+            this.tabPage2.Text = "Rectangular Sleeve";
+            this.tabPage2.UseVisualStyleBackColor = true;
+            // 
             // RoundPanel
             // 
             this.RoundPanel.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
@@ -117,17 +128,6 @@
             this.RoundPanel.Size = new System.Drawing.Size(921, 355);
             this.RoundPanel.TabIndex = 0;
             // 
-            // tabPage2
-            // 
-            this.tabPage2.Controls.Add(this.sectionEditorControl2);
-            this.tabPage2.Location = new System.Drawing.Point(4, 22);
-            this.tabPage2.Name = "tabPage2";
-            this.tabPage2.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage2.Size = new System.Drawing.Size(608, 225);
-            this.tabPage2.TabIndex = 1;
-            this.tabPage2.Text = "Rectangular Sleeve";
-            this.tabPage2.UseVisualStyleBackColor = true;
-            // 
             // sectionEditorControl2
             // 
             this.sectionEditorControl2.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
@@ -135,7 +135,7 @@
             | System.Windows.Forms.AnchorStyles.Right)));
             this.sectionEditorControl2.Location = new System.Drawing.Point(0, 0);
             this.sectionEditorControl2.Name = "sectionEditorControl2";
-            this.sectionEditorControl2.Size = new System.Drawing.Size(758, 361);
+            this.sectionEditorControl2.Size = new System.Drawing.Size(925, 361);
             this.sectionEditorControl2.TabIndex = 0;
             // 
             // SleeveSettings
