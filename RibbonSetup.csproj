@@ -129,6 +129,7 @@
     <Compile Include="CollisionEngine\CollisionResult.cs" />
     <Compile Include="CollisionEngine\ElementToGeometryData.cs" />
     <Compile Include="CollisionEngine\GeometryData.cs" />
+    <Compile Include="CollisionEngine\MeshColision\meshCollision.cs" />
     <Compile Include="CollisionEngine\RTree.cs" />
     <Compile Include="Connector Tools\Connect.cs" />
     <Compile Include="Connector Tools\RotateConnector.cs" />
