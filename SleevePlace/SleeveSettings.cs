@@ -89,14 +89,14 @@ namespace Intech.Sleeve
                 Family fam = fams.FirstOrDefault(f => f.Name == family);
                 List<FamilySymbol> types = Intech.Revit.RevitUtils.GetFamilySymbols(fam);
                 RoundPanel.SetComboBoxItems("Family Type", rowEvent.RowIndex, types.Select(fs => fs.Name).ToList());
-
-                if (RoundPanel.GetCellValue(3, rowEvent.RowIndex) is string typeName && !string.IsNullOrWhiteSpace(typeName))
+                List<string> names = new List<string>();
+                ParameterMap parameter = Intech.Revit.RevitUtils.GetParameters(fam);
+                foreach (Parameter param in parameter)
                 {
-                    FamilySymbol type = types.FirstOrDefault(t => t.Name == typeName);
-                    List<string> names = Intech.Revit.RevitUtils.GetParameters(type);
-                    RoundPanel.SetComboBoxItems("Length Parameter", names);
-                    RoundPanel.SetComboBoxItems("Diameter Parameter", names);
+                    names.Add(param.Definition.Name);
                 }
+                RoundPanel.SetComboBoxItems("Length Parameter", names);
+                RoundPanel.SetComboBoxItems("Diameter Parameter", names);
             }
         }
 
@@ -123,13 +123,12 @@ namespace Intech.Sleeve
                 typeNames.Sort();
                 RoundPanel.SetComboBoxItems("Family Type", cellEvent.RowIndex, typeNames);
 
-            }
-            if (cellEvent.ColumnIndex == 3)
-            {
-
-                Family fam = fams.FirstOrDefault(f => f.Name == (string)RoundPanel.GetCellValue(2, cellEvent.RowIndex));
-                FamilySymbol type = Intech.Revit.RevitUtils.GetFamilySymbols(fam).FirstOrDefault(t => t.Name == (string)RoundPanel.GetCellValue(3, cellEvent.RowIndex));
-                List<string> names = Intech.Revit.RevitUtils.GetParameters(type);
+                List<string> names = new List<string>();
+                ParameterMap parameter = Intech.Revit.RevitUtils.GetParameters(fam);
+                foreach (Parameter param in parameter)
+                {
+                    names.Add(param.Definition.Name);
+                }
                 RoundPanel.SetComboBoxItems("Length Parameter", names);
                 RoundPanel.SetComboBoxItems("Diameter Parameter", names);
             }
