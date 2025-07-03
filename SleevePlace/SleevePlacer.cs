@@ -284,8 +284,7 @@ namespace Intech
                     widthTolerance = 0 / 12;
                 }
 
-
-                    GetBoundingExtents(intersection, wallNormal, out double minZ, out double maxZ, out double minWall, out double maxWall);
+                GetBoundingExtents(intersection, wallNormal, out double minZ, out double maxZ, out double minWall, out double maxWall);
                 double rawHeight = maxZ - minZ + 2 * insulationThickness + heightTolerance;
                 double rawWidth = maxWall - minWall + 2 * insulationThickness + widthTolerance;
 

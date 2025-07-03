@@ -182,49 +182,82 @@ namespace Intech.Geometry
 
         public static class FaceReconstructor
         {
-            public static List<Polygon> SplitPolygonWithCuts(
-                Polygon original,
-                List<LineSegment> cuts,
-                ConnectionMesh targetMesh)
-            {
-                var allEdges = new List<(Vertex, Vertex)>();
 
-                // Add original triangle edges
+            public static List<Polygon> SplitPolygonWithCuts(
+             Polygon original,
+             List<LineSegment> cuts,
+             ConnectionMesh targetMesh)
+            {
+                // Step 1: Collect all edges (original + cuts)
+                var allEdges = new List<(Vertex, Vertex)>();
                 foreach (var edge in original.Edges)
                     allEdges.Add((edge.Start, edge.End));
-
-                // Add cut segments
                 foreach (var cut in cuts)
                     allEdges.Add((cut.Start, cut.End));
 
-                // Build adjacency map
-                var adjacency = new Dictionary<Vertex, List<Vertex>>();
-                foreach (var pair in allEdges)
+                // Step 2: Project all vertices to 2D (XY plane)
+                var projected = new Dictionary<Vertex, Vector2>();
+                foreach (var (a, b) in allEdges)
                 {
-                    AddEdge(adjacency, pair.Item1, pair.Item2);
-                    AddEdge(adjacency, pair.Item2, pair.Item1);
+                    if (!projected.ContainsKey(a))
+                        projected[a] = new Vector2(a.Position.X, a.Position.Y);
+                    if (!projected.ContainsKey(b))
+                        projected[b] = new Vector2(b.Position.X, b.Position.Y);
                 }
 
-                var visitedEdges = new HashSet<string>();
+                // Step 3: Build directed edge graph with angle sorting
+                var edgeMap = new Dictionary<Vertex, List<Vertex>>();
+                foreach (var (a, b) in allEdges)
+                {
+                    AddDirectedEdge(edgeMap, a, b);
+                    AddDirectedEdge(edgeMap, b, a); // bidirectional
+                }
+
+                // Step 4: Sort outgoing edges by angle (CCW)
+                var sortedEdges = new Dictionary<Vertex, List<Vertex>>();
+                foreach (var kvp in edgeMap)
+                {
+                    var origin = kvp.Key;
+                    var origin2D = projected[origin];
+                    var neighbors = kvp.Value;
+
+                    neighbors.Sort((v1, v2) =>
+                    {
+                        var a1 = AngleCCW(origin2D, projected[v1]);
+                        var a2 = AngleCCW(origin2D, projected[v2]);
+                        return a1.CompareTo(a2);
+                    });
+
+                    sortedEdges[origin] = neighbors;
+                }
+
+                // Step 5: Walk all faces
+                var visited = new HashSet<string>();
                 var faces = new List<List<Vertex>>();
 
-                foreach (var start in adjacency.Keys)
+                foreach (var from in sortedEdges.Keys)
                 {
-                    foreach (var next in adjacency[start])
+                    foreach (var to in sortedEdges[from])
                     {
-                        string edgeKey = GetEdgeKey(start, next);
-                        if (visitedEdges.Contains(edgeKey)) continue;
+                        string edgeKey = GetEdgeKey(from, to);
+                        if (visited.Contains(edgeKey)) continue;
 
-                        var face = WalkFace(start, next, adjacency, visitedEdges);
+                        var face = WalkFace(from, to, sortedEdges, visited);
                         if (face != null && face.Count >= 3)
                             faces.Add(face);
                     }
                 }
 
-                // Convert each face loop into a Polygon
+                // Step 6: Convert faces to Polygons
                 var polygons = new List<Polygon>();
+                var seenLoops = new HashSet<string>();
+
                 foreach (var loop in faces)
                 {
+                    string loopKey = GetLoopKey(loop);
+                    if (seenLoops.Contains(loopKey)) continue;
+                    seenLoops.Add(loopKey);
+
                     var poly = new Polygon();
                     for (int i = 0; i < loop.Count; i++)
                     {
@@ -237,36 +270,51 @@ namespace Intech.Geometry
                         if (edge.PolygonA == null) edge.PolygonA = poly;
                         else if (edge.PolygonB == null) edge.PolygonB = poly;
                     }
+
                     polygons.Add(poly);
                 }
 
                 return polygons;
             }
 
-            private static void AddEdge(Dictionary<Vertex, List<Vertex>> map, Vertex a, Vertex b)
+            private static void AddDirectedEdge(Dictionary<Vertex, List<Vertex>> map, Vertex from, Vertex to)
             {
                 List<Vertex> list;
-                if (!map.TryGetValue(a, out list))
+                if (!map.TryGetValue(from, out list))
                 {
                     list = new List<Vertex>();
-                    map[a] = list;
+                    map[from] = list;
                 }
-                if (!list.Contains(b))
-                    list.Add(b);
+                if (!list.Contains(to))
+                    list.Add(to);
+            }
+
+            private static float AngleCCW(Vector2 origin, Vector2 target)
+            {
+                Vector2 dir = target - origin;
+                return (float)Math.Atan2(dir.Y, dir.X);
             }
 
             private static string GetEdgeKey(Vertex a, Vertex b)
             {
-                int ha = a.GetHashCode();
-                int hb = b.GetHashCode();
-                return ha < hb ? ha + "_" + hb : hb + "_" + ha;
+                return a.GetHashCode() + "->" + b.GetHashCode();
+            }
+
+            private static string GetLoopKey(List<Vertex> loop)
+            {
+                var ids = new List<int>();
+                foreach (var v in loop)
+                    ids.Add(v.GetHashCode());
+
+                ids.Sort();
+                return string.Join("-", ids);
             }
 
             private static List<Vertex> WalkFace(
-                Vertex start,
-                Vertex next,
-                Dictionary<Vertex, List<Vertex>> adjacency,
-                HashSet<string> visited)
+            Vertex start,
+            Vertex next,
+            Dictionary<Vertex, List<Vertex>> sortedEdges,
+            HashSet<string> visited)
             {
                 var face = new List<Vertex>();
                 face.Add(start);
@@ -277,16 +325,18 @@ namespace Intech.Geometry
 
                 while (true)
                 {
-                    string edgeKey = GetEdgeKey(previous, current);
-                    visited.Add(edgeKey);
+                    visited.Add(GetEdgeKey(previous, current));
 
-                    List<Vertex> neighbors = adjacency[current];
-                    Vertex nextVertex;
-                    if (!TryGetNextVertex(previous, current, neighbors, out nextVertex))
-                        return null;
+                    List<Vertex> neighbors = sortedEdges[current];
+                    int index = neighbors.IndexOf(previous);
+                    int nextIndex = (index + 1) % neighbors.Count;
+                    Vertex nextVertex = neighbors[nextIndex];
 
                     if (nextVertex.Equals(start))
                         break;
+
+                    if (face.Contains(nextVertex))
+                        return null; // self-intersecting
 
                     face.Add(nextVertex);
                     previous = current;
@@ -295,38 +345,6 @@ namespace Intech.Geometry
 
                 return face;
             }
-
-            private static bool TryGetNextVertex(Vertex from, Vertex current, List<Vertex> neighbors, out Vertex next)
-            {
-                Vector3 dir = Vector3.Normalize(current.Position - from.Position);
-                float minAngle = float.MaxValue;
-                next = default(Vertex);
-                bool found = false;
-
-                foreach (var n in neighbors)
-                {
-                    if (n.Equals(from)) continue;
-
-                    Vector3 to = Vector3.Normalize(n.Position - current.Position);
-
-                    float dot = Vector3.Dot(dir, to);
-                    if (dot < -1f) dot = -1f;
-                    else if (dot > 1f) dot = 1f;
-
-                    float angle = (float)Math.Acos(dot);
-
-                    if (!found || angle < minAngle)
-                    {
-                        minAngle = angle;
-                        next = n;
-                        found = true;
-                    }
-                }
-
-                return found;
-            }
         }
-
-
     }
 }
