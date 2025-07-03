@@ -54,9 +54,14 @@ namespace Intech.Geometry.Collision
                         {
                             if (!BoxesIntersect(a.BoundingBox, b.BoundingBox)) continue;
 
-                            var key = a.SourceElementId.Value < b.SourceElementId.Value
-                            ? (a.SourceElementId, b.SourceElementId)
-                            : (b.SourceElementId, a.SourceElementId);
+
+                            long id1 = GetElementIdValue(a.SourceElementId);
+                            long id2 = GetElementIdValue(b.SourceElementId);
+
+                            var key = id1 < id2
+                             ? (a.SourceElementId, b.SourceElementId)
+                             : (b.SourceElementId, a.SourceElementId);
+
 
                             if (!processedPairs.TryAdd(key, 0)) continue;
 
@@ -86,6 +91,19 @@ namespace Intech.Geometry.Collision
                 }
             }
 
+
+            public static long GetElementIdValue(ElementId id)
+            {
+                // Try to get the 'Value' property (Revit 2024+)
+                var valueProperty = typeof(ElementId).GetProperty("Value");
+                if (valueProperty != null)
+                {
+                    return (long)valueProperty.GetValue(id);
+                }
+
+                // Fallback for Revit 2023 and earlier
+                return id.IntegerValue;
+            }
 
             bool BoxesIntersect(BoundingBoxXYZ a, BoundingBoxXYZ b)
             {

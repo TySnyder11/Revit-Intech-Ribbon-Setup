@@ -295,7 +295,7 @@ namespace Intech
                 try
                 {
                     //change viewport to correct scale
-                    viewport.ChangeTypeId(new ElementId(Int64.Parse(scales[sheetscale.Remove(0, 1).Remove(sheetscale.Length - 2, 1)].Item1)));
+                    viewport.ChangeTypeId(new ElementId(int.Parse(scales[sheetscale.Remove(0, 1).Remove(sheetscale.Length - 2, 1)].Item1)));
                 }
                 catch
                 {

@@ -65,10 +65,16 @@ namespace Intech
             }
 
             var engine = new Intech.Geometry.Collision.Engine.CollisionEngine();
+            List<CollisionResult> res = new List<CollisionResult>();
             engine.Run(mepGeometry, wallGeometry, 15, 3, result =>
             {
-                PlaceSleeveAtCollision(result, doc);
+                res.Add(result);
             });
+            foreach ( CollisionResult result in res)
+            {
+                placeSleeveAtCollision(result, doc);
+            }
+
             return Result.Succeeded;
         }
 
@@ -158,7 +164,7 @@ namespace Intech
         }
 
         string[] activeSettings = null;
-        public void PlaceSleeveAtCollision(CollisionResult collision, Document doc)
+        public void placeSleeveAtCollision(CollisionResult collision, Document doc)
         {
             Solid intersection = collision.Intersection;
             if (intersection == null || intersection.Faces.Size == 0)
@@ -206,7 +212,7 @@ namespace Intech
             {
                 sec = saveFileManager.GetSectionsByName("Sleeve Place", "Rectangular Sleeve");
             }
-            activeSettings = sec.lookUp(0, "true").FirstOrDefault() ?? sec.Rows[0];
+            activeSettings = sec.lookUp(0, "True").FirstOrDefault() ?? sec.Rows[0];
 
             string familyName = activeSettings[2];
             string symbolName = activeSettings[3];
@@ -304,11 +310,25 @@ namespace Intech
 
                 // Set sleeve dimensions
                 SetSleeveDimensions(sleeve, isRound, width, height);
-
+                MoveFamilyInstanceTo(sleeve, center);
                 tx.Commit();
             }
         }
 
+        public void MoveFamilyInstanceTo(FamilyInstance instance, XYZ targetPoint)
+        {
+            LocationPoint location = instance.Location as LocationPoint;
+            if (location == null)
+                throw new InvalidOperationException("FamilyInstance does not have a LocationPoint.");
+
+            XYZ currentPoint = location.Point;
+            XYZ translation = targetPoint - currentPoint;
+
+            if (!translation.IsZeroLength())
+            {
+                ElementTransformUtils.MoveElement(instance.Document, instance.Id, translation);
+            }
+        }
 
 
         private double GetInsulationThickness(Document doc, Element pipe)
@@ -356,19 +376,23 @@ namespace Intech
 
         private double RoundUpToNearestIncrement(double valueInFeet, double incrementInInches)
         {
-            double incrementInFeet = incrementInInches / 12.0;
-            double tolerance = 1e-6; // Arbitrarily small value in feet (~0.000012 inches)
-
-            double remainder = valueInFeet % incrementInFeet;
-
-            if (remainder < tolerance || Math.Abs(remainder - incrementInFeet) < tolerance)
+            if (incrementInInches != 0)
             {
-                // Already close enough to an increment — return the rounded value
-                return Math.Round(valueInFeet / incrementInFeet) * incrementInFeet;
-            }
+                double incrementInFeet = incrementInInches / 12.0;
+                double tolerance = 1e-6; // Arbitrarily small value in feet (~0.000012 inches)
 
-            // Otherwise, round up
-            return Math.Ceiling(valueInFeet / incrementInFeet) * incrementInFeet;
+                double remainder = valueInFeet % incrementInFeet;
+
+                if (remainder < tolerance || Math.Abs(remainder - incrementInFeet) < tolerance)
+                {
+                    // Already close enough to an increment — return the rounded value
+                    return Math.Round(valueInFeet / incrementInFeet) * incrementInFeet;
+                }
+
+                // Otherwise, round up
+                return Math.Ceiling(valueInFeet / incrementInFeet) * incrementInFeet;
+            }
+            return valueInFeet;
         }
 
 

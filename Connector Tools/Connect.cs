@@ -92,7 +92,7 @@ namespace Intech
                     return false;
 
                 // Allow element if its category is either Duct Curves or Duct Fittings
-                long categoryId = elem.Category.Id.Value;
+                long categoryId = elem.Category.Id.IntegerValue;
                 if (categoryId == (long)BuiltInCategory.OST_DuctCurves ||
                     categoryId == (long)BuiltInCategory.OST_DuctFitting)
                 {
@@ -478,7 +478,7 @@ namespace Intech
             if (element == null || element.Category == null)
                 return false;
 
-            Int64 catId = element.Category.Id.Value;
+            Int64 catId = element.Category.Id.IntegerValue;
             return (catId == (Int64)BuiltInCategory.OST_DuctCurves ||
                     catId == (Int64)BuiltInCategory.OST_FabricationDuctwork);
         }

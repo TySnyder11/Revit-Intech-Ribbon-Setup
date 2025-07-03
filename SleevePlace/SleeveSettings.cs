@@ -87,11 +87,14 @@ namespace Intech.Sleeve
             if (RoundPanel.GetCellValue(2, rowEvent.RowIndex) is string family && !string.IsNullOrWhiteSpace(family))
             {
                 Family fam = fams.FirstOrDefault(f => f.Name == family);
-                List<FamilySymbol> types = Intech.Revit.RevitUtils.GetFamilySymbols(fam);
-                RoundPanel.SetComboBoxItems("Family Type", rowEvent.RowIndex, types.Select(fs => fs.Name).ToList());
-                List<string> parameter = Intech.Revit.RevitUtils.GetParameters(fam);
-                RoundPanel.SetComboBoxItems("Length Parameter", parameter);
-                RoundPanel.SetComboBoxItems("Diameter Parameter", parameter);
+                if (fam != null)
+                {
+                    List<FamilySymbol> types = Intech.Revit.RevitUtils.GetFamilySymbols(fam);
+                    RoundPanel.SetComboBoxItems("Family Type", rowEvent.RowIndex, types.Select(fs => fs.Name).ToList());
+                    List<string> parameter = Intech.Revit.RevitUtils.GetParameters(fam);
+                    RoundPanel.SetComboBoxItems("Length Parameter", parameter);
+                    RoundPanel.SetComboBoxItems("Diameter Parameter", parameter);
+                }
             }
         }
 
